@@ -104,8 +104,40 @@ EOF
 
 #--
 
+pkg_arch () {
+  case "$1" in
+    "arm64v8")
+      echo "arm64" ;;
+    "arm32v7")
+      echo "armhf" ;;
+    "arm32v6"|"arm32v5")
+      echo "armel" ;;
+    "ppc64le")
+      echo "ppc64el" ;;
+    *)
+      echo "$1"
+  esac
+}
+
+guest_arch() {
+  case "$1" in
+   "amd64")
+     echo "x86_64" ;;
+   "arm64")
+     echo "aarch64" ;;
+   "armhf"|"armel")
+     echo "arm" ;;
+   "ppc64el")
+     echo "ppc64le" ;;
+   *)
+     echo "$1"
+  esac
+}
+
+#--
+
 build () {
-  [ -z "$PACKAGE_URI" ] && PACKAGE_URI="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_${PKG_ARCH}.deb"
+  [ -z "$PACKAGE_URI" ] && PACKAGE_URI="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $HOST_ARCH).deb"
 
   echo "PACKAGE_URI: $PACKAGE_URI"
 
@@ -122,15 +154,15 @@ build () {
   travis_finish "extract"
 
   for F in $(ls); do
-      tar -czf "../releases/${HOST_ARCH}_${F}.tgz" "$F"
+    tar -czf "../releases/${HOST_ARCH}_${F}.tgz" "$F"
 
-      IMG="${REPO}:${HOST_ARCH}-$(echo $F | cut -d- -f2)"
-      travis_start "$IMG" "Build $IMG"
-      docker build -t "$IMG" . -f-<<EOF
+    IMG="${REPO}:${HOST_ARCH}-$(echo $F | cut -d- -f2)"
+    travis_start "$IMG" "Build $IMG"
+    docker build -t "$IMG" . -f-<<EOF
 FROM scratch
 COPY ./$F /usr/bin/${HOST_ARCH}_${F}
 EOF
-      travis_finish "$IMG"
+    travis_finish "$IMG"
   done
 
   cd ..
@@ -149,16 +181,18 @@ EOF
 
   IMG="${REPO}:${HOST_ARCH}-register"
 
-  [ -n "$TRAVIS" ] && {
+  if [ -n "$TRAVIS" ]; then
     case "$HOST_ARCH" in
       "arm64v8"|"arm32v7"|"arm32v6"|"ppc64le"|"s390x")
         printf "$ANSI_RED! Skipping creation of $IMG. HOST_ARCH <$HOST_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
         HOST_LIB="skip"
       ;;
     esac
-  }
+  fi
 
-  [ "$HOST_LIB" != "skip" ] && {
+  [ "$HOST_LIB" = "skip" ] && {
+    printf "$ANSI_YELLOW! Skipping creation of $IMG because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
+  } || {
     travis_start "register" "Build $IMG"
     docker build -t $IMG . -f-<<EOF
 FROM ${HOST_LIB}busybox
@@ -170,7 +204,6 @@ ENTRYPOINT ["/register"]
 EOF
     travis_finish "register"
   }
-
 }
 
 #--
@@ -197,45 +230,25 @@ deploy () {
 PRINT_HOST_ARCH="$HOST_ARCH"
 case "$HOST_ARCH" in
   "x86_64"|"x86-64"|"amd64"|"AMD64")
-    HOST_ARCH="amd64"
-    PKG_ARCH="amd64"
-  ;;
+    HOST_ARCH="amd64" ;;
   "aarch64"|"armv8"|"ARMv8"|"arm64v8")
-    HOST_ARCH="arm64v8"
-    PKG_ARCH="arm64"
-  ;;
+    HOST_ARCH="arm64v8" ;;
   "aarch32"|"armv8l"|"armv7"|"armv7l"|"ARMv7"|"arm32v7"|"armhf")
-    HOST_ARCH="arm32v7"
-    PKG_ARCH="armhf"
-  ;;
+    HOST_ARCH="arm32v7" ;;
   "arm32v6"|"ARMv6"|"armel")
-    HOST_ARCH="arm32v6"
-    PKG_ARCH="armel"
-  ;;
+    HOST_ARCH="arm32v6" ;;
   "arm32v5"|"ARMv5")
-    HOST_ARCH="arm32v5"
-    PKG_ARCH="armel"
-  ;;
+    HOST_ARCH="arm32v5" ;;
   "i686"|"i386"|"x86")
-    HOST_ARCH="i386"
-    PKG_ARCH="i386"
-  ;;
+    HOST_ARCH="i386" ;;
   "ppc64le"|"ppc64el"|"POWER8")
-    HOST_ARCH="ppc64le"
-    PKG_ARCH="ppc64el"
-  ;;
+    HOST_ARCH="ppc64le" ;;
   "s390x")
-    HOST_ARCH="s390x"
-    PKG_ARCH="s390x"
-  ;;
+    HOST_ARCH="s390x" ;;
   "mips")
-    HOST_ARCH="mips"
-    PKG_ARCH="mips"
-  ;;
+    HOST_ARCH="mips" ;;
   "mips64el")
-    HOST_ARCH="mips64el"
-    PKG_ARCH="mips64el"
-  ;;
+    HOST_ARCH="mips64el" ;;
   *)
     echo "Invalid HOST_ARCH <${HOST_ARCH}>."
     exit 1
