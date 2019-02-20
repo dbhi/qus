@@ -5,6 +5,28 @@ addons:
     packages:
       - pass
 
+env:
+  - HOST_ARCH=x86_64
+  - HOST_ARCH=aarch64
+  - HOST_ARCH=armhf
+  - HOST_ARCH=armel
+  - HOST_ARCH=i686
+  - HOST_ARCH=ppc64le
+  - HOST_ARCH=s390x
+  - HOST_ARCH=mips
+  - HOST_ARCH=mips64el
+
+matrix:
+#  fast_finish: true
+  allow_failures:
+    - env: HOST_ARCH=aarch64
+    - env: HOST_ARCH=armhf
+    - env: HOST_ARCH=armel
+    - env: HOST_ARCH=ppc64le
+    - env: HOST_ARCH=s390x
+    - env: HOST_ARCH=mips
+    - env: HOST_ARCH=mips64el
+
 script: ./run.sh
 deploy:
   - provider: script
