@@ -109,17 +109,31 @@ build () {
 
   echo "PACKAGE_URI: $PACKAGE_URI"
 
-  IMG="${REPO}:register"
-  travis_start "register" "Build $IMG"
-  docker build -t "$IMG" . -f-<<EOF
-FROM busybox
+  case "$HOST_ARCH" in
+    "amd64"|"arm64v8"|"arm32v7"|"arm32v6"|"i386"|"ppc64le"|"s390x")
+      HOST_LIB="${HOST_ARCH}/"
+    ;;
+    "arm32v5"|"ARMv5"|"mips"|"mips64el")
+      HOST_LIB="skip"
+    ;;
+    *)
+      echo "Invalid HOST_ARCH <${HOST_ARCH}>."
+      exit 1
+  esac
+
+  [ "$HOST_LIB" != "skip" ] && {
+    IMG="${REPO}:${HOST_ARCH}-register"
+    travis_start "register" "Build $IMG"
+    docker build -t $IMG . -f-<<EOF
+FROM ${HOST_LIB}busybox
 ENV QEMU_BIN_DIR=/usr/bin
 COPY ./register.sh /register
 ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
 RUN chmod +x /qemu-binfmt-conf.sh
 ENTRYPOINT ["/register"]
 EOF
-  travis_finish "register"
+    travis_finish "register"
+  }
 
   [ -d bin-static ] && rm -rf bin-static
   mkdir -p bin-static
@@ -175,28 +189,52 @@ case "$HOST_ARCH" in
     HOST_ARCH="amd64"
     PKG_ARCH="amd64"
   ;;
-  "aarch64"|"armv8"|"ARMv8"|"arm64v8"|\
-  "aarch32"|"armv8l"|"armv7"|"armv7l"|"ARMv7"|"arm32v7"|"armhf"|\
-  "arm32v6"|"ARMv6"|"armel"|\
-  "arm32v5"|"ARMv5"|\
-  "i686"|"i386"|"x86"|\
-  "ppc64le"|"ppc64el"|"POWER8"|\
-  "s390x"|\
-  "mips"|\
+  "aarch64"|"armv8"|"ARMv8"|"arm64v8")
+    HOST_ARCH="arm64v8"
+    PKG_ARCH="arm64"
+  ;;
+  "aarch32"|"armv8l"|"armv7"|"armv7l"|"ARMv7"|"arm32v7"|"armhf")
+    HOST_ARCH="arm32v7"
+    PKG_ARCH="armhf"
+  ;;
+  "arm32v6"|"ARMv6"|"armel")
+    HOST_ARCH="arm32v6"
+    PKG_ARCH="armel"
+  ;;
+  "arm32v5"|"ARMv5")
+    HOST_ARCH="arm32v5"
+    PKG_ARCH="armel"
+  ;;
+  "i686"|"i386"|"x86")
+    HOST_ARCH="i386"
+    PKG_ARCH="i386"
+  ;;
+  "ppc64le"|"ppc64el"|"POWER8")
+    HOST_ARCH="ppc64le"
+    PKG_ARCH="ppc64el"
+  ;;
+  "s390x")
+    HOST_ARCH="s390x"
+    PKG_ARCH="s390x"
+  ;;
+  "mips")
+    HOST_ARCH="mips"
+    PKG_ARCH="mips"
+  ;;
   "mips64el")
-    echo "HOST_ARCH <${HOST_ARCH}> not supported yet."
-    exit 1
+    HOST_ARCH="mips64el"
+    PKG_ARCH="mips64el"
   ;;
   *)
     echo "Invalid HOST_ARCH <${HOST_ARCH}>."
     exit 1
 esac
 
+[ -n "$PRINT_HOST_ARCH" ] && PRINT_HOST_ARCH="$HOST_ARCH [$PRINT_HOST_ARCH]" || PRINT_HOST_ARCH="$HOST_ARCH"
+
 echo "VERSION: $VERSION"
 echo "REPO: $REPO"
-[ -n "$PRINT_HOST_ARCH" ] && PRINT_HOST_ARCH="$HOST_ARCH [$PRINT_HOST_ARCH]" || PRINT_HOST_ARCH="$HOST_ARCH"
-echo "HOST_ARCH: $PRINT_HOST_ARCH"
-unset PRINT_HOST_ARCH
+echo "HOST_ARCH: $PRINT_HOST_ARCH"; unset PRINT_HOST_ARCH
 
 case "$1" in
   "-d") deploy  ;;
