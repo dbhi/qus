@@ -105,7 +105,7 @@ EOF
 #--
 
 build () {
-  [ -z "$PACKAGE_URI" ] && PACKAGE_URI="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_amd64.deb"
+  [ -z "$PACKAGE_URI" ] && PACKAGE_URI="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_${PKG_ARCH}.deb"
 
   echo "PACKAGE_URI: $PACKAGE_URI"
 
@@ -132,8 +132,6 @@ EOF
   travis_start "extract" "Extract $PACKAGE_URI"
   curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
   travis_finish "extract"
-
-  HOST_ARCH="x86_64"
 
   for F in $(ls); do
       tar -czf "../releases/${HOST_ARCH}_${F}.tar.gz" "$F"
@@ -169,9 +167,36 @@ deploy () {
 
 [ -z "$VERSION" ] && VERSION="3.1+dfsg-4"
 [ -z "$REPO" ] && REPO="aptman/qus"
+[ -z "$HOST_ARCH" ] && REPO="x86_64"
+
+PRINT_HOST_ARCH="$HOST_ARCH"
+case "$HOST_ARCH" in
+  "x86_64"|"x86-64"|"amd64"|"AMD64")
+    HOST_ARCH="amd64"
+    PKG_ARCH="amd64"
+  ;;
+  "aarch64"|"armv8"|"ARMv8"|"arm64v8"|\
+  "aarch32"|"armv8l"|"armv7"|"armv7l"|"ARMv7"|"arm32v7"|"armhf"|\
+  "arm32v6"|"ARMv6"|"armel"|\
+  "arm32v5"|"ARMv5"|\
+  "i686"|"i386"|"x86"|\
+  "ppc64le"|"ppc64el"|"POWER8"|\
+  "s390x"|\
+  "mips"|\
+  "mips64el")
+    echo "HOST_ARCH <${HOST_ARCH}> not supported yet."
+    exit 1
+  ;;
+  *)
+    echo "Invalid HOST_ARCH <${HOST_ARCH}>."
+    exit 1
+esac
 
 echo "VERSION: $VERSION"
 echo "REPO: $REPO"
+[ -n "$PRINT_HOST_ARCH" ] && PRINT_HOST_ARCH="$HOST_ARCH [$PRINT_HOST_ARCH]" || PRINT_HOST_ARCH="$HOST_ARCH"
+echo "HOST_ARCH: $PRINT_HOST_ARCH"
+unset PRINT_HOST_ARCH
 
 case "$1" in
   "-d") deploy  ;;
