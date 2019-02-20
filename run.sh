@@ -134,7 +134,7 @@ EOF
   travis_finish "extract"
 
   for F in $(ls); do
-      tar -czf "../releases/${HOST_ARCH}_${F}.tar.gz" "$F"
+      tar -czf "../releases/${HOST_ARCH}_${F}.tgz" "$F"
 
       IMG="${REPO}:${HOST_ARCH}-$(echo $F | cut -d- -f2)"
       travis_start "$IMG" "Build $IMG"
