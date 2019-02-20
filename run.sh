@@ -109,32 +109,6 @@ build () {
 
   echo "PACKAGE_URI: $PACKAGE_URI"
 
-  case "$HOST_ARCH" in
-    "amd64"|"arm64v8"|"arm32v7"|"arm32v6"|"i386"|"ppc64le"|"s390x")
-      HOST_LIB="${HOST_ARCH}/"
-    ;;
-    "arm32v5"|"ARMv5"|"mips"|"mips64el")
-      HOST_LIB="skip"
-    ;;
-    *)
-      echo "Invalid HOST_ARCH <${HOST_ARCH}>."
-      exit 1
-  esac
-
-  [ "$HOST_LIB" != "skip" ] && {
-    IMG="${REPO}:${HOST_ARCH}-register"
-    travis_start "register" "Build $IMG"
-    docker build -t $IMG . -f-<<EOF
-FROM ${HOST_LIB}busybox
-ENV QEMU_BIN_DIR=/usr/bin
-COPY ./register.sh /register
-ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
-RUN chmod +x /qemu-binfmt-conf.sh
-ENTRYPOINT ["/register"]
-EOF
-    travis_finish "register"
-  }
-
   [ -d bin-static ] && rm -rf bin-static
   mkdir -p bin-static
 
@@ -160,6 +134,43 @@ EOF
   done
 
   cd ..
+
+  case "$HOST_ARCH" in
+    "amd64"|"arm64v8"|"arm32v7"|"arm32v6"|"i386"|"ppc64le"|"s390x")
+      HOST_LIB="${HOST_ARCH}/"
+    ;;
+    "arm32v5"|"ARMv5"|"mips"|"mips64el")
+      HOST_LIB="skip"
+    ;;
+    *)
+      echo "Invalid HOST_ARCH <${HOST_ARCH}>."
+      exit 1
+  esac
+
+  IMG="${REPO}:${HOST_ARCH}-register"
+
+  [ -n "$TRAVIS" ] && {
+    case "$HOST_ARCH" in
+      "arm64v8"|"arm32v7"|"arm32v6"|"ppc64le"|"s390x")
+        printf "$ANSI_RED! Skipping creation of $IMG. HOST_ARCH <$HOST_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
+        HOST_LIB="skip"
+      ;;
+    esac
+  }
+
+  [ "$HOST_LIB" != "skip" ] && {
+    travis_start "register" "Build $IMG"
+    docker build -t $IMG . -f-<<EOF
+FROM ${HOST_LIB}busybox
+ENV QEMU_BIN_DIR=/usr/bin
+COPY ./register.sh /register
+ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
+RUN chmod +x /qemu-binfmt-conf.sh
+ENTRYPOINT ["/register"]
+EOF
+    travis_finish "register"
+  }
+
 }
 
 #--
