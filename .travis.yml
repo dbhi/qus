@@ -1,0 +1,25 @@
+services: docker
+language: bash
+addons:
+  apt:
+    packages:
+      - pass
+
+script: ./run.sh
+deploy:
+  - provider: script
+    skip_cleanup: true
+    script: ./run.sh -d
+    on:
+      repo: umarcor/qus
+      branch: master
+  - provider: releases
+    skip_cleanup: true
+#    api_key:
+#      secure:
+#    file: "*.tgz"
+#    file_glob: true
+#    on:
+#      repo: 1138-4EB/qemu-user-static
+#      branch: master
+#      tags: true
