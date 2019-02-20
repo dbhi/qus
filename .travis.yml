@@ -16,17 +16,6 @@ env:
   - BASE_ARCH=mips
   - BASE_ARCH=mips64el
 
-matrix:
-#  fast_finish: true
-  allow_failures:
-    - env: BASE_ARCH=aarch64
-    - env: BASE_ARCH=armhf
-    - env: BASE_ARCH=armel
-    - env: BASE_ARCH=ppc64le
-    - env: BASE_ARCH=s390x
-    - env: BASE_ARCH=mips
-    - env: BASE_ARCH=mips64el
-
 script: ./run.sh
 deploy:
   - provider: script

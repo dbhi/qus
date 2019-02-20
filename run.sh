@@ -137,33 +137,44 @@ guest_arch() {
 #--
 
 build_register () {
+  IMG="${REPO}:${BASE_ARCH}-register"
+
+
   case "$BASE_ARCH" in
     amd64|arm64v8|arm32v7|arm32v6|i386|ppc64le|s390x)
       HOST_LIB="${BASE_ARCH}/"
     ;;
-    arm32v5|ARMv5|mips|mips64el)
-      HOST_LIB="skip"
-    ;;
     *)
-      echo "Invalid BASE_ARCH <${BASE_ARCH}>."
-      exit 1
+      HOST_LIB="skip"
   esac
-
-  IMG="${REPO}:${BASE_ARCH}-register"
 
   if [ -n "$TRAVIS" ]; then
     case "$BASE_ARCH" in
       arm64v8|arm32v7|arm32v6|ppc64le|s390x)
-        printf "$ANSI_RED! Skipping creation of $IMG. BASE_ARCH <$BASE_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
-        HOST_LIB="skip"
-      ;;
+        GUEST="$(guest_arch $(pkg_arch $BASE_ARCH))"
+
+        travis_start "get" "Get <amd64_qemu-${GUEST}-static>"
+        curl -fsSL "http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_amd64.deb" \
+        | dpkg --fsys-tarfile - \
+        | tar xvf - --wildcards ./usr/bin/qemu-${GUEST}-static --strip-components=3
+        travis_finish "get"
+
+        travis_start "guest" "Register binfmt interpreter <$GUEST>"
+        set +e
+        QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -t "$GUEST" -- -p yes
+        set -e
+        travis_finish "guest"
+
+        travis_start "list" "List binfmt interpreters"
+        ./register.sh -l
+        travis_finish "list"
     esac
   fi
 
   [ "$HOST_LIB" = "skip" ] && {
     printf "$ANSI_YELLOW! Skipping creation of $IMG because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
   } || {
-
+    travis_start "register" "Build $IMG"
     docker build -t $IMG . -f-<<EOF
 FROM ${HOST_LIB}busybox
 ENV QEMU_BIN_DIR=/usr/bin
@@ -172,15 +183,14 @@ ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.
 RUN chmod +x /qemu-binfmt-conf.sh
 ENTRYPOINT ["/register"]
 EOF
+    travis_finish "register"
   }
 }
 
 #--
 
 build () {
-  PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $BASE_ARCH).deb}
-
-  echo "PACKAGE_URI: $PACKAGE_URI"
+  build_register
 
   [ -d bin-static ] && rm -rf bin-static
   mkdir -p bin-static
@@ -190,6 +200,7 @@ build () {
 
   cd bin-static
 
+  PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $BASE_ARCH).deb}
   travis_start "extract" "Extract $PACKAGE_URI"
   curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
   travis_finish "extract"
@@ -198,19 +209,15 @@ build () {
     tar -czf "../releases/${BASE_ARCH}_${F}.tgz" "$F"
 
     IMG="${REPO}:${BASE_ARCH}-$(echo $F | cut -d- -f2)"
-    travis_start "$IMG" "Build $IMG"
+    travis_start "$F" "Build $IMG"
     docker build -t "$IMG" . -f-<<EOF
 FROM scratch
 COPY ./$F /usr/bin/${BASE_ARCH}_${F}
 EOF
-    travis_finish "$IMG"
+    travis_finish "$F"
   done
 
   cd ..
-
-  travis_start "register" "Build $IMG"
-  build_register
-  travis_finish "register"
 }
 
 #--
@@ -268,7 +275,6 @@ echo "REPO: $REPO"
 echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
 
 case "$1" in
-  "-d") deploy  ;;
-  *)
-    build
+  -d) deploy ;;
+  *)  build
 esac
