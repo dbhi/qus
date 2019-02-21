@@ -3,42 +3,75 @@ dist: xenial
 services: docker
 language: minimal
 install: skip
-addons:
-  apt:
-    packages:
-      - pass
+#addons:
+#  apt:
+#    packages:
+#    - pass
 
 stages:
-  - build
+  - name: build
+    if: (branch == master) && (tag IS present)
+  - name: manifests
+    if: (branch == master) && (tag IS present)
+  - name: publish
+    if: (branch == master) && (tag IS present)
   - test
-  - manifests
+
+script: ./run.sh
+
+env:
+  - QUS_JOB=
+  - QUS_JOB=f
+  - QUS_JOB=F
+  - QUS_JOB=c
+  - QUS_JOB=C
+  - QUS_JOB=v
+  - QUS_JOB=V
+  - QUS_JOB=i
+  - QUS_JOB=I
+  - QUS_JOB=d
+  - QUS_JOB=D
+  - QUS_JOB=R
+  - QUS_JOB=r
+  - QUS_JOB=s
+  - QUS_JOB=n
+  - QUS_JOB=h
+  - QUS_JOB=H
 
 jobs:
   fast_finish: true
   allow_failures:
-    - env: HOST
-    - env: STATIC
+    - env: QUS_JOB=h
+    - env: QUS_JOB=H
   include:
-    - &build
-      env: BASE_ARCH=x86_64
-      stage: build
-      script: ./run.sh
+    - stage: manifests
+      env: MANIFESTS
+      script: skip
       deploy:
-        - provider: script
+        - &script
+          provider: script
           skip_cleanup: true
+          script: ./run.sh -m
+          on: &on
+            repo: umarcor/qus
+            branch: master
+    - &build
+      stage: build
+      env: BASE_ARCH=x86_64
+      script: ./run.sh -b
+      deploy:
+        - <<: *script
           script: ./run.sh -d
-          on:
-            repo: umarcor/qus
-            branch: master
-        - provider: releases
+        - &releases
+          provider: releases
+          api_key:
+            secure: DFvuc1OE3AJ+6Rieoh8Ybhxv/GZlaAc5JNMxY7CWdC0jXmZsxDjM6EU4yVyB9OHvXgXTMomvf3jUq4VbC1CNtt9pMl8xhDPrbrXDEVR0/BxLRhGPmtT5tvS31+QIHK3W0jowmySvhpKLGjqFVuLGLv1ibsHqdJEZUdNTarwtnvZrPeWUBeet/1S2M/aJPeGW2TZWFEMuNakNGO/esRTqcBADDEB29pD4Ou1wNFx0LCxxp3KYF3EXD3p/qXFeFyvH4vcxWJG0jF9vCuNr9Ci9qJJG3RK+0yYoCdcdS2UkX1MAXbMM1nKpMDZSu+mTT0UJh7XuV+8yXh1BugR68dfxj4y6A3Bl3CF2JV7qI3et5P+qtXDmMnbLkAKCUYSOFCpYcSNrvIi1pG7ZdvIQAU8GjkZnptEdfBm3xA+20TMKmRDC1jHNPtzRoh8XgUM1O0IXWzN7v9p7HZ945AAtpEuo/BaErxHXb/lMBWSi4g1xFZWNw1s6PB1QOJfSgyMgIlUEThq/oV3WxL1AfxONsZdEeaq6OLgj++3cfX9njG74cDAhCP70/9KQ2YH/fE4xgBr4QNL2JprhgIX7MTQ0WsSLHXKsZ75FtD3Pcw+5X/5wnr6d+qkUPwJnnF/XDanseXGLiX8oUg4KNdfl2dv+f5rjGo+Kh5qO8KDBVXpJu5m2p6k=
           skip_cleanup: true
-      #    api_key:
-      #      secure:
           file: "./releases/*.tgz"
-      #    file_glob: true
+          file_glob: true
+          draft: true
           on:
-            repo: umarcor/qus
-            branch: master
+            <<: *on
             tags: true
     - <<: *build
       env: BASE_ARCH=aarch64
@@ -58,38 +91,12 @@ jobs:
       env: BASE_ARCH=mips
     - <<: *build
       env: BASE_ARCH=mips64el
-    - &host
-      stage: test
-      env: NATIVE
-      before_install: sudo apt-get install qemu-user
-      script: ./test.sh -n
-    - env: DOCKER
-      script: ./test.sh -d
-    - env: FIX
-      script: ./test.sh -f
-    - env: FIX_CUSTOM
-      script: ./test.sh -u
-    - env: MULTILIB
-      script: ./test.sh -m
-    - env: MULTILIB_VOLUME
-      script: ./test.sh -v
-    - env: MULTILIB_FIX
-      script: ./test.sh -p
-    - <<: *host
-      env: HOST
-      script: ./test.sh -h
-    - env: STATIC
-      before_install: sudo apt-get install qemu-user-static
-      script: ./test.sh -s
-    - env: STATIC_FIX
-      before_install: sudo apt-get install qemu-user-static
-      script: ./test.sh -r
-    - env: MANIFESTS
-      stage: manifests
-      script: skip
+    - stage: publish
+      env: PUBLISH=
+      script: ./run.sh -p
       deploy:
-        - provider: script
-          script: echo "Not implemented yet"
-          on:
-            repo: umarcor/qus
-            branch: mster
+        <<: *releases
+        file:
+          - test-aarch64
+          - test-riscv64
+        draft: false
