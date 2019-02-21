@@ -137,12 +137,27 @@ guest_arch() {
 #--
 
 getSingleQemuUserStatic () {
-  V=${1:-} # VERSION
-  G=${2:-} # GUEST_ARCH
-  H=${3:-} # HOST_ARCH
-  curl -fsSL "http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${V}_$(pkg_arch ${$H}).deb" \
+  V=${1:-$VERSION}
+  G=${2:-$BASE_ARCH}
+  H=${3:-amd64}
+
+  curl -fsSL "http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${V}_$(pkg_arch ${H}).deb" \
   | dpkg --fsys-tarfile - \
   | tar xvf - --wildcards ./usr/bin/qemu-$(guest_arch $(pkg_arch ${G}))-static --strip-components=3
+}
+
+getAndRegisterSingleQemuUserStatic () {
+  travis_start "get" "Get single qemu-user-static"
+  getSingleQemuUserStatic
+  travis_finish "get"
+
+  travis_start "guest" "Register binfmt interpreter for single qemu-user-static"
+  QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -t "$(guest_arch $(pkg_arch $BASE_ARCH))" -- -p yes
+  travis_finish "guest"
+
+  travis_start "list" "List binfmt interpreters"
+  ./register.sh -l
+  travis_finish "list"
 }
 
 build_register () {
@@ -157,19 +172,7 @@ build_register () {
   if [ -n "$TRAVIS" ]; then
     case "$BASE_ARCH" in
       arm64v8|arm32v7|arm32v6|ppc64le|s390x)
-        GUEST="$(guest_arch $(pkg_arch $BASE_ARCH))"
-
-        travis_start "get" "Get <amd64_qemu-${GUEST}-static>"
-        getSingleQemuUserStatic "$VERSION" $GUEST amd64
-        travis_finish "get"
-
-        travis_start "guest" "Register binfmt interpreter <$GUEST>"
-        QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -t "$GUEST" -- -p yes
-        travis_finish "guest"
-
-        travis_start "list" "List binfmt interpreters"
-        ./register.sh -l
-        travis_finish "list"
+        getAndRegisterSingleQemuUserStatic
     esac
   fi
 
