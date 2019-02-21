@@ -106,14 +106,14 @@ EOF
 
 pkg_arch () {
   case "$1" in
-    "arm64v8")
-      echo "arm64" ;;
-    "arm32v7")
-      echo "armhf" ;;
-    "arm32v6"|"arm32v5")
-      echo "armel" ;;
-    "ppc64le")
-      echo "ppc64el" ;;
+    arm64v8)
+      echo arm64 ;;
+    arm32v7)
+      echo armhf ;;
+    arm32v6|arm32v5)
+      echo armel ;;
+    ppc64le)
+      echo ppc64el ;;
     *)
       echo "$1"
   esac
@@ -121,14 +121,14 @@ pkg_arch () {
 
 guest_arch() {
   case "$1" in
-   "amd64")
-     echo "x86_64" ;;
-   "arm64")
-     echo "aarch64" ;;
-   "armhf"|"armel")
-     echo "arm" ;;
-   "ppc64el")
-     echo "ppc64le" ;;
+   amd64)
+     echo x86_64 ;;
+   arm64)
+     echo aarch64 ;;
+   armhf|armel)
+     echo arm ;;
+   ppc64el)
+     echo ppc64le ;;
    *)
      echo "$1"
   esac
@@ -138,10 +138,10 @@ guest_arch() {
 
 build_register () {
   case "$HOST_ARCH" in
-    "amd64"|"arm64v8"|"arm32v7"|"arm32v6"|"i386"|"ppc64le"|"s390x")
+    amd64|arm64v8|arm32v7|arm32v6|i386|ppc64le|s390x)
       HOST_LIB="${HOST_ARCH}/"
     ;;
-    "arm32v5"|"ARMv5"|"mips"|"mips64el")
+    arm32v5|ARMv5|mips|mips64el)
       HOST_LIB="skip"
     ;;
     *)
@@ -153,7 +153,7 @@ build_register () {
 
   if [ -n "$TRAVIS" ]; then
     case "$HOST_ARCH" in
-      "arm64v8"|"arm32v7"|"arm32v6"|"ppc64le"|"s390x")
+      arm64v8|arm32v7|arm32v6|ppc64le|s390x)
         printf "$ANSI_RED! Skipping creation of $IMG. HOST_ARCH <$HOST_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
         HOST_LIB="skip"
       ;;
@@ -236,26 +236,26 @@ HOST_ARCH=${HOST_ARCH:-x86_64}
 
 PRINT_HOST_ARCH="$HOST_ARCH"
 case "$HOST_ARCH" in
-  "x86_64"|"x86-64"|"amd64"|"AMD64")
-    HOST_ARCH="amd64" ;;
-  "aarch64"|"armv8"|"ARMv8"|"arm64v8")
-    HOST_ARCH="arm64v8" ;;
-  "aarch32"|"armv8l"|"armv7"|"armv7l"|"ARMv7"|"arm32v7"|"armhf")
-    HOST_ARCH="arm32v7" ;;
-  "arm32v6"|"ARMv6"|"armel")
-    HOST_ARCH="arm32v6" ;;
-  "arm32v5"|"ARMv5")
-    HOST_ARCH="arm32v5" ;;
-  "i686"|"i386"|"x86")
-    HOST_ARCH="i386" ;;
-  "ppc64le"|"ppc64el"|"POWER8")
-    HOST_ARCH="ppc64le" ;;
-  "s390x")
-    HOST_ARCH="s390x" ;;
-  "mips")
-    HOST_ARCH="mips" ;;
-  "mips64el")
-    HOST_ARCH="mips64el" ;;
+  x86_64|x86-64|amd64|AMD64)
+    HOST_ARCH=amd64 ;;
+  aarch64|armv8|ARMv8|arm64v8)
+    HOST_ARCH=arm64v8 ;;
+  aarch32|armv8l|armv7|armv7l|ARMv7|arm32v7|armhf)
+    HOST_ARCH=arm32v7 ;;
+  arm32v6|ARMv6|armel)
+    HOST_ARCH=arm32v6 ;;
+  arm32v5|ARMv5)
+    HOST_ARCH=arm32v5 ;;
+  i686|i386|x86)
+    HOST_ARCH=i386 ;;
+  ppc64le|ppc64el|POWER8)
+    HOST_ARCH=ppc64le ;;
+  s390x)
+    HOST_ARCH=s390x ;;
+  mips)
+    HOST_ARCH=mips ;;
+  mips64el)
+    HOST_ARCH=mips64el ;;
   *)
     echo "Invalid HOST_ARCH <${HOST_ARCH}>."
     exit 1
