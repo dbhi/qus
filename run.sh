@@ -185,11 +185,12 @@ build_register () {
     travis_start "register" "Build $IMG-register"
     docker build -t $IMG-register . -f-<<EOF
 FROM ${HOST_LIB}busybox
-ENV QEMU_BIN_DIR=/usr/bin
-COPY ./register.sh /register
-ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
-RUN chmod +x /qemu-binfmt-conf.sh
-ENTRYPOINT ["/register"]
+RUN mkdir /qus
+ENV QEMU_BIN_DIR=/qus/bin
+COPY ./register.sh /qus/register
+ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qus/qemu-binfmt-conf.sh
+RUN chmod +x /qus/qemu-binfmt-conf.sh
+ENTRYPOINT ["/qus/register"]
 EOF
     travis_finish "register"
     travis_start "$BASE_ARCH" "Build $IMG"

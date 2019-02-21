@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd $(dirname $0)
+
 QEMU_BIN_DIR=${QEMU_BIN_DIR:-/usr/bin}
 
 #--
