@@ -137,7 +137,7 @@ guest_arch() {
 #--
 
 build () {
-  [ -z "$PACKAGE_URI" ] && PACKAGE_URI="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $HOST_ARCH).deb"
+  PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $HOST_ARCH).deb}
 
   echo "PACKAGE_URI: $PACKAGE_URI"
 
@@ -223,9 +223,9 @@ deploy () {
 
 #--
 
-[ -z "$VERSION" ] && VERSION="3.1+dfsg-4"
-[ -z "$REPO" ] && REPO="aptman/qus"
-[ -z "$HOST_ARCH" ] && REPO="x86_64"
+VERSION=${VERSION:-3.1+dfsg-4}
+REPO=${REPO:-aptman/qus}
+HOST_ARCH=${HOST_ARCH:-x86_64}
 
 PRINT_HOST_ARCH="$HOST_ARCH"
 case "$HOST_ARCH" in
