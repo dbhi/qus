@@ -146,9 +146,6 @@ getSingleQemuUserStatic () {
 }
 
 build_register () {
-  IMG="${REPO}:${BASE_ARCH}-register"
-
-
   case "$BASE_ARCH" in
     amd64|arm64v8|arm32v7|arm32v6|i386|ppc64le|s390x)
       HOST_LIB="${BASE_ARCH}/"
@@ -176,11 +173,14 @@ build_register () {
     esac
   fi
 
+  PKG_IMG="$IMG"
+  IMG="${REPO}:${BASE_ARCH}"
+
   [ "$HOST_LIB" = "skip" ] && {
-    printf "$ANSI_YELLOW! Skipping creation of $IMG because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
+    printf "$ANSI_YELLOW! Skipping creation of $IMG[-register] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
   } || {
-    travis_start "register" "Build $IMG"
-    docker build -t $IMG . -f-<<EOF
+    travis_start "register" "Build $IMG-register"
+    docker build -t $IMG-register . -f-<<EOF
 FROM ${HOST_LIB}busybox
 ENV QEMU_BIN_DIR=/usr/bin
 COPY ./register.sh /register
@@ -189,14 +189,19 @@ RUN chmod +x /qemu-binfmt-conf.sh
 ENTRYPOINT ["/register"]
 EOF
     travis_finish "register"
+    travis_start "$BASE_ARCH" "Build $IMG"
+
+    docker build -t $IMG . -f-<<EOF
+FROM $IMG-register
+COPY --from="$PKG_IMG" /usr/bin/qemu-* /user/bin/
+EOF
+    travis_finish "$BASE_ARCH"
   }
 }
 
 #--
 
 build () {
-  build_register
-
   [ -d bin-static ] && rm -rf bin-static
   mkdir -p bin-static
 
@@ -211,18 +216,20 @@ build () {
   travis_finish "extract"
 
   for F in $(ls); do
-    tar -czf "../releases/${BASE_ARCH}_${F}.tgz" "$F"
-
-    IMG="${REPO}:${BASE_ARCH}-$(echo $F | cut -d- -f2)"
-    travis_start "$F" "Build $IMG"
-    docker build -t "$IMG" . -f-<<EOF
-FROM scratch
-COPY ./$F /usr/bin/${BASE_ARCH}_${F}
-EOF
-    travis_finish "$F"
+    tar -czf "../releases/${F}_${BASE_ARCH}.tgz" "$F"
   done
 
+  IMG="${REPO}:${BASE_ARCH}-pkg"
+  travis_start "$F" "Build $IMG"
+  docker build -t "$IMG" . -f-<<EOF
+FROM scratch
+COPY ./* /usr/bin/
+EOF
+  travis_finish "$F"
+
   cd ..
+
+  build_register
 }
 
 #--
