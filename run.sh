@@ -136,6 +136,47 @@ guest_arch() {
 
 #--
 
+build_register () {
+  case "$HOST_ARCH" in
+    "amd64"|"arm64v8"|"arm32v7"|"arm32v6"|"i386"|"ppc64le"|"s390x")
+      HOST_LIB="${HOST_ARCH}/"
+    ;;
+    "arm32v5"|"ARMv5"|"mips"|"mips64el")
+      HOST_LIB="skip"
+    ;;
+    *)
+      echo "Invalid HOST_ARCH <${HOST_ARCH}>."
+      exit 1
+  esac
+
+  IMG="${REPO}:${HOST_ARCH}-register"
+
+  if [ -n "$TRAVIS" ]; then
+    case "$HOST_ARCH" in
+      "arm64v8"|"arm32v7"|"arm32v6"|"ppc64le"|"s390x")
+        printf "$ANSI_RED! Skipping creation of $IMG. HOST_ARCH <$HOST_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
+        HOST_LIB="skip"
+      ;;
+    esac
+  fi
+
+  [ "$HOST_LIB" = "skip" ] && {
+    printf "$ANSI_YELLOW! Skipping creation of $IMG because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
+  } || {
+
+    docker build -t $IMG . -f-<<EOF
+FROM ${HOST_LIB}busybox
+ENV QEMU_BIN_DIR=/usr/bin
+COPY ./register.sh /register
+ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
+RUN chmod +x /qemu-binfmt-conf.sh
+ENTRYPOINT ["/register"]
+EOF
+  }
+}
+
+#--
+
 build () {
   PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $HOST_ARCH).deb}
 
@@ -167,43 +208,9 @@ EOF
 
   cd ..
 
-  case "$HOST_ARCH" in
-    "amd64"|"arm64v8"|"arm32v7"|"arm32v6"|"i386"|"ppc64le"|"s390x")
-      HOST_LIB="${HOST_ARCH}/"
-    ;;
-    "arm32v5"|"ARMv5"|"mips"|"mips64el")
-      HOST_LIB="skip"
-    ;;
-    *)
-      echo "Invalid HOST_ARCH <${HOST_ARCH}>."
-      exit 1
-  esac
-
-  IMG="${REPO}:${HOST_ARCH}-register"
-
-  if [ -n "$TRAVIS" ]; then
-    case "$HOST_ARCH" in
-      "arm64v8"|"arm32v7"|"arm32v6"|"ppc64le"|"s390x")
-        printf "$ANSI_RED! Skipping creation of $IMG. HOST_ARCH <$HOST_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
-        HOST_LIB="skip"
-      ;;
-    esac
-  fi
-
-  [ "$HOST_LIB" = "skip" ] && {
-    printf "$ANSI_YELLOW! Skipping creation of $IMG because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
-  } || {
-    travis_start "register" "Build $IMG"
-    docker build -t $IMG . -f-<<EOF
-FROM ${HOST_LIB}busybox
-ENV QEMU_BIN_DIR=/usr/bin
-COPY ./register.sh /register
-ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qemu-binfmt-conf.sh
-RUN chmod +x /qemu-binfmt-conf.sh
-ENTRYPOINT ["/register"]
-EOF
-    travis_finish "register"
-  }
+  travis_start "register" "Build $IMG"
+  build_register
+  travis_finish "register"
 }
 
 #--
