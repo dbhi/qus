@@ -137,24 +137,24 @@ guest_arch() {
 #--
 
 build_register () {
-  case "$HOST_ARCH" in
+  case "$BASE_ARCH" in
     amd64|arm64v8|arm32v7|arm32v6|i386|ppc64le|s390x)
-      HOST_LIB="${HOST_ARCH}/"
+      HOST_LIB="${BASE_ARCH}/"
     ;;
     arm32v5|ARMv5|mips|mips64el)
       HOST_LIB="skip"
     ;;
     *)
-      echo "Invalid HOST_ARCH <${HOST_ARCH}>."
+      echo "Invalid BASE_ARCH <${BASE_ARCH}>."
       exit 1
   esac
 
-  IMG="${REPO}:${HOST_ARCH}-register"
+  IMG="${REPO}:${BASE_ARCH}-register"
 
   if [ -n "$TRAVIS" ]; then
-    case "$HOST_ARCH" in
+    case "$BASE_ARCH" in
       arm64v8|arm32v7|arm32v6|ppc64le|s390x)
-        printf "$ANSI_RED! Skipping creation of $IMG. HOST_ARCH <$HOST_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
+        printf "$ANSI_RED! Skipping creation of $IMG. BASE_ARCH <$BASE_ARCH> not supported in Travis, yet.$ANSI_NOCOLOR\n"
         HOST_LIB="skip"
       ;;
     esac
@@ -178,7 +178,7 @@ EOF
 #--
 
 build () {
-  PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $HOST_ARCH).deb}
+  PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $BASE_ARCH).deb}
 
   echo "PACKAGE_URI: $PACKAGE_URI"
 
@@ -195,13 +195,13 @@ build () {
   travis_finish "extract"
 
   for F in $(ls); do
-    tar -czf "../releases/${HOST_ARCH}_${F}.tgz" "$F"
+    tar -czf "../releases/${BASE_ARCH}_${F}.tgz" "$F"
 
-    IMG="${REPO}:${HOST_ARCH}-$(echo $F | cut -d- -f2)"
+    IMG="${REPO}:${BASE_ARCH}-$(echo $F | cut -d- -f2)"
     travis_start "$IMG" "Build $IMG"
     docker build -t "$IMG" . -f-<<EOF
 FROM scratch
-COPY ./$F /usr/bin/${HOST_ARCH}_${F}
+COPY ./$F /usr/bin/${BASE_ARCH}_${F}
 EOF
     travis_finish "$IMG"
   done
@@ -216,10 +216,10 @@ EOF
 #--
 
 deploy () {
-  travis_start "tag" "Tag ${REPO}:${HOST_ARCH}-*"
+  travis_start "tag" "Tag ${REPO}:${BASE_ARCH}-*"
   for T in $(ls releases); do
     T="$(echo $T | cut -d- -f2)"
-    docker tag "${REPO}:${HOST_ARCH}-$T" "${REPO}:$T"
+    docker tag "${REPO}:${BASE_ARCH}-$T" "${REPO}:$T"
   done
   travis_finish "tag"
   getDockerCredentialPass
@@ -232,40 +232,40 @@ deploy () {
 
 VERSION=${VERSION:-3.1+dfsg-4}
 REPO=${REPO:-aptman/qus}
-HOST_ARCH=${HOST_ARCH:-x86_64}
+BASE_ARCH=${BASE_ARCH:-x86_64}
 
-PRINT_HOST_ARCH="$HOST_ARCH"
-case "$HOST_ARCH" in
+PRINT_BASE_ARCH="$BASE_ARCH"
+case "$BASE_ARCH" in
   x86_64|x86-64|amd64|AMD64)
-    HOST_ARCH=amd64 ;;
+    BASE_ARCH=amd64 ;;
   aarch64|armv8|ARMv8|arm64v8)
-    HOST_ARCH=arm64v8 ;;
+    BASE_ARCH=arm64v8 ;;
   aarch32|armv8l|armv7|armv7l|ARMv7|arm32v7|armhf)
-    HOST_ARCH=arm32v7 ;;
+    BASE_ARCH=arm32v7 ;;
   arm32v6|ARMv6|armel)
-    HOST_ARCH=arm32v6 ;;
+    BASE_ARCH=arm32v6 ;;
   arm32v5|ARMv5)
-    HOST_ARCH=arm32v5 ;;
+    BASE_ARCH=arm32v5 ;;
   i686|i386|x86)
-    HOST_ARCH=i386 ;;
+    BASE_ARCH=i386 ;;
   ppc64le|ppc64el|POWER8)
-    HOST_ARCH=ppc64le ;;
+    BASE_ARCH=ppc64le ;;
   s390x)
-    HOST_ARCH=s390x ;;
+    BASE_ARCH=s390x ;;
   mips)
-    HOST_ARCH=mips ;;
+    BASE_ARCH=mips ;;
   mips64el)
-    HOST_ARCH=mips64el ;;
+    BASE_ARCH=mips64el ;;
   *)
-    echo "Invalid HOST_ARCH <${HOST_ARCH}>."
+    echo "Invalid BASE_ARCH <${BASE_ARCH}>."
     exit 1
 esac
 
-[ -n "$PRINT_HOST_ARCH" ] && PRINT_HOST_ARCH="$HOST_ARCH [$PRINT_HOST_ARCH]" || PRINT_HOST_ARCH="$HOST_ARCH"
+[ -n "$PRINT_BASE_ARCH" ] && PRINT_BASE_ARCH="$BASE_ARCH [$PRINT_BASE_ARCH]" || PRINT_BASE_ARCH="$BASE_ARCH"
 
 echo "VERSION: $VERSION"
 echo "REPO: $REPO"
-echo "HOST_ARCH: $PRINT_HOST_ARCH"; unset PRINT_HOST_ARCH
+echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
 
 case "$1" in
   "-d") deploy  ;;

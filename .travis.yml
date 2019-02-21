@@ -6,26 +6,26 @@ addons:
       - pass
 
 env:
-  - HOST_ARCH=x86_64
-  - HOST_ARCH=aarch64
-  - HOST_ARCH=armhf
-  - HOST_ARCH=armel
-  - HOST_ARCH=i686
-  - HOST_ARCH=ppc64le
-  - HOST_ARCH=s390x
-  - HOST_ARCH=mips
-  - HOST_ARCH=mips64el
+  - BASE_ARCH=x86_64
+  - BASE_ARCH=aarch64
+  - BASE_ARCH=armhf
+  - BASE_ARCH=armel
+  - BASE_ARCH=i686
+  - BASE_ARCH=ppc64le
+  - BASE_ARCH=s390x
+  - BASE_ARCH=mips
+  - BASE_ARCH=mips64el
 
 matrix:
 #  fast_finish: true
   allow_failures:
-    - env: HOST_ARCH=aarch64
-    - env: HOST_ARCH=armhf
-    - env: HOST_ARCH=armel
-    - env: HOST_ARCH=ppc64le
-    - env: HOST_ARCH=s390x
-    - env: HOST_ARCH=mips
-    - env: HOST_ARCH=mips64el
+    - env: BASE_ARCH=aarch64
+    - env: BASE_ARCH=armhf
+    - env: BASE_ARCH=armel
+    - env: BASE_ARCH=ppc64le
+    - env: BASE_ARCH=s390x
+    - env: BASE_ARCH=mips
+    - env: BASE_ARCH=mips64el
 
 script: ./run.sh
 deploy:
@@ -42,6 +42,6 @@ deploy:
 #    file: "*.tgz"
 #    file_glob: true
 #    on:
-#      repo: 1138-4EB/qemu-user-static
+#      repo: umarcor/qus
 #      branch: master
 #      tags: true
