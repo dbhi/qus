@@ -136,6 +136,15 @@ guest_arch() {
 
 #--
 
+getSingleQemuUserStatic () {
+  V=${1:-} # VERSION
+  G=${2:-} # GUEST_ARCH
+  H=${3:-} # HOST_ARCH
+  curl -fsSL "http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${V}_$(pkg_arch ${$H}).deb" \
+  | dpkg --fsys-tarfile - \
+  | tar xvf - --wildcards ./usr/bin/qemu-$(guest_arch $(pkg_arch ${G}))-static --strip-components=3
+}
+
 build_register () {
   IMG="${REPO}:${BASE_ARCH}-register"
 
@@ -154,15 +163,11 @@ build_register () {
         GUEST="$(guest_arch $(pkg_arch $BASE_ARCH))"
 
         travis_start "get" "Get <amd64_qemu-${GUEST}-static>"
-        curl -fsSL "http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_amd64.deb" \
-        | dpkg --fsys-tarfile - \
-        | tar xvf - --wildcards ./usr/bin/qemu-${GUEST}-static --strip-components=3
+        getSingleQemuUserStatic "$VERSION" $GUEST amd64
         travis_finish "get"
 
         travis_start "guest" "Register binfmt interpreter <$GUEST>"
-        set +e
         QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -t "$GUEST" -- -p yes
-        set -e
         travis_finish "guest"
 
         travis_start "list" "List binfmt interpreters"

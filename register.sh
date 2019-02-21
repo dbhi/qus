@@ -26,7 +26,7 @@ fi
 args="--qemu-path=${QEMU_BIN_DIR}"
 rargs="$@"
 
-if [ "$(echo "$@" | grep -- '--')" ]; then
+if [ "$rargs" != "--" ] && [ "$(echo "$@" | grep -- '--')" ]; then
   args="$args $(echo "$@" | sed 's/.* -- \(.*\)/\1/')"
   rargs="$(echo "$@" | sed 's/\(.*\) -- .*/\1/')"
 fi
