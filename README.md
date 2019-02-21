@@ -5,7 +5,7 @@
 </p>
 
 <p align="center">
-  <a title="Build Status" href="https://travis-ci.com/umarcor/qus/builds"><img src="https://img.shields.io/travis/com/umarcor/qus/qus.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=qus"></a><!--
+  <a title="Build Status" href="https://travis-ci.com/umarcor/qus/builds"><img src="https://img.shields.io/travis/com/umarcor/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=qus"></a><!--
   -->
   <a title="Docker Hub" href="https://hub.docker.com/r/aptman/qus/"><img src="https://img.shields.io/docker/pulls/aptman/qus.svg?longCache=true&style=flat-square&logo=docker&logoColor=fff&label=aptman%2Fqus"></a><!--
   -->
@@ -65,9 +65,80 @@ i386 i486 alpha arm armeb sparc32plus ppc ppc64 ppc64le m68k mips mipsel mipsn32
 In order to unset the registered formats, and unload the binaries, run:
 
 ``` bash
-docker run --rm --privileged aptman/qus -r
+docker run --rm --privileged aptman/qus -r -e
 ```
 
 ### Bandwidth-efficient procedure
 
-In contexts such as CI services it might be desirable to reduce the required bandwidth. Hence, instead of using `aptman/qus` images —which include all the binaries for all the supported target architectures—, individual tarballs are available through GitHub Releases. These can be used along with `aptman/qus:register` images or with [`register.sh`](./register.sh).
+In contexts such as CI services it might be desirable to reduce the required bandwidth. Hence, instead of using `aptman/qus` images —which include all the binaries for all the supported target architectures—, individual tarballs are available through GitHub Releases. These can be used along with `aptman/qus:register` images or with [`register.sh`](./register.sh). See either XXXX or XXXX for alternatives to examples of these use cases.
+
+## Available docker images
+
+Manifests for `amd64`, `arm64v8`, `arm32v7`, `arm32v6`, `i386`, `s390x` or `ppc64le` hosts:
+
+- `aptman/qus:pkg`: all the `qemu-*-static` binaries from [packages.debian.org/sid/qemu-user-static](https://packages.debian.org/sid/qemu-user-static) extracted on a `scratch` image.
+- `aptman/qus:register`: a `busybox` image with [`register.sh`](./register.sh) and [`qemu-binfmt-conf.sh`](https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh). The entrypoint is set to `register.sh`.
+- `aptman/qus`: union of the two previous images.
+
+Apart from those, `aptman/qus:mips-pkg` and `aptman/qus:mips64el-pkg` are also available.
+
+---
+
+- https://wiki.qemu.org/Testing/DockerBuild
+
+- https://hub.docker.com/r/fkrull/qemu-user-static
+    - [fkrull/docker-qemu-user-static](https://github.com/fkrull/docker-qemu-user-static/)
+- https://github.com/rmoriz/multiarch-test
+
+
+## Dropping the kernel dependency
+
+Sudo privileges, which are required in order to register binfmt formats, are not available in all context. See, for example, [play-with-docker/play-with-docker#276](https://github.com/play-with-docker/play-with-docker/issues/276). In [balena.io/blog: Building ARM containers on any x86 machine, even DockerHub](https://www.balena.io/blog/building-arm-containers-on-any-x86-machine-even-dockerhub/), an alternative to binfmt is proposed. However, this approach has not been implemented in this repo yet.
+
+## Tests
+
+| Job | Register method       | -r | -s | -p | Dependecy          | Install method   | vol |
+|:---:|:---------------------:|:--:|:--:|:--:|:------------------:|------------------|:---:|
+|     | `aptman/qus`          | n  | y  | y  | -                  |                  | n   |
+| f   | `register.sh`         | n  | y  | y  | `/usr/bin/$file`   | host  [curl]     | n   |
+| F   | `aptman/qus:register` | n  | y  | y* | `/usr/bin/$file`   | host  [curl]     | n   |
+| c   | `register.sh`         | n  | y  | y  | `$(pwd)/$file`     | host  [curl]     | n   |
+| C   | `aptman/qus:register` | n  | y  | y* | `$(pwd)/$file`     | host  [curl]     | n   |
+| v   | `register.sh`         | n  | y  | n  | `$(pwd)/$file`     | host  [curl]     | y   |
+| V   | `aptman/qus:register` | n  | y  | n  | `$(pwd)/$file`     | host  [curl]     | y   |
+| i   | `register.sh`         | n  | y  | n  | `$file`            | image [add/copy] | n   |
+| I   | `aptman/qus:register` | n  | y  | n  | `$file`            | image [add/copy] | n   |
+| d   | `register.sh`         | n  | y  | n  | `qemu-user`        | image [apt]      | n   |
+| D   | `aptman/qus:register` | n  | y  | n  | `qemu-user`        | image [apt]      | n   |
+| r   | `register.sh`         | y  | y  | y  | `qemu-user-static` | host  [apt]      | n   |
+| R   | `aptman/qus:register` | y  | y  | y* | `qemu-user-static` | host  [apt]      | n   |
+| s   | -                     | -  | -  | -  | `qemu-user-static` | host  [apt]      | y   |
+| n   | -                     | -  | -  | -  | `qemu-user-binfmt` | host  [apt]      | -   |
+| h   | `register.sh`         | y  | n  | y  | `qemu-user`        | host  [apt]      | n   |
+| H   | `aptman/qus:register` | y  | n  | y* | `qemu-user`        | host  [apt]      | n   |
+
+where:
+
+- `file` is the `qemu-*-static` binary corresponding to the target architecture. In these tests: `file=qemu-aarch64-static`.
+- `-r|--reset|-reset`: clean any registered 'qemu-*' interpreter
+- `-s|--static|-static`: add '--qemu-suffix -static' to the args for qemu-binfmt-conf.sh
+- `-p|--persistent`: if yes, the interpreter is loaded when binfmt is configured and remains in memory. All future uses are cloned from the open file.
+- `vol`: whether the QEMU binary must be bind between the host and the container where target binaries are located. None of the methods with `vol=y` can be used for `docker build`.
+
+> NOTE: `n` is about executing a binary on the host, not inside a container.
+
+## Similar projects and blog posts
+
+The use cases in the following references are similar to the ones in this project:
+
+- [multiarch/qemu-user-static](https://github.com/multiarch/qemu-user-static)
+- [Travis with Docker and QEMU for multi-architecture CI workflow](https://developer.ibm.com/linuxonpower/2017/07/28/travis-multi-architecture-ci-workflow/)
+- [ownyourbits.com](https://ownyourbits.com)
+    - [Running and building ARM Docker containers in x86](https://ownyourbits.com/2018/06/27/running-and-building-arm-docker-containers-in-x86/)
+    - [Transparently running binaries from any architecture in Linux with QEMU and binfmt_misc](https://ownyourbits.com/2018/06/13/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt_misc/)
+
+The main enhancements provided by *qus* are the following:
+
+- Do not require the addition of any binary to the docker images.
+- Optionally, limit the list of QEMU binaries to be registered on the host.
+- Provide docker images for host architectures other than `amd64`.

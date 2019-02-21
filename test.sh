@@ -4,70 +4,7 @@ set -e
 
 cd $(dirname $0)
 
-#--
-
-enable_color() {
-  ENABLECOLOR='-c '
-  ANSI_RED="\033[31m"
-  ANSI_GREEN="\033[32m"
-  ANSI_YELLOW="\033[33m"
-  ANSI_BLUE="\033[34m"
-  ANSI_MAGENTA="\033[35m"
-  ANSI_CYAN="\033[36;1m"
-  ANSI_DARKCYAN="\033[36m"
-  ANSI_NOCOLOR="\033[0m"
-}
-
-disable_color() { unset ENABLECOLOR ANSI_RED ANSI_GREEN ANSI_YELLOW ANSI_BLUE ANSI_MAGENTA ANSI_CYAN ANSI_DARKCYAN ANSI_NOCOLOR; }
-
-enable_color
-
-#--
-
-travis_start () {
-  :
-}
-travis_finish () {
-  :
-}
-
-[ -n "$TRAVIS" ] && {
-  # This is a trimmed down copy of
-  # https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/templates/header.sh
-  travis_time_start() {
-    # `date +%N` returns the date in nanoseconds. It is used as a replacement for $RANDOM, which is only available in bash.
-    travis_timer_id=`date +%N`
-    travis_start_time=$(travis_nanoseconds)
-    echo "travis_time:start:$travis_timer_id"
-  }
-  travis_time_finish() {
-    travis_end_time=$(travis_nanoseconds)
-    local duration=$(($travis_end_time-$travis_start_time))
-    echo "travis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration"
-  }
-
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    travis_nanoseconds() {
-      date -u '+%s000000000'
-    }
-  else
-    travis_nanoseconds() {
-      date -u '+%s%N'
-    }
-  fi
-
-  travis_start () {
-    echo "travis_fold:start:$1"
-    travis_time_start
-    printf "$ANSI_BLUE> $2$ANSI_NOCOLOR\n"
-  }
-
-  travis_finish () {
-    travis_time_finish
-    echo "travis_fold:end:$1"
-  }
-
-}
+. ./utils.sh
 
 #--
 
@@ -84,17 +21,17 @@ compile () {
 #--
 
 register () {
-  travis_start "register" "Register qemu-user binfmt interpreters"
+  travis_start "register" "Register qemu-user binfmt interpreters with register.sh"
   sudo ./register.sh $@
   travis_finish "register"
 
   list
 }
 
-register_multilib () {
-  travis_start "register" "Register qemu-user-static binfmt interpreters"
+register_docker () {
+  travis_start "register" "Register qemu-user binfmt interpreters with aptman/qus:register"
   [ -n "$QEMU_BIN_DIR" ] && vol="-e QEMU_BIN_DIR=$QEMU_BIN_DIR -v=$QEMU_BIN_DIR:$QEMU_BIN_DIR" || vol=""
-  docker run --rm --privileged $vol multiarch/qemu-user-static:register $@
+  docker run --rm --privileged $vol aptman/qus:register $@
   travis_finish "register"
 
   list
@@ -102,20 +39,11 @@ register_multilib () {
 
 list () {
   travis_start "list" "List binfmt interpreters"
-  sudo ./register.sh -l
+  sudo ./register.sh -l -e
   travis_finish "list"
 }
 
 #--
-
-build () {
-  travis_start "build" "Build docker image containing qemu-user"
-  docker build -t tmp/tmp -<<EOF
-FROM ubuntu:18.04
-RUN apt update && apt install -y qemu-user
-EOF
-  travis_finish "build"
-}
 
 build_static () {
   travis_start "build" "Build docker image containing qemu-aarch64-static"
@@ -142,7 +70,7 @@ pull_tmp () {
   travis_start "pull" "Pull docker image $1 and tag it as tmp/tmp"
   docker pull $1
   docker tag $1 tmp/tmp
-  travis_finish "build"
+  travis_finish "pull"
 }
 
 #--
@@ -168,23 +96,16 @@ test_docker () {
   travis_finish "test"
 }
 
-test_native () {
-  travis_start "native" "Test direct and explicit native execution"
-  printf 'DIRECT: '
-  ./main
-  printf 'EXPLICIT: '
-  qemu-aarch64 ./main
-  travis_finish "native"
-}
-
 tmp_test () {
   pull_tmp "arm64v8/ubuntu:bionic"
 
-  q="qemu-aarch64-static"
-  if [ "$@" != "" ]; then
-    test_docker $q -v=$(pwd)/$q:/usr/bin/$q
+  if [ "$#" != "0" ]; then
+    q="$(basename $1)"
+    v="$(dirname $1)"
+    if [ "$v" = "." ]; then v="$(pwd)"; fi
+    test_docker $q "-v=$v/$q:/usr/bin/$q"
   else
-    test_docker $q
+    test_docker "qemu-aarch64-static"
   fi
 }
 
@@ -192,66 +113,108 @@ tmp_test () {
 
 compile
 
-case "$1" in
-  "-n")
-    register
-    test_native
-  ;;
-  "-d")
-    register
-    build
-    test_docker qemu-aarch64
-  ;;
-  "-f")
+case "$QUS_JOB" in
+  [fF])
     get_static
     sudo mv qemu-aarch64-static /usr/bin
-    register -s -- -p yes
+
+    [ "$QUS_JOB" = "f" ] && cmd="register" || QEMU_BIN_DIR=/usr/bin cmd="register_docker"
+
+    $cmd -s -t aarch64 -- -p yes
 
     tmp_test
   ;;
-  "-u")
+  [cC])
     get_static
     export QEMU_BIN_DIR=$(pwd)
-    register -s -- -p yes
+
+    [ "$QUS_JOB" = "c" ] && cmd="register" || cmd="register_docker"
+
+    $cmd -s -t aarch64 -- -p yes
 
     tmp_test
   ;;
-  "-m")
-    register_multilib
+  [vV])
+    args="-s -t aarch64"
+    [ "$QUS_JOB" = "v" ] && register $args || QEMU_BIN_DIR=/usr/bin register_docker $args
+
     get_static
+
+    tmp_test qemu-aarch64-static
+  ;;
+  [iI])
+    args="-s -t aarch64"
+    [ "$QUS_JOB" = "i" ] && register $args || QEMU_BIN_DIR=/usr/bin register_docker $args
+
+    get_static
+
     build_static
     test_docker qemu-aarch64-static
   ;;
-  "-v")
-    register_multilib
-    get_static
-
-    tmp_test vol
+  [hH])
+    exit 1
   ;;
-  "-p")
-    get_static
-    export QEMU_BIN_DIR=$(pwd)
-    register_multilib -p yes
+  [dD])
+    args="-t aarch64"
+    [ "$QUS_JOB" = "d" ] && register $args || QEMU_BIN_DIR=/usr/bin register_docker $args
+
+    travis_start "build" "Build docker image containing qemu-user"
+    docker build -t tmp/tmp -<<EOF
+FROM ubuntu:18.04
+RUN apt update && apt install -y qemu-user
+EOF
+    travis_finish "build"
+
+    test_docker qemu-aarch64
+  ;;
+  s)
+    travis_start "apt" "sudo apt install qemu-user-static"
+    sudo apt-get install qemu-user-static
+    travis_finish "apt"
+
+    list
+
+    tmp_test /usr/bin/qemu-aarch64-static
+  ;;
+  [rR])
+    travis_start "apt" "sudo apt install qemu-user-static"
+    sudo apt-get install qemu-user-static
+    travis_finish "apt"
+
+    list
+
+    args="-r -s -t aarch64 -- -p yes"
+    [ "$QUS_JOB" = "r" ] && register $args || QEMU_BIN_DIR=/usr/bin register_docker $args
 
     tmp_test
   ;;
-  "-h")
-    register -- -p yes
+  n)
+    travis_start "apt" "sudo apt install qemu-user-binfmt"
+    sudo apt-get install qemu-user-binfmt
+    travis_finish "apt"
 
-    pull_tmp "ubuntu:18.04"
-    q="qemu-aarch64"
-    #test_docker $q -v=/usr/bin/$q:/usr/bin/$q
-    test_docker $q
-  ;;
-  "-s")
-    tmp_test vol
-  ;;
-  "-r")
-    register -r -s -- -p yes
+    list
 
-    tmp_test
+    travis_start "native" "Test direct and explicit native execution"
+    printf 'DIRECT: '
+    ./main
+    printf 'EXPLICIT: '
+    qemu-aarch64 ./main
+    travis_finish "native"
   ;;
+
+#  "-h")
+#    register -- -p yes
+#
+#    pull_tmp "ubuntu:18.04"
+#    q="qemu-aarch64"
+#    #test_docker $q -v=/usr/bin/$q:/usr/bin/$q
+#    test_docker $q
   *)
-    echo "Unknown arg <$1>"
+    travis_start "register" "Register and load qemu-aarch64-static with/from aptman/qus"
+    docker run --rm --privileged aptman/qus -s -t aarch64 -- -p yes
+    travis_finish "register"
+
+    tmp_test
   ;;
 esac

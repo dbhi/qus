@@ -2,104 +2,48 @@
 
 cd "$(dirname $0)"
 
-#--
-
-enable_color() {
-  ENABLECOLOR='-c '
-  ANSI_RED="\033[31m"
-  ANSI_GREEN="\033[32m"
-  ANSI_YELLOW="\033[33m"
-  ANSI_BLUE="\033[34m"
-  ANSI_MAGENTA="\033[35m"
-  ANSI_CYAN="\033[36;1m"
-  ANSI_DARKCYAN="\033[36m"
-  ANSI_NOCOLOR="\033[0m"
-}
-
-disable_color() { unset ENABLECOLOR ANSI_RED ANSI_GREEN ANSI_YELLOW ANSI_BLUE ANSI_MAGENTA ANSI_CYAN ANSI_DARKCYAN ANSI_NOCOLOR; }
-
-enable_color
-
-#--
-
-travis_start () {
-  :
-}
-travis_finish () {
-  :
-}
-
-[ -n "$TRAVIS" ] && {
-  # This is a trimmed down copy of
-  # https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/templates/header.sh
-  travis_time_start() {
-    # `date +%N` returns the date in nanoseconds. It is used as a replacement for $RANDOM, which is only available in bash.
-    travis_timer_id=`date +%N`
-    travis_start_time=$(travis_nanoseconds)
-    echo "travis_time:start:$travis_timer_id"
-  }
-  travis_time_finish() {
-    travis_end_time=$(travis_nanoseconds)
-    local duration=$(($travis_end_time-$travis_start_time))
-    echo "travis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration"
-  }
-
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    travis_nanoseconds() {
-      date -u '+%s000000000'
-    }
-  else
-    travis_nanoseconds() {
-      date -u '+%s%N'
-    }
-  fi
-
-  travis_start () {
-    echo "travis_fold:start:$1"
-    travis_time_start
-    printf "$ANSI_BLUE> $2$ANSI_NOCOLOR\n"
-  }
-
-  travis_finish () {
-    travis_time_finish
-    echo "travis_fold:end:$1"
-  }
-
-}
+. ./utils.sh
 
 #--
 
 getDockerCredentialPass () {
-  PASS_URL="$(curl -s https://api.github.com/repos/docker/docker-credential-helpers/releases/latest \
-    | grep "browser_download_url.*pass-.*-amd64" \
-    | cut -d : -f 2,3 \
-    | tr -d \" \
-    | cut -c2- )"
-
-  [ "$(echo "$PASS_URL" | cut -c1-5)" != "https" ] && PASS_URL="https://github.com/docker/docker-credential-helpers/releases/download/v0.6.0/docker-credential-pass-v0.6.0-amd64.tar.gz"
-
-  echo "PASS_URL: $PASS_URL"
-  curl -fsSL "$PASS_URL" | tar xv
-  chmod + $(pwd)/docker-credential-pass
+:
+#  travis_start "get_docker_credential_pass" "Get docker-credential-pass"
+#  PASS_URL="$(curl -s https://api.github.com/repos/docker/docker-credential-helpers/releases/latest \
+#    | grep "browser_download_url.*pass-.*-amd64" \
+#    | cut -d : -f 2,3 \
+#    | tr -d \" \
+#    | cut -c2- )"
+#
+#  [ "$(echo "$PASS_URL" | cut -c1-5)" != "https" ] && PASS_URL="https://github.com/docker/docker-credential-helpers/releases/download/v0.6.0/docker-credential-pass-v0.6.0-amd64.tar.gz"
+#
+#  echo "PASS_URL: $PASS_URL"
+#  curl -fsSL "$PASS_URL" | tar xv
+#  chmod + $(pwd)/docker-credential-pass
+#  travis_finish "get_docker_credential_pass"
 }
 
 #--
 
 dockerLogin () {
-  [ "$CI" = "true" ] && gpg --batch --gen-key <<-EOF ; pass init $(gpg --no-auto-check-trustdb --list-secret-keys | grep ^sec | cut -d/ -f2 | cut -d" " -f1)
-%echo Generating a standard key
-Key-Type: DSA
-Key-Length: 1024
-Subkey-Type: ELG-E
-Subkey-Length: 1024
-Name-Real: Meshuggah Rocks
-Name-Email: meshuggah@example.com
-Expire-Date: 0
-# Do a commit here, so that we can later print "done" :-)
-%commit
-%echo done
-EOF
+  travis_start "docker_login" "Docker login"
+#  if [ "$CI" = "true" ]; then
+#    gpg --batch --gen-key <<-EOF ; pass init $(gpg --no-auto-check-trustdb --list-secret-keys | grep ^sec | cut -d/ -f2 | cut -d" " -f1)
+#%echo Generating a standard key
+#Key-Type: DSA
+#Key-Length: 1024
+#Subkey-Type: ELG-E
+#Subkey-Length: 1024
+#Name-Real: Meshuggah Rocks
+#Name-Email: meshuggah@example.com
+#Expire-Date: 0
+## Do a commit here, so that we can later print "done" :-)
+#%commit
+#%echo done
+#EOF
+#  fi
   echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+  travis_finish "docker_login"
 }
 
 #--
@@ -156,7 +100,7 @@ getAndRegisterSingleQemuUserStatic () {
   travis_finish "guest"
 
   travis_start "list" "List binfmt interpreters"
-  ./register.sh -l
+  ./register.sh -l -e
   travis_finish "list"
 }
 
@@ -197,7 +141,8 @@ EOF
 
     docker build -t $IMG . -f-<<EOF
 FROM $IMG-register
-COPY --from="$PKG_IMG" /usr/bin/qemu-* /user/bin/
+COPY --from="$PKG_IMG" /usr/bin/qemu-* /qus/bin/
+VOLUME /qus
 EOF
     travis_finish "$BASE_ARCH"
   }
@@ -239,16 +184,57 @@ EOF
 #--
 
 deploy () {
-  travis_start "tag" "Tag ${REPO}:${BASE_ARCH}-*"
-  for T in $(ls releases); do
-    T="$(echo $T | cut -d- -f2)"
-    docker tag "${REPO}:${BASE_ARCH}-$T" "${REPO}:$T"
-  done
-  travis_finish "tag"
   getDockerCredentialPass
   dockerLogin
   docker push $REPO
   docker logout
+}
+
+#--
+
+manifests () {
+  mkdir -p ~/.docker
+  echo '{"experimental": "enabled"}' > ~/.docker/config.json
+
+  getDockerCredentialPass
+  dockerLogin
+
+  for i in latest pkg register; do
+    travis_start "man_create_$i" "Docker manifest create $i"
+    cmd="docker manifest create -a ${REPO}:$i"
+    [ "$i" == "latest" ] && p="" || p="-$i"
+    for a in amd64 arm64v8 arm32v7 arm32v6 i386 s390x ppc64le; do
+      cmd="$cmd ${REPO}:${a}${p}"
+    done
+    $cmd
+    travis_finish "man_create_$i"
+
+    travis_start "man_push_$i" "Docker manifest push ${REPO}:$i"
+    docker manifest push --purge "${REPO}:$i"
+    travis_finish "man_push_$i"
+  done
+
+  docker logout
+}
+
+#--
+
+publish () {
+  travis_start "compile" "Cross-compile main.c for 'aarch64' and 'riscv64' in an 'amd64' docker container"
+  docker run --rm -itv $(pwd):/src -w /src ubuntu:bionic bash -c "$(cat <<-EOF
+apt update -y
+apt install -y gcc-aarch64-linux-gnu ca-certificates curl
+update-ca-certificates
+aarch64-linux-gnu-gcc -static -o test-aarch64 main.c
+chmod +x test-aarch64
+
+mkdir /riscv
+curl -fsSL https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-20170612-x86_64-linux-centos6.tar.gz | tar -xzvf - -C /riscv --strip-components=1
+/riscv/bin/riscv64-unknown-elf-gcc -static -o test-riscv64 main.c
+chmod +x test-riscv64
+EOF
+)"
+  travis_finish "compile"
 }
 
 #--
@@ -291,6 +277,8 @@ echo "REPO: $REPO"
 echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
 
 case "$1" in
-  -d) deploy ;;
+  -d) deploy    ;;
+  -m) manifests ;;
+  -p) publish   ;;
   *)  build
 esac
