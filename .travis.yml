@@ -1,36 +1,90 @@
+os: linux
+dist: xenial
 services: docker
-language: bash
+language: minimal
+install: skip
 addons:
   apt:
     packages:
       - pass
 
-env:
-  - BASE_ARCH=x86_64
-  - BASE_ARCH=aarch64
-  - BASE_ARCH=armhf
-  - BASE_ARCH=armel
-  - BASE_ARCH=i686
-  - BASE_ARCH=ppc64le
-  - BASE_ARCH=s390x
-  - BASE_ARCH=mips
-  - BASE_ARCH=mips64el
+stages:
+  - build
+  - test
+  - manifests
 
-script: ./run.sh
-deploy:
-  - provider: script
-    skip_cleanup: true
-    script: ./run.sh -d
-    on:
-      repo: umarcor/qus
-      branch: master
-  - provider: releases
-    skip_cleanup: true
-#    api_key:
-#      secure:
-#    file: "*.tgz"
-#    file_glob: true
-#    on:
-#      repo: umarcor/qus
-#      branch: master
-#      tags: true
+jobs:
+  fast_finish: true
+  allow_failures:
+    - env: HOST
+    - env: STATIC
+  include:
+    - &build
+      env: BASE_ARCH=x86_64
+      stage: build
+      script: ./run.sh
+      deploy:
+        - provider: script
+          skip_cleanup: true
+          script: ./run.sh -d
+          on:
+            repo: umarcor/qus
+            branch: master
+        - provider: releases
+          skip_cleanup: true
+      #    api_key:
+      #      secure:
+          file: "./releases/*.tgz"
+      #    file_glob: true
+          on:
+            repo: umarcor/qus
+            branch: master
+            tags: true
+    - <<: *build
+      env: BASE_ARCH=aarch64
+    - <<: *build
+      env: BASE_ARCH=armhf
+    - <<: *build
+      env: BASE_ARCH=aarch64
+    - <<: *build
+      env: BASE_ARCH=armel
+    - <<: *build
+      env: BASE_ARCH=i686
+    - <<: *build
+      env: BASE_ARCH=ppc64le
+    - <<: *build
+      env: BASE_ARCH=s390x
+    - <<: *build
+      env: BASE_ARCH=mips
+    - <<: *build
+      env: BASE_ARCH=mips64el
+    - &host
+      stage: test
+      env: NATIVE
+      before_install: sudo apt-get install qemu-user
+      script: ./test.sh -n
+    - env: DOCKER
+      script: ./test.sh -d
+    - env: FIX
+      script: ./test.sh -f
+    - env: MULTILIB
+      script: ./test.sh -m
+    - env: MULTILIB_VOLUME
+      script: ./test.sh -v
+    - env: MULTILIB_FIX
+      script: ./test.sh -p
+    - <<: *host
+      env: HOST
+      script: ./test.sh -h
+    - env: STATIC
+      before_install: sudo apt-get install qemu-user-static
+      script: ./test.sh -s
+    - env: MANIFESTS
+      stage: manifests
+      script: skip
+      deploy:
+        - provider: script
+          script: skip
+          on:
+            repo: umarcor/qus
+            branch: mster
