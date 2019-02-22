@@ -93,7 +93,7 @@ register () {
 
 register_multilib () {
   travis_start "register" "Register qemu-user-static binfmt interpreters"
-  [ -n "$QEMU_BIN_DIR" ] && vol="-v=$QEMU_BIN_DIR:$QEMU_BIN_DIR" || vol=""
+  [ -n "$QEMU_BIN_DIR" ] && vol="-e QEMU_BIN_DIR=$QEMU_BIN_DIR -v=$QEMU_BIN_DIR:$QEMU_BIN_DIR" || vol=""
   docker run --rm --privileged $vol multiarch/qemu-user-static:register $@
   travis_finish "register"
 
@@ -102,8 +102,7 @@ register_multilib () {
 
 list () {
   travis_start "list" "List binfmt interpreters"
-  findmnt binfmt_misc
-  ls -la /proc/sys/fs/binfmt_misc
+  sudo ./register.sh -l
   travis_finish "list"
 }
 
@@ -155,7 +154,7 @@ test_docker_direct() {
 test_docker_explicit() {
   docker run --rm -itv $(pwd):/src $2 tmp/tmp bash -c "$(cat <<-EOF
 #!/bin/sh
-which -v $1 && $1 /src/main || echo "$1 not available"
+command -v $1 >/dev/null 2>&1 && $1 /src/main || echo "$1 not available"
 EOF
 )"
 }
@@ -178,6 +177,17 @@ test_native () {
   travis_finish "native"
 }
 
+tmp_test () {
+  pull_tmp "arm64v8/ubuntu:bionic"
+
+  q="qemu-aarch64-static"
+  if [ "$@" != "" ]; then
+    test_docker $q -v=$(pwd)/$q:/usr/bin/$q
+  else
+    test_docker $q
+  fi
+}
+
 #--
 
 compile
@@ -197,8 +207,14 @@ case "$1" in
     sudo mv qemu-aarch64-static /usr/bin
     register -s -- -p yes
 
-    pull_tmp "arm64v8/ubuntu:bionic"
-    test_docker qemu-aarch64-static
+    tmp_test
+  ;;
+  "-u")
+    get_static
+    export QEMU_BIN_DIR=$(pwd)
+    register -s -- -p yes
+
+    tmp_test
   ;;
   "-m")
     register_multilib
@@ -210,19 +226,14 @@ case "$1" in
     register_multilib
     get_static
 
-    pull_tmp "arm64v8/ubuntu:bionic"
-    q="qemu-aarch64-static"
-    test_docker $q -v=$(pwd)/$q:/usr/bin/$q
+    tmp_test vol
   ;;
   "-p")
     get_static
-    q="qemu-aarch64-static"
-    sudo mv $q /usr/bin
-    export QEMU_BIN_DIR="/usr/bin/$q"
+    export QEMU_BIN_DIR=$(pwd)
     register_multilib -p yes
 
-    pull_tmp "arm64v8/ubuntu:bionic"
-    test_docker $q
+    tmp_test
   ;;
   "-h")
     register -- -p yes
@@ -233,13 +244,12 @@ case "$1" in
     test_docker $q
   ;;
   "-s")
-    register -s -- -p yes
+    tmp_test vol
+  ;;
+  "-r")
+    register -r -s -- -p yes
 
-    pull_tmp "ubuntu:18.04"
-
-    pwd
-    ls -la
-    test_docker qemu-aarch64-static
+    tmp_test
   ;;
   *)
     echo "Unknown arg <$1>"

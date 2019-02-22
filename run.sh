@@ -112,7 +112,7 @@ pkg_arch () {
       echo armhf ;;
     arm32v6|arm32v5)
       echo armel ;;
-    ppc64le)
+    ppc64*)
       echo ppc64el ;;
     *)
       echo "$1"
@@ -127,7 +127,7 @@ guest_arch() {
      echo aarch64 ;;
    armhf|armel)
      echo arm ;;
-   ppc64el)
+   ppc64*)
      echo ppc64le ;;
    *)
      echo "$1"
@@ -271,13 +271,13 @@ case "$BASE_ARCH" in
     BASE_ARCH=arm32v5 ;;
   i686|i386|x86)
     BASE_ARCH=i386 ;;
-  ppc64le|ppc64el|POWER8)
+  ppc64*|POWER8)
     BASE_ARCH=ppc64le ;;
   s390x)
     BASE_ARCH=s390x ;;
   mips)
     BASE_ARCH=mips ;;
-  mips64el)
+  mips64*)
     BASE_ARCH=mips64el ;;
   *)
     echo "Invalid BASE_ARCH <${BASE_ARCH}>."

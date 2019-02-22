@@ -69,7 +69,7 @@ done
 # Use getopts to process $@
 while getopts ":t:rs" opt; do
   case $opt in
-    r)  find "$binfmt" -type f -name 'qemu-*' -exec sh -c 'echo -1 > {}';;
+    r)  find "$binfmt" -type f -name 'qemu-*' -exec sh -c 'echo -1 > {}' \; ;;
     s)  args="$args --qemu-suffix -static";;
     t)  TARGETS=$OPTARG;;
     \?) printf "${ANSI_RED}Invalid option: -${OPTARG}${ANSI_NOCOLOR}\n" >&2

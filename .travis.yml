@@ -67,6 +67,8 @@ jobs:
       script: ./test.sh -d
     - env: FIX
       script: ./test.sh -f
+    - env: FIX_CUSTOM
+      script: ./test.sh -u
     - env: MULTILIB
       script: ./test.sh -m
     - env: MULTILIB_VOLUME
@@ -79,12 +81,15 @@ jobs:
     - env: STATIC
       before_install: sudo apt-get install qemu-user-static
       script: ./test.sh -s
+    - env: STATIC_FIX
+      before_install: sudo apt-get install qemu-user-static
+      script: ./test.sh -r
     - env: MANIFESTS
       stage: manifests
       script: skip
       deploy:
         - provider: script
-          script: skip
+          script: echo "Not implemented yet"
           on:
             repo: umarcor/qus
             branch: mster
