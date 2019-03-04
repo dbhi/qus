@@ -10,9 +10,9 @@ install: skip
 
 stages:
   - name: build
-    if: (branch == master) && (tag IS present)
+#    if: (branch == master) && (tag IS present)
   - name: manifests
-    if: (branch == master) && (tag IS present)
+#    if: (branch == master) && (tag IS present)
   - name: publish
     if: (branch == master) && (tag IS present)
   - test
@@ -31,8 +31,8 @@ env:
   - QUS_JOB=I
   - QUS_JOB=d
   - QUS_JOB=D
-  - QUS_JOB=R
   - QUS_JOB=r
+  - QUS_JOB=R
   - QUS_JOB=s
   - QUS_JOB=n
   - QUS_JOB=h

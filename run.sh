@@ -157,11 +157,11 @@ getAndRegisterSingleQemuUserStatic () {
   travis_finish "get"
 
   travis_start "guest" "Register binfmt interpreter for single qemu-user-static"
-  QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -t "$(guest_arch $(pkg_arch $BASE_ARCH))" -- -p yes
+  QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -- -p "$(guest_arch $(pkg_arch $BASE_ARCH))"
   travis_finish "guest"
 
   travis_start "list" "List binfmt interpreters"
-  ./register.sh -l -e
+  $(command -v sudo) ./register.sh -l -- -t
   travis_finish "list"
 }
 
@@ -193,7 +193,7 @@ FROM ${HOST_LIB}busybox
 RUN mkdir /qus
 ENV QEMU_BIN_DIR=/qus/bin
 COPY ./register.sh /qus/register
-ADD https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh /qus/qemu-binfmt-conf.sh
+ADD https://raw.githubusercontent.com/umarcor/qemu/series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh /qus/qemu-binfmt-conf.sh
 RUN chmod +x /qus/qemu-binfmt-conf.sh
 ENTRYPOINT ["/qus/register"]
 EOF
@@ -375,7 +375,7 @@ do_register () {
 
 list () {
   travis_start "list" "List binfmt interpreters"
-  sudo ./register.sh -l -e
+  sudo ./register.sh -l -- -t
   travis_finish "list"
 }
 
@@ -434,21 +434,21 @@ test_case () {
   case "$QUS_JOB" in
     [fF])
       get_static /usr/bin
-      do_register -s -t aarch64 -- -p yes
+      do_register -s -- -p aarch64
       qus_test
     ;;
     [cC])
       get_static
-      QEMU_BIN_DIR=$(pwd) do_register -s -t aarch64 -- -p yes
+      QEMU_BIN_DIR=$(pwd) do_register -s -- -p aarch64
       qus_test
     ;;
     [vV])
-      do_register -s -t aarch64
+      do_register -s -- aarch64
       get_static
       qus_test qemu-aarch64-static
     ;;
     [iI])
-      do_register -s -t aarch64
+      do_register -s -- aarch64
 
       travis_start "build" "Build arm64v8 docker image containing qemu-aarch64-static"
       get_static
@@ -462,7 +462,7 @@ EOF
       qus_test
     ;;
     [dD])
-      do_register -t aarch64
+      do_register -- aarch64
 
       travis_start "build" "Build amd64 docker image containing qemu-user"
       docker build -t qus/test -<<EOF
@@ -481,7 +481,8 @@ EOF
     [rR])
       apt_install qemu-user-static
       list
-      do_register -r -s -t aarch64 -- -p yes
+      do_register -- -r
+      do_register -s -- -p aarch64
       qus_test
     ;;
     n)
@@ -495,7 +496,7 @@ EOF
     ;;
     [hH])
       exit 1
-#     register -- -p yes
+#     register -- -p
 #
 #     pull_tmp "ubuntu:18.04"
 #     q="qemu-aarch64"
@@ -504,7 +505,7 @@ EOF
     ;;
     *)
       travis_start "register" "Register and load qemu-aarch64-static with/from aptman/qus"
-      docker run --rm --privileged aptman/qus -s -t aarch64 -- -p yes
+      docker run --rm --privileged aptman/qus -s -- -p aarch64
       travis_finish "register"
 
       qus_test
