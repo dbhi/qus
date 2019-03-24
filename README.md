@@ -58,6 +58,9 @@ i386 i486 alpha arm armeb sparc32plus ppc ppc64 ppc64le m68k mips mipsel mipsn32
 ```
 
 > NOTE: sudo privileges on the host are required in order to register `binfmt` formats.
+> On GNU/Linux, it is possible to execute `register.sh` directly.
+> On Windows, a container must be used, so that changes are applied to the underlying VM, since no kernel is available on the host.
+> I.e., from the test list below, only `C`, `V`, `I` or `D` will work on Windows.
 
 > NOTE: `aptman/qus` is a manifest, so the commans below will work on `amd64`, `arm64v8`, `arm32v7`, `arm32v6`, `i386`, `s390x` or `ppc64le` hosts.
 
