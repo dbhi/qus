@@ -53,7 +53,7 @@ jobs:
           skip_cleanup: true
           script: ./run.sh -m
           on: &on
-            repo: umarcor/qus
+            repo: dbhi/qus
             branch: master
     - &build
       stage: build

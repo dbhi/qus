@@ -5,11 +5,11 @@
 </p>
 
 <p align="center">
-  <a title="Build Status" href="https://travis-ci.com/umarcor/qus/builds"><img src="https://img.shields.io/travis/com/umarcor/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=qus"></a><!--
+  <a title="Build Status" href="https://travis-ci.com/dbhi/qus/builds"><img src="https://img.shields.io/travis/com/dbhi/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=qus"></a><!--
   -->
   <a title="Docker Hub" href="https://hub.docker.com/r/aptman/qus/"><img src="https://img.shields.io/docker/pulls/aptman/qus.svg?longCache=true&style=flat-square&logo=docker&logoColor=fff&label=aptman%2Fqus"></a><!--
   -->
-  <a title="Releases" href="https://github.com/umarcor/qus/releases"><img src="https://img.shields.io/github/commits-since/umarcor/qus/latest.svg?longCache=true&style=flat-square"></a>
+  <a title="Releases" href="https://github.com/dbhi/qus/releases"><img src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"></a>
 </p>
 
 ---
