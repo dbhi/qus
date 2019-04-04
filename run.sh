@@ -392,8 +392,9 @@ get_static () {
 }
 
 apt_install () {
-  travis_start "apt" "sudo apt install $@"
-  sudo apt-get install $@
+  travis_start "apt" "sudo apt-get install $@"
+  sudo apt update -y
+  sudo apt install -y $@
   travis_finish "apt"
 }
 
