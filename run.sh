@@ -311,7 +311,7 @@ EOF
 #--
 
 build_cfg () {
-  VERSION=${VERSION:-3.1+dfsg-5}
+  VERSION=${VERSION:-3.1+dfsg-7}
   REPO=${REPO:-aptman/qus}
   BASE_ARCH=${BASE_ARCH:-x86_64}
 
