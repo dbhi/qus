@@ -9,12 +9,9 @@ install: skip
 #    - pass
 
 stages:
-  - name: build
-#    if: (branch == master) && (tag IS present)
-  - name: manifests
-#    if: (branch == master) && (tag IS present)
-  - name: publish
-    if: (branch == master) && (tag IS present)
+  - build
+  - manifests
+  - publish
   - test
 
 script: ./run.sh
@@ -92,6 +89,7 @@ jobs:
     - <<: *build
       env: BASE_ARCH=mips64el
     - stage: publish
+      if: tag IS present
       env: PUBLISH=
       script: ./run.sh -p
       deploy:
