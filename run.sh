@@ -387,7 +387,7 @@ get_static () {
     dir="-C $1"
     subin="$(command -v sudo)"
   fi
-  curl -fsSL https://github.com/dbhi/qus/releases/download/v0.0-v3.1/qemu-aarch64-static_amd64.tgz | $subin tar xvzf - $dir
+  curl -fsSL https://github.com/dbhi/qus/releases/download/$TEST_RELEASE/qemu-aarch64-static_amd64.tgz | $subin tar xvzf - $dir
   travis_finish "build"
 }
 
@@ -429,7 +429,7 @@ qus_test () {
 #--
 
 test_case () {
-  curl -fsSL https://github.com/dbhi/qus/releases/download/v0.0-v3.1/test-aarch64 -o main
+  curl -fsSL https://github.com/dbhi/qus/releases/download/$TEST_RELEASE/test-aarch64 -o main
   chmod +x main
 
   case "$QUS_JOB" in
@@ -526,5 +526,7 @@ case "$1" in
       *)  build
     esac
   ;;
-  *) test_case
+  *)
+    TEST_RELEASE="v0.0.1-v3.1+dfsg-8"
+    test_case
 esac
