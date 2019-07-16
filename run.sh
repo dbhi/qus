@@ -230,12 +230,12 @@ build () {
   done
 
   IMG="${REPO}:${BASE_ARCH}-pkg"
-  travis_start "$F" "Build $IMG"
+  travis_start "${BASE_ARCH}-pkg" "Build $IMG"
   docker build -t "$IMG" . -f-<<EOF
 FROM scratch
 COPY ./* /usr/bin/
 EOF
-  travis_finish "$F"
+  travis_finish "${BASE_ARCH}-pkg"
 
   cd ..
 
@@ -247,7 +247,11 @@ EOF
 deploy () {
   getDockerCredentialPass
   dockerLogin
+
+  travis_start "push" "Push $REPO"
   docker push $REPO
+  travis_finish "push"
+
   docker logout
 }
 
