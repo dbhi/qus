@@ -75,8 +75,6 @@ jobs:
     - <<: *build
       env: BASE_ARCH=armhf
     - <<: *build
-      env: BASE_ARCH=aarch64
-    - <<: *build
       env: BASE_ARCH=armel
     - <<: *build
       env: BASE_ARCH=i686
