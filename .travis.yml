@@ -41,24 +41,18 @@ jobs:
     - env: QUS_JOB=h
     - env: QUS_JOB=H
   include:
-    - stage: manifests
-      env: MANIFESTS
-      script: skip
+    - &build
+      stage: build
+      env: BUILD
+      script: ./run.sh -a
       deploy:
         - &script
           provider: script
           skip_cleanup: true
-          script: ./run.sh -m
+          script: ./run.sh -d
           on: &on
             repo: dbhi/qus
             branch: master
-    - &build
-      stage: build
-      env: BASE_ARCH=x86_64
-      script: ./run.sh -b
-      deploy:
-        - <<: *script
-          script: ./run.sh -d
         - &releases
           provider: releases
           api_key:
@@ -70,22 +64,12 @@ jobs:
           on:
             <<: *on
             tags: true
-    - <<: *build
-      env: BASE_ARCH=aarch64
-    - <<: *build
-      env: BASE_ARCH=armhf
-    - <<: *build
-      env: BASE_ARCH=armel
-    - <<: *build
-      env: BASE_ARCH=i686
-    - <<: *build
-      env: BASE_ARCH=ppc64le
-    - <<: *build
-      env: BASE_ARCH=s390x
-    - <<: *build
-      env: BASE_ARCH=mips
-    - <<: *build
-      env: BASE_ARCH=mips64el
+    - stage: manifests
+      env: MANIFESTS
+      script: skip
+      deploy:
+        - <<: *script
+          script: ./run.sh -m
     - stage: publish
       if: tag IS present
       env: PUBLISH=

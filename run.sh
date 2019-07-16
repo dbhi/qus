@@ -55,7 +55,11 @@ travis_finish () {
   travis_start () {
     echo "travis_fold:start:$1"
     travis_time_start
-    printf "$ANSI_BLUE> $2$ANSI_NOCOLOR\n"
+    COL="$ANSI_BLUE"
+    if [ "x$3" != "x" ]; then
+      COL="$3"
+    fi
+    printf "$COL> $2$ANSI_NOCOLOR\n"
   }
 
   travis_finish () {
@@ -157,6 +161,7 @@ getAndRegisterSingleQemuUserStatic () {
   travis_finish "get"
 
   travis_start "guest" "Register binfmt interpreter for single qemu-user-static"
+  QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -- -r
   QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -- -p "$(guest_arch $(pkg_arch $BASE_ARCH))"
   travis_finish "guest"
 
@@ -214,9 +219,6 @@ EOF
 build () {
   [ -d bin-static ] && rm -rf bin-static
   mkdir -p bin-static
-
-  [ -d releases ] && rm -rf releases
-  mkdir -p releases
 
   cd bin-static
 
@@ -351,6 +353,9 @@ build_cfg () {
   echo "VERSION: $VERSION"
   echo "REPO: $REPO"
   echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
+
+  [ -d releases ] && rm -rf releases
+  mkdir -p releases
 }
 
 #
@@ -529,6 +534,15 @@ case "$1" in
       -p) publish   ;;
       *)  build
     esac
+  ;;
+  -a)
+    for BASE_ARCH in x86_64 armhf aarch64 armel i686 ppc64le s390x mips mips64el; do
+      travis_start "build-$BASE_ARCH" "Build $BASE_ARCH" "$ANSI_MAGENTA"
+      unset PACKAGE_URI
+      build_cfg
+      build
+      travis_finish "build-$BASE_ARCH"
+    done
   ;;
   *)
     TEST_RELEASE="v0.0.1-v3.1+dfsg-8"
