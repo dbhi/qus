@@ -14,7 +14,7 @@
 
 ---
 
-This repository contains utilities, examples and references to build and execute [Docker](https://www.docker.com/) images for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation. Multiple minimal working and non-working setups to build and execute `arm64v8` containers on `x86-64` are configured and tested on [Travis CI](https://travis-ci.com/), so that the full flow is public. Moreover, three complementary docker images are provided for each of seven host architectures officially supported by Docker, Inc. or built by official images ([docker-library/official-images: Architectures other than amd64?](https://github.com/docker-library/official-images#architectures-other-than-amd64)): `amd64`, `i386`, `arm64v8`, `arm32v7`, `arm32v6`, `s390x` and `ppc64le`.
+This repository contains utilities, examples and references to build and execute [Docker](https://www.docker.com/) images for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation. Multiple minimal working and non-working setups to build and execute `arm64v8` containers on `amd64` are configured and tested on [Travis CI](https://travis-ci.com/), so that the full flow is public. Moreover, docker images are provided for each of seven host architectures officially supported by Docker, Inc. or built by official images ([docker-library/official-images: Architectures other than amd64?](https://github.com/docker-library/official-images#architectures-other-than-amd64)): `amd64`, `i386`, `arm64v8`, `arm32v7`, `arm32v6`, `s390x` and `ppc64le`.
 
 ## Overview
 
@@ -39,7 +39,7 @@ For further info, see:
 - [lwn.net: Architecture emulation containers with binfmt_misc](https://lwn.net/Articles/679308/)
 - [Commit by James Bottomley](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=948b701a607f123df92ed29084413e5dd8cda2ed)
 
-> NOTE: this project uses a modified `qemu-binfmt-conf.sh` script from [umarcor/qemu](https://github.com/umarcor/qemu/tree/feat-qemu-binfmt-conf), which includes some additional features, such as `-r|--clear`. These patches have already been pushed upstream, so they will be included in future releases. Therefore, this project will be updated accordingly in the following weeks/months.
+> NOTE: this project uses a modified `qemu-binfmt-conf.sh` script from [umarcor/qemu](https://github.com/umarcor/qemu/tree/feat-qemu-binfmt-conf), which includes some additional features, such as `-r|--clear`. These patches have already been pushed upstream, so they will be eventaully included in future releases. Therefore, this project will be updated accordingly in the following months.
 
 ## Usage
 
@@ -62,7 +62,7 @@ i386 i486 alpha arm armeb sparc32plus ppc ppc64 ppc64le m68k mips mipsel mipsn32
 > On Windows, a container must be used, so that changes are applied to the underlying VM, since no kernel is available on the host.
 > I.e., from the test list below, only `C`, `V`, `I` or `D` will work on Windows.
 
-> NOTE: `aptman/qus` is a manifest, so the commans below will work on `amd64`, `arm64v8`, `arm32v7`, `arm32v6`, `i386`, `s390x` or `ppc64le` hosts.
+> NOTE: `aptman/qus` is a manifest. Hence, the examples work on `amd64`, `arm64v8`, `arm32v7`, `arm32v6`, `i386`, `s390x` or `ppc64le` hosts.
 
 ---
 
@@ -84,7 +84,17 @@ Manifests for `amd64`, `arm64v8`, `arm32v7`, `arm32v6`, `i386`, `s390x` or `ppc6
 - `aptman/qus:register`: a `busybox` image with [`register.sh`](./register.sh) and [`qemu-binfmt-conf.sh`](https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh). The entrypoint is set to `register.sh`.
 - `aptman/qus`: union of the two previous images.
 
+### Debian [3.1]
+
+For each `HOST_ARCH`, an image named `${HOST_ARCH}-d${VERSION}${TAG}` is published; where `TAG` is `-pkg, -register, ""`. Moreover, three manifests are available: `aptman/qus:d${VERSION}-pkg`, `aptman/qus:d${VERSION}-register` and `aptman/qus:d${VERSION}`.
+
+> NOTE: latest/default versions above correspond to these Debian variants. Therefore, running `aptman/qus` on an `amd64` host is equivalent to running `aptman/qus:d3.1` or `aptman/qus:amd64-d3.1`.
+
 Apart from those, `aptman/qus:mips-pkg` and `aptman/qus:mips64el-pkg` are also available.
+
+### Fedora [4.0.0]
+
+For each `HOST_ARCH` (except `arm32v6`), an image named `${HOST_ARCH}-f${VERSION}${TAG}` is published; where `TAG` is `-pkg, -register, ""`. Moreover, three manifests are available: `aptman/qus:f${VERSION}-pkg`, `aptman/qus:f${VERSION}-register` and `aptman/qus:f${VERSION}`.
 
 ## Tests
 

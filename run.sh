@@ -114,17 +114,39 @@ dockerLogin () {
 #--
 
 pkg_arch () {
-  case "$1" in
-    arm64v8)
-      echo arm64 ;;
-    arm32v7)
-      echo armhf ;;
-    arm32v6|arm32v5)
-      echo armel ;;
-    ppc64*)
-      echo ppc64el ;;
-    *)
-      echo "$1"
+  case "$BUILD_ARCH" in
+    fedora)
+      case "$1" in
+        amd64)
+          echo x86_64 ;;
+        i386)
+          echo i686 ;;
+        arm64v8)
+          echo aarch64 ;;
+        arm32v7)
+          echo armv7hl ;;
+        ppc64*)
+          echo ppc64le ;;
+        *)
+          echo "$1"
+      esac
+    ;;
+    debian)
+      case "$1" in
+        x86_64)
+          echo amd64 ;;
+        arm64v8)
+          echo arm64 ;;
+        arm32v7)
+          echo armhf ;;
+        arm32v6|arm32v5)
+          echo armel ;;
+        ppc64*)
+          echo ppc64el ;;
+        *)
+          echo "$1"
+      esac
+    ;;
   esac
 }
 
@@ -134,7 +156,7 @@ guest_arch() {
      echo x86_64 ;;
    arm64)
      echo aarch64 ;;
-   armhf|armel)
+   armhf|armel|armv7hl)
      echo arm ;;
    ppc64*)
      echo ppc64le ;;
@@ -146,13 +168,24 @@ guest_arch() {
 #--
 
 getSingleQemuUserStatic () {
-  V=${1:-$VERSION}
-  G=${2:-$BASE_ARCH}
-  H=${3:-amd64}
-
-  curl -fsSL "http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${V}_$(pkg_arch ${H}).deb" \
-  | dpkg --fsys-tarfile - \
-  | tar xvf - --wildcards ./usr/bin/qemu-$(guest_arch $(pkg_arch ${G}))-static --strip-components=3
+  case "$BUILD_ARCH" in
+    fedora)
+      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch ${HOST_ARCH})/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch ${HOST_ARCH}).rpm"
+      echo "$URL"
+      curl -fsSL "$URL" \
+      | rpm2cpio - \
+      | cpio -dimv "*usr/bin*qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static"
+      mv ./usr/bin/qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static ./
+      rm -rf ./usr/bin
+    ;;
+    debian)
+      URL="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_$(pkg_arch ${HOST_ARCH}).deb"
+      echo "$URL"
+      curl -fsSL "$URL" \
+      | dpkg --fsys-tarfile - \
+      | tar xvf - --wildcards ./usr/bin/qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static --strip-components=3
+    ;;
+  esac
 }
 
 getAndRegisterSingleQemuUserStatic () {
@@ -186,31 +219,28 @@ build_register () {
     esac
   fi
 
-  PKG_IMG="$IMG"
-  IMG="${REPO}:${BASE_ARCH}"
-
   [ "$HOST_LIB" = "skip" ] && {
     printf "$ANSI_YELLOW! Skipping creation of $IMG[-register] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
   } || {
-    travis_start "register" "Build $IMG-register"
+    travis_start "img-$BASE_ARCH-register" "Build $IMG-register"
     docker build -t $IMG-register . -f-<<EOF
 FROM ${HOST_LIB}busybox
-RUN mkdir /qus
+#RUN mkdir /qus
 ENV QEMU_BIN_DIR=/qus/bin
 COPY ./register.sh /qus/register
 ADD https://raw.githubusercontent.com/umarcor/qemu/series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh /qus/qemu-binfmt-conf.sh
 RUN chmod +x /qus/qemu-binfmt-conf.sh
 ENTRYPOINT ["/qus/register"]
 EOF
-    travis_finish "register"
-    travis_start "$BASE_ARCH" "Build $IMG"
+    travis_finish "img-$BASE_ARCH-register"
 
+    travis_start "img-$BASE_ARCH" "Build $IMG"
     docker build -t $IMG . -f-<<EOF
 FROM $IMG-register
-COPY --from="$PKG_IMG" /usr/bin/qemu-* /qus/bin/
+COPY --from="$IMG"-pkg /usr/bin/qemu-* /qus/bin/
 VOLUME /qus
 EOF
-    travis_finish "$BASE_ARCH"
+    travis_finish "img-$BASE_ARCH"
   }
 }
 
@@ -222,22 +252,42 @@ build () {
 
   cd bin-static
 
-  PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}_$(pkg_arch $BASE_ARCH).deb}
-  travis_start "extract" "Extract $PACKAGE_URI"
-  curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
-  travis_finish "extract"
+  case "$BUILD_ARCH" in
+    fedora)
+      PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch $BASE_ARCH)/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch $BASE_ARCH).rpm}
+      travis_start "extract" "Extract $PACKAGE_URI"
+      curl -fsSL "$PACKAGE_URI" | rpm2cpio - | cpio -dimv "*usr/bin*qemu-*-static"
+      mv ./usr/bin/* ./
+      rm -rf ./usr/bin
+      travis_finish "extract"
+    ;;
+    debian)
+      PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_$(pkg_arch $BASE_ARCH).deb}
+      travis_start "extract" "Extract $PACKAGE_URI"
+      curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
+      travis_finish "extract"
+    ;;
+  esac
 
   for F in $(ls); do
     tar -czf "../releases/${F}_${BASE_ARCH}.tgz" "$F"
   done
 
-  IMG="${REPO}:${BASE_ARCH}-pkg"
-  travis_start "${BASE_ARCH}-pkg" "Build $IMG"
-  docker build -t "$IMG" . -f-<<EOF
+  case "$BUILD_ARCH" in
+    fedora)
+      IMG="${REPO}:${BASE_ARCH}-f${VERSION}"
+    ;;
+    debian)
+      IMG="${REPO}:${BASE_ARCH}-d${VERSION}"
+    ;;
+  esac
+
+  travis_start "img-${BASE_ARCH}-pkg" "Build $IMG"
+  docker build -t "$IMG"-pkg . -f-<<EOF
 FROM scratch
 COPY ./* /usr/bin/
 EOF
-  travis_finish "${BASE_ARCH}-pkg"
+  travis_finish "img-${BASE_ARCH}-pkg"
 
   cd ..
 
@@ -266,19 +316,52 @@ manifests () {
   getDockerCredentialPass
   dockerLogin
 
-  for i in latest pkg register; do
-    travis_start "man_create_$i" "Docker manifest create $i"
-    cmd="docker manifest create -a ${REPO}:$i"
-    [ "$i" == "latest" ] && p="" || p="-$i"
-    for a in amd64 arm64v8 arm32v7 arm32v6 i386 s390x ppc64le; do
-      cmd="$cmd ${REPO}:${a}${p}"
-    done
-    $cmd
-    travis_finish "man_create_$i"
+  for BUILD in latest debian fedora; do
 
-    travis_start "man_push_$i" "Docker manifest push ${REPO}:$i"
-    docker manifest push --purge "${REPO}:$i"
-    travis_finish "man_push_$i"
+    MAN_ARCH_LIST="amd64 arm64v8 arm32v7 i386 s390x ppc64le"
+    case "$BUILD" in
+      fedora)
+        MAN_VERSION="f${DEF_FEDORA_VERSION}"
+      ;;
+      debian|latest)
+        MAN_VERSION="d${DEF_DEBIAN_VERSION}"
+        MAN_ARCH_LIST+=" arm32v6"
+      ;;
+    esac
+    case "$BUILD" in
+      latest)
+        unset MAN_IMG_VERSION
+      ;;
+      debian|fedora)
+        MAN_IMG_VERSION="$MAN_VERSION"
+      ;;
+    esac
+
+    for i in latest pkg register; do
+      #[ "$i" == "latest" ] && p="latest" || p="$i"
+
+      [ "x$MAN_IMG_VERSION" != "x" ] && p="-$i" || p="$i"
+      if [ "x$MAN_IMG_VERSION" != "x" ] && [ "x$i" = "xlatest" ]; then
+        p=""
+      fi
+
+      MAN_IMG="${REPO}:${MAN_IMG_VERSION}${p}"
+
+      [ "$i" == "latest" ] && p="" || p="-$i"
+      unset cmd
+      for arch in $MAN_ARCH_LIST; do
+        cmd="$cmd ${REPO}:${arch}-${MAN_VERSION}${p}"
+      done
+
+      travis_start "man-create-$i" "Docker manifest create $MAN_IMG"
+      docker manifest create -a $MAN_IMG $cmd
+      travis_finish "man-create-$i"
+
+      travis_start "man-push-$i" "Docker manifest push $MAN_IMG"
+      docker manifest push --purge "$MAN_IMG"
+      travis_finish "man-push-$i"
+    done
+
   done
 
   docker logout
@@ -317,8 +400,26 @@ EOF
 #--
 
 build_cfg () {
-  VERSION=${VERSION:-3.1+dfsg-8}
+  BUILD_ARCH=${BUILD:-debian}
+
+  FEDORA_VERSION="5.fc31"
+  DEF_FEDORA_VERSION="4.0.0"
+
+  DEBIAN_VERSION="+dfsg-8"
+  DEF_DEBIAN_VERSION="3.1"
+
+  case "$BUILD_ARCH" in
+    fedora)
+      DEF_VERSION="$DEF_FEDORA_VERSION"
+    ;;
+    debian)
+      DEF_VERSION="$DEF_DEBIAN_VERSION"
+    ;;
+  esac
+  VERSION=${VERSION:-$DEF_VERSION}
+
   REPO=${REPO:-aptman/qus}
+  HOST_ARCH=${HOST_ARCH:-x86_64}
   BASE_ARCH=${BASE_ARCH:-x86_64}
 
   PRINT_BASE_ARCH="$BASE_ARCH"
@@ -327,7 +428,7 @@ build_cfg () {
       BASE_ARCH=amd64 ;;
     aarch64|armv8|ARMv8|arm64v8)
       BASE_ARCH=arm64v8 ;;
-    aarch32|armv8l|armv7|armv7l|ARMv7|arm32v7|armhf)
+    aarch32|armv8l|armv7|armv7l|ARMv7|arm32v7|armhf|armv7hl)
       BASE_ARCH=arm32v7 ;;
     arm32v6|ARMv6|armel)
       BASE_ARCH=arm32v6 ;;
@@ -353,6 +454,8 @@ build_cfg () {
   echo "VERSION: $VERSION"
   echo "REPO: $REPO"
   echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
+  echo "HOST_ARCH: $HOST_ARCH";
+  echo "BUILD_ARCH: $BUILD_ARCH";
 
   [ -d releases ] && rm -rf releases
   mkdir -p releases
@@ -536,7 +639,17 @@ case "$1" in
     esac
   ;;
   -a)
-    for BASE_ARCH in x86_64 armhf aarch64 armel i686 ppc64le s390x mips mips64el; do
+    ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
+    case "$BUILD" in
+      fedora)
+        ARCH_LIST+=" armv7hl"
+      ;;
+      debian)
+        ARCH_LIST+=" armhf armel mips mips64el"
+      ;;
+    esac
+
+    for BASE_ARCH in $ARCH_LIST; do
       travis_start "build-$BASE_ARCH" "Build $BASE_ARCH" "$ANSI_MAGENTA"
       unset PACKAGE_URI
       build_cfg
