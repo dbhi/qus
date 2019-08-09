@@ -1,0 +1,34 @@
+name: 'docs'
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build -t rmdi - < .github/Dockerfile
+
+    - name: Build article
+      run: ./docs/_build.sh
+
+    - name: Publish site to gh-pages
+      if: github.event_name != 'pull_request'
+      run: |
+        mkdir -p public
+        cp docs/index.html public
+        cd public
+        touch .nojekyll
+        git init
+        cp ../.git/config ./.git/config
+        git checkout --orphan gh-pages
+        git add .
+        git config --local user.email "push@gha"
+        git config --local user.name "GHA"
+        git commit -a -m "update ${{ github.sha }}"
+        git push -u origin +gh-pages
