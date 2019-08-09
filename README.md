@@ -14,7 +14,7 @@
 
 ---
 
-This repository contains utilities, examples and references to build and execute [Docker](https://www.docker.com/) images for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation. Multiple minimal working and non-working setups to build and execute `arm64v8` containers on `amd64` are configured and tested on [Travis CI](https://travis-ci.com/), so that the full flow is public. Moreover, docker images are provided for each of seven host architectures officially supported by Docker, Inc. or built by official images ([docker-library/official-images: Architectures other than amd64?](https://github.com/docker-library/official-images#architectures-other-than-amd64)): `amd64`, `i386`, `arm64v8`, `arm32v7`, `arm32v6`, `s390x` and `ppc64le`.
+This repository contains utilities, examples and references to build and execute OCI images (aka [docker](https://www.docker.com/) images) for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation. Multiple minimal working and non-working setups to build and execute `arm64v8` containers on `amd64` are configured and tested on [Travis CI](https://travis-ci.com/), so that the full flow is public. Moreover, docker images are provided for each of seven host architectures officially supported by Docker, Inc. or built by official images ([docker-library/official-images: Architectures other than amd64?](https://github.com/docker-library/official-images#architectures-other-than-amd64)): `amd64`, `i386`, `arm64v8`, `arm32v7`, `arm32v6`, `s390x` and `ppc64le`.
 
 ## Overview
 
@@ -39,9 +39,11 @@ For further info, see:
 - [lwn.net: Architecture emulation containers with binfmt_misc](https://lwn.net/Articles/679308/)
 - [Commit by James Bottomley](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=948b701a607f123df92ed29084413e5dd8cda2ed)
 
-> NOTE: this project uses a modified `qemu-binfmt-conf.sh` script from [umarcor/qemu](https://github.com/umarcor/qemu/tree/feat-qemu-binfmt-conf), which includes some additional features, such as `-r|--clear`. These patches have already been pushed upstream, so they will be eventaully included in future releases. Therefore, this project will be updated accordingly in the following months.
+> NOTE: this project uses a modified `qemu-binfmt-conf.sh` script from [umarcor/qemu](https://github.com/umarcor/qemu/tree/series-qemu-binfmt-conf), which includes some additional features, such as `-r|--clear`. These patches have already been pushed upstream, so they will be eventaully included in future releases. Therefore, this project will be updated accordingly in the following months.
 
 ## Usage
+
+> NOTE: Although `docker` is used in these examples, users have reported that other engines such as [podman](https://podman.io/) can also be used. See also [kata-containers/runtime#1280](https://github.com/kata-containers/runtime/issues/1280).
 
 The recommended approach is to run the following container:
 
