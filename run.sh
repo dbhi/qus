@@ -440,8 +440,8 @@ build_cfg () {
       BASE_ARCH=ppc64le ;;
     s390x)
       BASE_ARCH=s390x ;;
-    mips)
-      BASE_ARCH=mips ;;
+    mips|mipsel)
+      BASE_ARCH=mipsel ;;
     mips64*)
       BASE_ARCH=mips64el ;;
     *)
@@ -645,7 +645,7 @@ case "$1" in
         ARCH_LIST+=" armv7hl"
       ;;
       debian)
-        ARCH_LIST+=" armhf armel mips mips64el"
+        ARCH_LIST+=" armhf armel mipsel mips64el"
       ;;
     esac
 
