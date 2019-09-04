@@ -172,9 +172,7 @@ getSingleQemuUserStatic () {
     fedora)
       URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch ${HOST_ARCH})/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch ${HOST_ARCH}).rpm"
       echo "$URL"
-      curl -fsSL "$URL" \
-      | rpm2cpio - \
-      | cpio -dimv "*usr/bin*qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static"
+      curl -fsSL "$URL" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static"
       mv ./usr/bin/qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static ./
       rm -rf ./usr/bin
     ;;
@@ -256,7 +254,10 @@ build () {
     fedora)
       PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch $BASE_ARCH)/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch $BASE_ARCH).rpm}
       travis_start "extract" "Extract $PACKAGE_URI"
-      curl -fsSL "$PACKAGE_URI" | rpm2cpio - | cpio -dimv "*usr/bin*qemu-*-static"
+
+      # https://bugzilla.redhat.com/show_bug.cgi?id=837945
+      curl -fsSL "$PACKAGE_URI" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-*-static"
+
       mv ./usr/bin/* ./
       rm -rf ./usr/bin
       travis_finish "extract"
