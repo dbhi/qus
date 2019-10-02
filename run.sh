@@ -406,7 +406,7 @@ build_cfg () {
   FEDORA_VERSION="1.fc32"
   DEF_FEDORA_VERSION="4.1.0"
 
-  DEBIAN_VERSION="-1"
+  DEBIAN_VERSION="-1+b2"
   DEF_DEBIAN_VERSION="4.1"
 
   case "$BUILD_ARCH" in
