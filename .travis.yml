@@ -7,13 +7,6 @@ before_install:
   - echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
   - sudo service docker restart
 install: skip
-
-stages:
-  - build
-  - manifests
-  - publish
-  - test
-
 script: ./run.sh
 
 env:
@@ -35,54 +28,33 @@ env:
   - QUS_JOB=h
   - QUS_JOB=H
 
+stages:
+  - build
+  - test
+
 jobs:
   fast_finish: true
   allow_failures:
-    - env: BUILD=fedora
     - env: QUS_JOB=h
     - env: QUS_JOB=H
   include:
-    - &build
-      stage: build
+    - stage: build
+      if: tag IS present
       env: BUILD=debian
-      script: ./run.sh -a
+      script:
+        - ./run.sh -a
+        - ./run.sh -p
       deploy:
-        - &script
-          provider: script
-          skip_cleanup: true
-          script: ./run.sh -d
-          on:
-            repo: dbhi/qus
-            branch: master
-        - &releases
-          provider: releases
+        - provider: releases
           api_key:
             secure: DFvuc1OE3AJ+6Rieoh8Ybhxv/GZlaAc5JNMxY7CWdC0jXmZsxDjM6EU4yVyB9OHvXgXTMomvf3jUq4VbC1CNtt9pMl8xhDPrbrXDEVR0/BxLRhGPmtT5tvS31+QIHK3W0jowmySvhpKLGjqFVuLGLv1ibsHqdJEZUdNTarwtnvZrPeWUBeet/1S2M/aJPeGW2TZWFEMuNakNGO/esRTqcBADDEB29pD4Ou1wNFx0LCxxp3KYF3EXD3p/qXFeFyvH4vcxWJG0jF9vCuNr9Ci9qJJG3RK+0yYoCdcdS2UkX1MAXbMM1nKpMDZSu+mTT0UJh7XuV+8yXh1BugR68dfxj4y6A3Bl3CF2JV7qI3et5P+qtXDmMnbLkAKCUYSOFCpYcSNrvIi1pG7ZdvIQAU8GjkZnptEdfBm3xA+20TMKmRDC1jHNPtzRoh8XgUM1O0IXWzN7v9p7HZ945AAtpEuo/BaErxHXb/lMBWSi4g1xFZWNw1s6PB1QOJfSgyMgIlUEThq/oV3WxL1AfxONsZdEeaq6OLgj++3cfX9njG74cDAhCP70/9KQ2YH/fE4xgBr4QNL2JprhgIX7MTQ0WsSLHXKsZ75FtD3Pcw+5X/5wnr6d+qkUPwJnnF/XDanseXGLiX8oUg4KNdfl2dv+f5rjGo+Kh5qO8KDBVXpJu5m2p6k=
           skip_cleanup: true
-          file: "./releases/*.tgz"
+          file:
+            - "./releases/*.tgz"
+            - test-aarch64
+            - test-riscv64
           file_glob: true
           draft: true
           on:
             repo: dbhi/qus
             tags: true
-    - <<: *build
-      env: BUILD=fedora
-      install: sudo apt-get install -y rpm2cpio zstd cpio curl
-      deploy:
-        <<: *script
-    - stage: manifests
-      env: MANIFESTS
-      script: skip
-      deploy:
-        - <<: *script
-          script: ./run.sh -m
-    - stage: publish
-      if: tag IS present
-      env: PUBLISH=
-      script: ./run.sh -p
-      deploy:
-        <<: *releases
-        file:
-          - test-aarch64
-          - test-riscv64
-        draft: false

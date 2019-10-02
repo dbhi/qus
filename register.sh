@@ -98,6 +98,8 @@ cmd='./qemu-binfmt-conf.sh'
 [ ! -f "$cmd" ] && cmd='/qemu-binfmt-conf.sh'
 [ -f "$cmd" ] && cmd="cat $cmd" || cmd='curl -fsSL https://raw.githubusercontent.com/umarcor/qemu/series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh'
 
+echo "$cmd | sh -s -- $args"
+
 sh -c "$cmd | sh -s -- $args"
 
 if [ "$LIST_BINFMT" = "true" ]; then

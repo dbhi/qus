@@ -1,0 +1,71 @@
+name: 'push'
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '0 0 * * 5'
+jobs:
+
+  debian:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        arch: [ x86_64, i686, aarch64, ppc64le, s390x, armhf, armel, mipsel, mips64el ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: BUILD=debian ./run.sh -b
+      env:
+        BASE_ARCH: ${{ matrix.arch }}
+    - name: deploy to hub.docker.com
+      run: ./run.sh -d
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+
+  fedora:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        arch: [ x86_64, i686, aarch64, ppc64le, s390x, armv7hl ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - run: sudo apt-get install -y rpm2cpio zstd cpio curl
+    - run: BUILD=fedora ./run.sh -b
+      env:
+        BASE_ARCH: ${{ matrix.arch }}
+    - name: deploy to hub.docker.com
+      run: ./run.sh -d
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+
+  manifests:
+    needs: [ debian, fedora ]
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: update manifests
+      run: ./run.sh -m
+      env:
+        DOCKER_USER: ${{ secrets.DOCKER_USER }}
+        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+
+  test:
+    needs: [ manifests ]
+    strategy:
+      fail-fast: false
+      max-parallel: 2
+      matrix:
+        test: [ "", f, F, c, C, v, V, i, I, d, D, r, R, s, n ]
+#, h, H
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: test
+      run: ./run.sh
+      env:
+        QUS_JOB: ${{ matrix.test }}

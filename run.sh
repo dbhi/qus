@@ -1,6 +1,12 @@
-#!/bin/bash -e
+#!/usr/bin/env bash
 
-cd "$(dirname $0)"
+set -e
+
+cd $(dirname $0)
+
+export DOCKER_BUILDKIT=1
+
+#--
 
 enable_color() {
   ENABLECOLOR='-c '
@@ -9,6 +15,7 @@ enable_color() {
   ANSI_YELLOW="\033[33m"
   ANSI_BLUE="\033[34m"
   ANSI_MAGENTA="\033[35m"
+  ANSI_GRAY="\033[90m"
   ANSI_CYAN="\033[36;1m"
   ANSI_DARKCYAN="\033[36m"
   ANSI_NOCOLOR="\033[0m"
@@ -18,56 +25,41 @@ disable_color() { unset ENABLECOLOR ANSI_RED ANSI_GREEN ANSI_YELLOW ANSI_BLUE AN
 
 enable_color
 
-#--
-
-travis_start () {
-  :
-}
-travis_finish () {
-  :
-}
-
-[ -n "$TRAVIS" ] && {
-  # This is a trimmed down copy of
-  # https://github.com/travis-ci/travis-build/blob/master/lib/travis/build/templates/header.sh
-  travis_time_start() {
-    # `date +%N` returns the date in nanoseconds. It is used as a replacement for $RANDOM, which is only available in bash.
-    travis_timer_id=`date +%N`
-    travis_start_time=$(travis_nanoseconds)
-    echo "travis_time:start:$travis_timer_id"
-  }
-  travis_time_finish() {
-    travis_end_time=$(travis_nanoseconds)
-    local duration=$(($travis_end_time-$travis_start_time))
-    echo "travis_time:end:$travis_timer_id:start=$travis_start_time,finish=$travis_end_time,duration=$duration"
-  }
-
-  if [ "$TRAVIS_OS_NAME" = "osx" ]; then
-    travis_nanoseconds() {
-      date -u '+%s000000000'
-    }
+print_start() {
+  if [ "x$2" != "x" ]; then
+    COL="$2"
+  elif [ "x$BASE_COL" != "x" ]; then
+    COL="$BASE_COL"
   else
-    travis_nanoseconds() {
-      date -u '+%s%N'
-    }
+    COL="$ANSI_MAGENTA"
   fi
+  printf "${COL}${1}$ANSI_NOCOLOR\n"
+}
 
-  travis_start () {
-    echo "travis_fold:start:$1"
-    travis_time_start
-    COL="$ANSI_BLUE"
-    if [ "x$3" != "x" ]; then
-      COL="$3"
-    fi
-    printf "$COL> $2$ANSI_NOCOLOR\n"
+gstart () {
+  print_start "$@"
+}
+gend () {
+  :
+}
+
+if [ -n "$GITHUB_EVENT_PATH" ]; then
+  export CI=true
+fi
+
+[ -n "$CI" ] && {
+  gstart () {
+    printf '::[group]'
+    print_start "$@"
+    SECONDS=0
   }
 
-  travis_finish () {
-    travis_time_finish
-    echo "travis_fold:end:$1"
+  gend () {
+    duration=$SECONDS
+    echo '::[endgroup]'
+    printf "${ANSI_GRAY}took $(($duration / 60)) min $(($duration % 60)) sec.${ANSI_NOCOLOR}\n"
   }
-
-} || echo "INFO: not in Travis CI"
+} || echo "INFO: not in CI"
 
 #--
 
@@ -145,18 +137,15 @@ getSingleQemuUserStatic () {
 }
 
 getAndRegisterSingleQemuUserStatic () {
-  travis_start "get" "Get single qemu-user-static"
+  print_start "Get single qemu-user-static"
   getSingleQemuUserStatic
-  travis_finish "get"
 
-  travis_start "guest" "Register binfmt interpreter for single qemu-user-static"
-  QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -- -r
-  QEMU_BIN_DIR="$(pwd)" $(command -v sudo) ./register.sh -s -- -p "$(guest_arch $(pkg_arch $BASE_ARCH))"
-  travis_finish "guest"
+  print_start "Register binfmt interpreter for single qemu-user-static"
+  $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -- -r
+  $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -s -- -p "$(guest_arch $(pkg_arch $BASE_ARCH))"
 
-  travis_start "list" "List binfmt interpreters"
+  print_start "List binfmt interpreters"
   $(command -v sudo) ./register.sh -l -- -t
-  travis_finish "list"
 }
 
 build_register () {
@@ -168,7 +157,7 @@ build_register () {
       HOST_LIB="skip"
   esac
 
-  if [ -n "$TRAVIS" ]; then
+  if [ -n "$CI" ]; then
     case "$BASE_ARCH" in
       arm64v8|arm32v7|arm32v6|ppc64le|s390x)
         getAndRegisterSingleQemuUserStatic
@@ -178,7 +167,7 @@ build_register () {
   [ "$HOST_LIB" = "skip" ] && {
     printf "$ANSI_YELLOW! Skipping creation of $IMG[-register] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
   } || {
-    travis_start "img-$BASE_ARCH-register" "Build $IMG-register"
+    print_start "Build $IMG-register"
     docker build -t $IMG-register . -f-<<EOF
 FROM ${HOST_LIB}busybox
 #RUN mkdir /qus
@@ -188,15 +177,13 @@ ADD https://raw.githubusercontent.com/umarcor/qemu/series-qemu-binfmt-conf/scrip
 RUN chmod +x /qus/qemu-binfmt-conf.sh
 ENTRYPOINT ["/qus/register"]
 EOF
-    travis_finish "img-$BASE_ARCH-register"
 
-    travis_start "img-$BASE_ARCH" "Build $IMG"
+    print_start "Build $IMG"
     docker build -t $IMG . -f-<<EOF
 FROM $IMG-register
 COPY --from="$IMG"-pkg /usr/bin/qemu-* /qus/bin/
 VOLUME /qus
 EOF
-    travis_finish "img-$BASE_ARCH"
   }
 }
 
@@ -211,20 +198,18 @@ build () {
   case "$BUILD_ARCH" in
     fedora)
       PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch $BASE_ARCH)/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch $BASE_ARCH).rpm}
-      travis_start "extract" "Extract $PACKAGE_URI"
+      print_start "Extract $PACKAGE_URI"
 
       # https://bugzilla.redhat.com/show_bug.cgi?id=837945
       curl -fsSL "$PACKAGE_URI" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-*-static"
 
       mv ./usr/bin/* ./
       rm -rf ./usr/bin
-      travis_finish "extract"
     ;;
     debian)
       PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_$(pkg_arch $BASE_ARCH).deb}
-      travis_start "extract" "Extract $PACKAGE_URI"
+      print_start "Extract $PACKAGE_URI"
       curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
-      travis_finish "extract"
     ;;
   esac
 
@@ -241,27 +226,24 @@ build () {
     ;;
   esac
 
-  travis_start "img-${BASE_ARCH}-pkg" "Build $IMG-pkg"
-  docker build -t "$IMG"-pkg . -f-<<EOF
+  cd ..
+
+  if [ -z "$TRAVIS" ]; then
+    print_start "Build $IMG-pkg"
+    docker build -t "$IMG"-pkg ./bin-static -f-<<EOF
 FROM scratch
 COPY ./* /usr/bin/
 EOF
-  travis_finish "img-${BASE_ARCH}-pkg"
-
-  cd ..
-
-  build_register
+    build_register
+  fi
 }
 
 #--
 
 deploy () {
   echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-
-  travis_start "push" "Push $REPO"
+  print_start "Push $REPO"
   docker push $REPO
-  travis_finish "push"
-
   docker logout
 }
 
@@ -282,7 +264,7 @@ manifests () {
       ;;
       debian|latest)
         MAN_VERSION="d${DEF_DEBIAN_VERSION}"
-        MAN_ARCH_LIST+=" arm32v6"
+        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6"
       ;;
     esac
     case "$BUILD" in
@@ -310,13 +292,11 @@ manifests () {
         cmd="$cmd ${REPO}:${arch}-${MAN_VERSION}${p}"
       done
 
-      travis_start "man-create-$i" "Docker manifest create $MAN_IMG"
+      print_start "Docker manifest create $MAN_IMG"
       docker manifest create -a $MAN_IMG $cmd
-      travis_finish "man-create-$i"
 
-      travis_start "man-push-$i" "Docker manifest push $MAN_IMG"
+      print_start "Docker manifest push $MAN_IMG"
       docker manifest push --purge "$MAN_IMG"
-      travis_finish "man-push-$i"
     done
 
   done
@@ -327,7 +307,7 @@ manifests () {
 #--
 
 publish () {
-  travis_start "compile" "Cross-compile main.c for 'aarch64' and 'riscv64' in an 'amd64' docker container"
+  print_start "Cross-compile main.c for 'aarch64' and 'riscv64' in an 'amd64' docker container"
 
   cat > main.c <<-EOF
 #include <stdio.h>
@@ -338,7 +318,7 @@ int main(void) {
 }
 EOF
 
-  docker run --rm -itv $(pwd):/src -w /src ubuntu:bionic bash -c "$(cat <<-EOF
+  docker run --rm -tv $(pwd):/src -w /src ubuntu:bionic bash -c "$(cat <<-EOF
 apt update -y
 apt install -y gcc-aarch64-linux-gnu ca-certificates curl
 update-ca-certificates
@@ -351,7 +331,6 @@ curl -fsSL https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-20170
 chmod +x test-riscv64
 EOF
 )"
-  travis_finish "compile"
 }
 
 #--
@@ -408,7 +387,7 @@ build_cfg () {
 
   [ -n "$PRINT_BASE_ARCH" ] && PRINT_BASE_ARCH="$BASE_ARCH [$PRINT_BASE_ARCH]" || PRINT_BASE_ARCH="$BASE_ARCH"
 
-  echo "VERSION: $VERSION"
+  echo "VERSION: $VERSION $DEF_VERSION"
   echo "REPO: $REPO"
   echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
   echo "HOST_ARCH: $HOST_ARCH";
@@ -425,52 +404,46 @@ build_cfg () {
 do_register () {
   case "$QUS_JOB" in
    [a-z]*)
-     travis_start "register" "Register qemu-user binfmt interpreters with register.sh"
+     print_start "Register qemu-user binfmt interpreters with register.sh"
      sudo QEMU_BIN_DIR=$QEMU_BIN_DIR ./register.sh $@
-     travis_finish "register"
    ;;
    *)
-     travis_start "register" "Register qemu-user binfmt interpreters with aptman/qus:register"
+     print_start "Register qemu-user binfmt interpreters with aptman/qus:register"
      QEMU_BIN_DIR=${QEMU_BIN_DIR:-/usr/bin}
      docker run --rm --privileged \
        -e "QEMU_BIN_DIR=$QEMU_BIN_DIR" \
        -v "$QEMU_BIN_DIR:$QEMU_BIN_DIR" \
        aptman/qus:register $@
   esac
-  travis_finish "register"
-
   list
 }
 
 list () {
-  travis_start "list" "List binfmt interpreters"
+  print_start "List binfmt interpreters"
   sudo ./register.sh -l -- -t
-  travis_finish "list"
 }
 
 #--
 
 get_static () {
-  travis_start "build" "Get qemu-aarch64-static"
+  print_start "Get qemu-aarch64-static"
   if [ "$#" != "0" ]; then
     dir="-C $1"
     subin="$(command -v sudo)"
   fi
   curl -fsSL https://github.com/dbhi/qus/releases/download/$TEST_RELEASE/qemu-aarch64-static_amd64.tgz | $subin tar xvzf - $dir
-  travis_finish "build"
 }
 
 apt_install () {
-  travis_start "apt" "sudo apt-get install $@"
+  print_start "sudo apt-get install $@"
   sudo apt update -y
   sudo apt install -y $@
-  travis_finish "apt"
 }
 
 #--
 
 do_test () {
-  cmd="docker run --rm -itv $(pwd):/src $2 qus/test bash -c"
+  cmd="docker run --rm -tv $(pwd):/src $2 qus/test bash -c"
   printf "$ANSI_BLUE> Test direct and explicit execution in a docker container$ANSI_NOCOLOR\n"
   printf 'DIRECT: ';   $cmd "/src/main"
   printf 'EXPLICIT: '; $cmd "command -v $1 >/dev/null 2>&1 && $1 /src/main || echo '$1 not available'"
@@ -479,10 +452,9 @@ do_test () {
 qus_test () {
   if [ "$(docker images -q qus/test 2> /dev/null)" == "" ]; then
     img="arm64v8/ubuntu:bionic"
-    travis_start "pull" "Pull docker image $img and tag it as qus/test"
+    print_start "Pull docker image $img and tag it as qus/test"
     docker pull "$img"
     docker tag "$img" qus/test
-    travis_finish "pull"
   fi
 
   if [ "$#" != "0" ]; then
@@ -520,26 +492,24 @@ test_case () {
     [iI])
       do_register -s -- aarch64
 
-      travis_start "build" "Build arm64v8 docker image containing qemu-aarch64-static"
+      print_start "Build arm64v8 docker image containing qemu-aarch64-static"
       get_static
       docker build -t qus/test . -f-<<EOF
 FROM arm64v8/ubuntu:bionic
 COPY ./qemu-aarch64-static /usr/bin
 EOF
       rm -rf qemu-aarch64-static
-      travis_finish "build"
 
       qus_test
     ;;
     [dD])
       do_register -- aarch64
 
-      travis_start "build" "Build amd64 docker image containing qemu-user"
+      print_start "Build amd64 docker image containing qemu-user"
       docker build -t qus/test -<<EOF
 FROM amd64/ubuntu:bionic
 RUN apt update && apt install -y qemu-user
 EOF
-      travis_finish "build"
 
       do_test qemu-aarch64
     ;;
@@ -559,10 +529,9 @@ EOF
       apt_install qemu-user-binfmt
       list
 
-      travis_start "native" "Test direct and explicit native execution"
+      print_start "Test direct and explicit native execution"
       printf 'DIRECT: ';   ./main
       printf 'EXPLICIT: '; qemu-aarch64 ./main
-      travis_finish "native"
     ;;
     [hH])
       exit 1
@@ -574,9 +543,8 @@ EOF
 #     do_test $q
     ;;
     *)
-      travis_start "register" "Register and load qemu-aarch64-static with/from aptman/qus"
+      print_start "Register and load qemu-aarch64-static with/from aptman/qus"
       docker run --rm --privileged aptman/qus -s -- -p aarch64
-      travis_finish "register"
 
       qus_test
     ;;
@@ -584,8 +552,6 @@ EOF
 }
 
 #--
-
-export DOCKER_BUILDKIT=1
 
 case "$1" in
   -b|-d|-m|-p)
@@ -601,20 +567,19 @@ case "$1" in
     ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
     case "$BUILD" in
       fedora)
-        ARCH_LIST+=" armv7hl"
+        ARCH_LIST="$ARCH_LIST armv7hl"
       ;;
       debian)
-        ARCH_LIST+=" armhf armel mipsel mips64el"
+        ARCH_LIST="$ARCH_LIST armhf armel mipsel mips64el"
       ;;
     esac
     mkdir -p ../releases
     for BASE_ARCH in $ARCH_LIST; do
-      travis_start "build-$BASE_ARCH" "Build $BASE_ARCH" "$ANSI_MAGENTA"
+      print_start "Build $BASE_ARCH" "$ANSI_MAGENTA"
       unset PACKAGE_URI
       build_cfg
       build
       cp -r releases/* ../releases/
-      travis_finish "build-$BASE_ARCH"
     done
     rm -rf releases
     mv ../releases ./
