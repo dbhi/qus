@@ -3,10 +3,6 @@ dist: xenial
 services: docker
 language: minimal
 install: skip
-#addons:
-#  apt:
-#    packages:
-#    - pass
 
 stages:
   - build
