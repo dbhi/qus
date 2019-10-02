@@ -585,6 +585,8 @@ EOF
 
 #--
 
+export DOCKER_BUILDKIT=1
+
 case "$1" in
   -b|-d|-m|-p)
     build_cfg
@@ -611,6 +613,7 @@ case "$1" in
       unset PACKAGE_URI
       build_cfg
       build
+      ls -la releases
       travis_finish "build-$BASE_ARCH"
     done
   ;;

@@ -2,6 +2,10 @@ os: linux
 dist: xenial
 services: docker
 language: minimal
+before_install:
+  - curl -fsSL https://get.docker.com | sudo sh
+  - echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
+  - sudo service docker restart
 install: skip
 
 stages:
@@ -47,7 +51,7 @@ jobs:
           provider: script
           skip_cleanup: true
           script: ./run.sh -d
-          on: &on
+          on:
             repo: dbhi/qus
             branch: master
         - &releases
@@ -59,7 +63,7 @@ jobs:
           file_glob: true
           draft: true
           on:
-            <<: *on
+            repo: dbhi/qus
             tags: true
     - <<: *build
       env: BUILD=fedora
