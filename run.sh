@@ -190,7 +190,7 @@ ENTRYPOINT ["/qus/register"]
 EOF
     travis_finish "img-$BASE_ARCH-register"
 
-    travis_start "img-$BASE_ARCH" "Build $IMG"
+    travis_start "img-$BASE_ARCH" "Build $IMG-pkg"
     docker build -t $IMG . -f-<<EOF
 FROM $IMG-register
 COPY --from="$IMG"-pkg /usr/bin/qemu-* /qus/bin/
@@ -607,15 +607,17 @@ case "$1" in
         ARCH_LIST+=" armhf armel mipsel mips64el"
       ;;
     esac
-
+    mkdir -p ../releases
     for BASE_ARCH in $ARCH_LIST; do
       travis_start "build-$BASE_ARCH" "Build $BASE_ARCH" "$ANSI_MAGENTA"
       unset PACKAGE_URI
       build_cfg
       build
-      ls -la releases
+      cp -r releases/* ../releases/
       travis_finish "build-$BASE_ARCH"
     done
+    rm -rf releases
+    mv ../releases ./
   ;;
   *)
     TEST_RELEASE="v0.0.1-v3.1+dfsg-8"

@@ -68,6 +68,8 @@ jobs:
     - <<: *build
       env: BUILD=fedora
       install: sudo apt-get install -y rpm2cpio zstd cpio curl
+      deploy:
+        <<: *script
     - stage: manifests
       env: MANIFESTS
       script: skip
