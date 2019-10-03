@@ -190,7 +190,7 @@ ENTRYPOINT ["/qus/register"]
 EOF
     travis_finish "img-$BASE_ARCH-register"
 
-    travis_start "img-$BASE_ARCH" "Build $IMG-pkg"
+    travis_start "img-$BASE_ARCH" "Build $IMG"
     docker build -t $IMG . -f-<<EOF
 FROM $IMG-register
 COPY --from="$IMG"-pkg /usr/bin/qemu-* /qus/bin/
@@ -241,7 +241,7 @@ build () {
     ;;
   esac
 
-  travis_start "img-${BASE_ARCH}-pkg" "Build $IMG"
+  travis_start "img-${BASE_ARCH}-pkg" "Build $IMG-pkg"
   docker build -t "$IMG"-pkg . -f-<<EOF
 FROM scratch
 COPY ./* /usr/bin/
