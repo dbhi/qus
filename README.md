@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <a title="'push' workflow Status" href="https://github.com/dbhi/qus/actions"><img alt="'push' workflow Status" src="https://github.com/dbhi/qus/workflows/push/badge.svg"></a><!--
+  <a title="'push' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Apush"><img alt="'push' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/push?longCache=true&style=flat-square&logo=github&label=push"></a><!--
   -->
   <a title="Build Status" href="https://travis-ci.com/dbhi/qus/builds"><img src="https://img.shields.io/travis/com/dbhi/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=travis"></a><!--
   -->
