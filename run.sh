@@ -190,6 +190,9 @@ EOF
 #--
 
 build () {
+  [ -d releases ] && rm -rf releases
+  mkdir -p releases
+
   [ -d bin-static ] && rm -rf bin-static
   mkdir -p bin-static
 
@@ -326,7 +329,7 @@ aarch64-linux-gnu-gcc -static -o test-aarch64 main.c
 chmod +x test-aarch64
 
 mkdir /riscv
-curl -fsSL https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-20170612-x86_64-linux-centos6.tar.gz | tar -xzvf - -C /riscv --strip-components=1
+curl -fsSL https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-20170612-x86_64-linux-centos6.tar.gz | tar -xzf - -C /riscv --strip-components=1
 /riscv/bin/riscv64-unknown-elf-gcc -static -o test-riscv64 main.c
 chmod +x test-riscv64
 EOF
@@ -392,9 +395,6 @@ build_cfg () {
   echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
   echo "HOST_ARCH: $HOST_ARCH";
   echo "BUILD_ARCH: $BUILD_ARCH";
-
-  [ -d releases ] && rm -rf releases
-  mkdir -p releases
 }
 
 #
@@ -579,7 +579,8 @@ case "$1" in
       unset PACKAGE_URI
       build_cfg
       build
-      cp -r releases/* ../releases/
+      print_start "Copy $BASE_ARCH" "$ANSI_MAGENTA"
+      cp -vr releases/* ../releases/
     done
     rm -rf releases
     mv ../releases ./
