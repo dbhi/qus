@@ -586,6 +586,6 @@ case "$1" in
     mv ../releases ./
   ;;
   *)
-    TEST_RELEASE="v0.0.1-v3.1+dfsg-8"
+    TEST_RELEASE="v0.0.3-v4.2-3"
     test_case
 esac
