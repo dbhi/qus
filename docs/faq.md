@@ -1,5 +1,9 @@
 # Frequently Asked Questions (FAQ)
 
+## Does `qus` work for building images?
+
+Yes, once the QEMU binary is configured/loaded, both building images and running containers is supported.
+
 ## Do I need to install `qemu-*-static` on the host, even though it is only needed by the containers?
 
 You can use static binaries at any location. So, you don't need to install all the `qemu-*-static` on the host. You just download the ones you want/need to a temporal folder. See cases `c`, `C`, `v` or `V` in [tests](tests.md).
