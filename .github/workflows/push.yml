@@ -1,9 +1,11 @@
 name: 'push'
+
 on:
   push:
   pull_request:
   schedule:
     - cron: '0 0 * * 5'
+
 jobs:
 
   debian:
@@ -19,6 +21,7 @@ jobs:
       env:
         BASE_ARCH: ${{ matrix.arch }}
     - name: deploy to hub.docker.com
+      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       run: ./run.sh -d
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
@@ -38,12 +41,14 @@ jobs:
       env:
         BASE_ARCH: ${{ matrix.arch }}
     - name: deploy to hub.docker.com
+      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       run: ./run.sh -d
       env:
         DOCKER_USER: ${{ secrets.DOCKER_USER }}
         DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
 
   manifests:
+    if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
     needs: [ debian, fedora ]
     runs-on: ubuntu-latest
     steps:
