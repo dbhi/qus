@@ -9,7 +9,10 @@
   -->
   <a title="Docker Hub" href="https://hub.docker.com/r/aptman/qus/"><img src="https://img.shields.io/docker/pulls/aptman/qus.svg?longCache=true&style=flat-square&logo=docker&logoColor=fff&label=aptman%2Fqus"></a><!--
   -->
-  <a title="Releases" href="https://github.com/dbhi/qus/releases"><img src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"></a>
+  <a title="Releases" href="https://github.com/dbhi/qus/releases"><img src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"></a><!--
+  -->
+  <a title="'check' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Acheck"><img alt="'check' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/check?longCache=true&style=flat-square&logo=github&label=check"></a><!--
+  -->
 </p>
 
 *qemu-user-static* (**qus**) is a compilation of utilities, examples and references to build and execute OCI images (aka [docker](https://www.docker.com/) images) for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation.
