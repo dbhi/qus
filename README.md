@@ -87,11 +87,11 @@ Manifests for `amd64`, `arm64v8`, `arm32v7`, `arm32v6`, `i386`, `s390x` or `ppc6
 - `aptman/qus:register`: a `busybox` image with [`register.sh`](./register.sh) and [`qemu-binfmt-conf.sh`](https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh). The entrypoint is set to `register.sh`.
 - `aptman/qus`: union of the two previous images.
 
-## Debian [4.2]
+## Debian [5.0]
 
 For each `HOST_ARCH`, an image named `${HOST_ARCH}-d${VERSION}${TAG}` is published; where `TAG` is `-pkg, -register, ""`. Moreover, three manifests are available: `aptman/qus:d${VERSION}-pkg`, `aptman/qus:d${VERSION}-register` and `aptman/qus:d${VERSION}`.
 
-> NOTE: latest/default versions above correspond to these Debian variants. Therefore, running `aptman/qus` on an `amd64` host is equivalent to running `aptman/qus:d4.2` or `aptman/qus:amd64-d4.2`.
+> NOTE: latest/default versions above correspond to these Debian variants. Therefore, running `aptman/qus` on an `amd64` host is equivalent to running `aptman/qus:d5.0` or `aptman/qus:amd64-d5.0`.
 
 Apart from those, `aptman/qus:mips-pkg` and `aptman/qus:mips64el-pkg` are also available.
 
