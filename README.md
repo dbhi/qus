@@ -98,6 +98,6 @@ For each `HOST_ARCH`, an image named `${HOST_ARCH}-d${VERSION}${TAG}` is publish
 
 Apart from those, `aptman/qus:mips-pkg` and `aptman/qus:mips64el-pkg` are also available.
 
-## Fedora [4.2.0]
+## Fedora [5.0.0]
 
 For each `HOST_ARCH` (except `arm32v6`), an image named `${HOST_ARCH}-f${VERSION}${TAG}` is published; where `TAG` is `-pkg, -register, ""`. Moreover, three manifests are available: `aptman/qus:f${VERSION}-pkg`, `aptman/qus:f${VERSION}-register` and `aptman/qus:f${VERSION}`.
