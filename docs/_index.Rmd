@@ -37,7 +37,7 @@ knitr::include_graphics("logo/light.png")
     title="'dbhi/qus' GitHub repository"
     href="https://github.com/dbhi/qus"
   ><img
-    src="https://img.shields.io/github/stars/dbhi/qus?longCache=true&style=flat-square&label=dbhi%2Fqus&logo=github&color=ec563c"
+    src="https://img.shields.io/github/stars/dbhi/qus?longCache=true&style=flat-square&label=dbhi%2Fqus&logo=github&color=d45500"
     data-external="1"
   ></a><!--
   -->
