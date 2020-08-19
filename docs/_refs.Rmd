@@ -29,6 +29,7 @@ For further details about similarities/differences, see:
 
 - [docker/binfmt#17](https://github.com/docker/binfmt/issues/17)
 - [linuxkit/linuxkit#3401](https://github.com/linuxkit/linuxkit/issues/3401)
+- [moby/qemu](https://github.com/moby/qemu)
 
 At DockerCon San Francisco 2019, a partnership with Arm was announces: [Building Multi-Arch Images for Arm and x86 with Docker Desktop](https://www.docker.com/blog/multi-arch-images/).
 
