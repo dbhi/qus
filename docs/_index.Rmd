@@ -53,7 +53,7 @@ knitr::include_graphics("logo/light.png")
     title="Releases"
     href="https://github.com/dbhi/qus/releases"
   ><img
-    src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"
+    src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square&logo=git&logoColor=fff"
     data-external="1"
   ></a>
 </aside>
