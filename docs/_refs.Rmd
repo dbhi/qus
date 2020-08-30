@@ -23,15 +23,16 @@ Tries to fix [moby/moby#36552](https://github.com/moby/moby/issues/36552) in `ho
 
 ## linuxkit/binfmt | docker/binfmt
 
-Although not well documented, since version 1.13.0 (2017-01-19), QEMU is installed by default with Docker Desktop and a tool written in golang (named `binfmt`) is used to register interpreters in the kernel. The upstream project is [linuxkit/linuxkit](https://github.com/linuxkit/linuxkit), and the actual project from docker is [docker/binfmt](https://github.com/docker/binfmt).
+Although not well documented, since version 1.13.0 (2017-01-19), QEMU is installed by default with Docker Desktop and a tool written in golang (named `binfmt`) is used to register interpreters in the kernel. The upstream project is [linuxkit/linuxkit](https://github.com/linuxkit/linuxkit).
 
 For further details about similarities/differences, see:
 
-- [docker/binfmt#17](https://github.com/docker/binfmt/issues/17)
+- The project from docker ([docker/binfmt](https://github.com/docker/binfmt)) was deprecated in favour of [github.com/linuxkit/linuxkit/tree/master/pkg/binfmt](https://github.com/linuxkit/linuxkit/tree/master/pkg/binfmt).
+  - [docker/binfmt#17](https://github.com/docker/binfmt/issues/17)
 - [linuxkit/linuxkit#3401](https://github.com/linuxkit/linuxkit/issues/3401)
 - [moby/qemu](https://github.com/moby/qemu)
 
-At DockerCon San Francisco 2019, a partnership with Arm was announces: [Building Multi-Arch Images for Arm and x86 with Docker Desktop](https://www.docker.com/blog/multi-arch-images/).
+At DockerCon San Francisco 2019, a partnership with Arm was announced: [Building Multi-Arch Images for Arm and x86 with Docker Desktop](https://www.docker.com/blog/multi-arch-images/).
 
 ## Blog posts
 
