@@ -7,7 +7,7 @@ before_install:
   - echo '{"experimental":true}' | sudo tee /etc/docker/daemon.json
   - sudo service docker restart
 install: skip
-script: ./run.sh
+script: ./test.sh
 
 env:
   - QUS_JOB=
@@ -43,7 +43,7 @@ jobs:
       env: BUILD=debian
       script:
         - ./run.sh -a
-        - ./run.sh -p
+        - ./run.sh -t
       deploy:
         - provider: releases
           api_key:

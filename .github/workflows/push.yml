@@ -95,6 +95,6 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: test
-      run: ./run.sh
+      run: ./test.sh
       env:
         QUS_JOB: ${{ matrix.test }}

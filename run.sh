@@ -20,60 +20,7 @@ cd $(dirname $0)
 
 export DOCKER_BUILDKIT=1
 
-#--
-
-enable_color() {
-  ENABLECOLOR='-c '
-  ANSI_RED="\033[31m"
-  ANSI_GREEN="\033[32m"
-  ANSI_YELLOW="\033[33m"
-  ANSI_BLUE="\033[34m"
-  ANSI_MAGENTA="\033[35m"
-  ANSI_GRAY="\033[90m"
-  ANSI_CYAN="\033[36;1m"
-  ANSI_DARKCYAN="\033[36m"
-  ANSI_NOCOLOR="\033[0m"
-}
-
-disable_color() { unset ENABLECOLOR ANSI_RED ANSI_GREEN ANSI_YELLOW ANSI_BLUE ANSI_MAGENTA ANSI_CYAN ANSI_DARKCYAN ANSI_NOCOLOR; }
-
-enable_color
-
-print_start() {
-  if [ "x$2" != "x" ]; then
-    COL="$2"
-  elif [ "x$BASE_COL" != "x" ]; then
-    COL="$BASE_COL"
-  else
-    COL="$ANSI_MAGENTA"
-  fi
-  printf "${COL}${1}$ANSI_NOCOLOR\n"
-}
-
-gstart () {
-  print_start "$@"
-}
-gend () {
-  :
-}
-
-if [ -n "$GITHUB_EVENT_PATH" ]; then
-  export CI=true
-fi
-
-[ -n "$CI" ] && {
-  gstart () {
-    printf '::[group]'
-    print_start "$@"
-    SECONDS=0
-  }
-
-  gend () {
-    duration=$SECONDS
-    echo '::[endgroup]'
-    printf "${ANSI_GRAY}took $(($duration / 60)) min $(($duration % 60)) sec.${ANSI_NOCOLOR}\n"
-  }
-} || echo "INFO: not in CI"
+. ./utils.sh
 
 #--
 
@@ -310,7 +257,7 @@ manifests () {
 
 #--
 
-publish () {
+bin_tests () {
   print_start "Cross-compile main.c for 'aarch64' and 'riscv64' in an 'amd64' docker container"
 
   cat > main.c <<-EOF
@@ -335,6 +282,31 @@ curl -fsSL https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-20170
 chmod +x test-riscv64
 EOF
 )"
+}
+
+#--
+
+assets() {
+  ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
+  case "$BUILD" in
+    fedora)
+      ARCH_LIST="$ARCH_LIST armv7hl"
+    ;;
+    debian)
+      ARCH_LIST="$ARCH_LIST armhf armel mipsel mips64el"
+    ;;
+  esac
+  mkdir -p ../releases
+  for BASE_ARCH in $ARCH_LIST; do
+    print_start "Build $BASE_ARCH" "$ANSI_MAGENTA"
+    unset PACKAGE_URI
+    build_cfg
+    build
+    print_start "Copy $BASE_ARCH" "$ANSI_MAGENTA"
+    cp -vr releases/* ../releases/
+  done
+  rm -rf releases
+  mv ../releases ./
 }
 
 #--
@@ -398,194 +370,21 @@ build_cfg () {
   echo "BUILD_ARCH: $BUILD_ARCH";
 }
 
-#
-#--
-#
-
-do_register () {
-  case "$QUS_JOB" in
-   [a-z]*)
-     print_start "Register qemu-user binfmt interpreters with register.sh"
-     sudo QEMU_BIN_DIR=$QEMU_BIN_DIR ./register.sh $@
-   ;;
-   *)
-     print_start "Register qemu-user binfmt interpreters with aptman/qus:register"
-     QEMU_BIN_DIR=${QEMU_BIN_DIR:-/usr/bin}
-     docker run --rm --privileged \
-       -e "QEMU_BIN_DIR=$QEMU_BIN_DIR" \
-       -v "$QEMU_BIN_DIR:$QEMU_BIN_DIR" \
-       aptman/qus:register $@
-  esac
-  list
-}
-
-list () {
-  print_start "List binfmt interpreters"
-  sudo ./register.sh -l -- -t
-}
-
-#--
-
-get_static () {
-  print_start "Get qemu-aarch64-static"
-  if [ "$#" != "0" ]; then
-    dir="-C $1"
-    subin="$(command -v sudo)"
-  fi
-  curl -fsSL https://github.com/dbhi/qus/releases/download/$TEST_RELEASE/qemu-aarch64-static_amd64.tgz | $subin tar xvzf - $dir
-}
-
-apt_install () {
-  print_start "sudo apt-get install $@"
-  sudo apt update -y
-  sudo apt install -y $@
-}
-
-#--
-
-do_test () {
-  cmd="docker run --rm -tv $(pwd):/src $2 qus/test bash -c"
-  printf "$ANSI_BLUE> Test direct and explicit execution in a docker container$ANSI_NOCOLOR\n"
-  printf 'DIRECT: ';   $cmd "/src/main"
-  printf 'EXPLICIT: '; $cmd "command -v $1 >/dev/null 2>&1 && $1 /src/main || echo '$1 not available'"
-}
-
-qus_test () {
-  if [ "$(docker images -q qus/test 2> /dev/null)" == "" ]; then
-    img="arm64v8/ubuntu:bionic"
-    print_start "Pull docker image $img and tag it as qus/test"
-    docker pull "$img"
-    docker tag "$img" qus/test
-  fi
-
-  if [ "$#" != "0" ]; then
-    q="$(basename $1)"
-    v="$(dirname $1)"
-    if [ "$v" = "." ]; then v="$(pwd)"; fi
-    do_test $q "-v=$v/$q:/usr/bin/$q"
-  else
-    do_test "qemu-aarch64-static"
-  fi
-}
-
-#--
-
-test_case () {
-  curl -fsSL https://github.com/dbhi/qus/releases/download/$TEST_RELEASE/test-aarch64 -o main
-  chmod +x main
-
-  case "$QUS_JOB" in
-    [fF])
-      get_static /usr/bin
-      do_register -s -- -p aarch64
-      qus_test
-    ;;
-    [cC])
-      get_static
-      QEMU_BIN_DIR=$(pwd) do_register -s -- -p aarch64
-      qus_test
-    ;;
-    [vV])
-      do_register -s -- aarch64
-      get_static
-      qus_test qemu-aarch64-static
-    ;;
-    [iI])
-      do_register -s -- aarch64
-
-      print_start "Build arm64v8 docker image containing qemu-aarch64-static"
-      get_static
-      docker build -t qus/test . -f-<<EOF
-FROM arm64v8/ubuntu:bionic
-COPY ./qemu-aarch64-static /usr/bin
-EOF
-      rm -rf qemu-aarch64-static
-
-      qus_test
-    ;;
-    [dD])
-      do_register -- aarch64
-
-      print_start "Build amd64 docker image containing qemu-user"
-      docker build -t qus/test -<<EOF
-FROM amd64/ubuntu:bionic
-RUN apt update && apt install -y qemu-user
-EOF
-
-      do_test qemu-aarch64
-    ;;
-    s)
-      apt_install qemu-user-static
-      list
-      qus_test /usr/bin/qemu-aarch64-static
-    ;;
-    [rR])
-      apt_install qemu-user-static
-      list
-      do_register -- -r
-      do_register -s -- -p aarch64
-      qus_test
-    ;;
-    n)
-      apt_install qemu-user-binfmt
-      list
-
-      print_start "Test direct and explicit native execution"
-      printf 'DIRECT: ';   ./main
-      printf 'EXPLICIT: '; qemu-aarch64 ./main
-    ;;
-    [hH])
-      exit 1
-#     register -- -p
-#
-#     pull_tmp "ubuntu:18.04"
-#     q="qemu-aarch64"
-#     #test $q -v=/usr/bin/$q:/usr/bin/$q
-#     do_test $q
-    ;;
-    *)
-      print_start "Register and load qemu-aarch64-static with/from aptman/qus"
-      docker run --rm --privileged aptman/qus -s -- -p aarch64
-
-      qus_test
-    ;;
-  esac
-}
-
 #--
 
 case "$1" in
-  -b|-m|-p)
+  -b|-m|-t)
     build_cfg
     case "$1" in
       -m) manifests ;;
-      -p) publish   ;;
+      -t) bin_tests ;;
       *)  build
     esac
   ;;
   -a)
-    ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
-    case "$BUILD" in
-      fedora)
-        ARCH_LIST="$ARCH_LIST armv7hl"
-      ;;
-      debian)
-        ARCH_LIST="$ARCH_LIST armhf armel mipsel mips64el"
-      ;;
-    esac
-    mkdir -p ../releases
-    for BASE_ARCH in $ARCH_LIST; do
-      print_start "Build $BASE_ARCH" "$ANSI_MAGENTA"
-      unset PACKAGE_URI
-      build_cfg
-      build
-      print_start "Copy $BASE_ARCH" "$ANSI_MAGENTA"
-      cp -vr releases/* ../releases/
-    done
-    rm -rf releases
-    mv ../releases ./
+    assets;
   ;;
   *)
-    TEST_RELEASE="v0.0.5-v5.0-14"
-    test_case
+    printf "${ANSI_RED}Unknown option '$1'!${ANSI_NOCOLOR}\n"
+    exit 1
 esac
