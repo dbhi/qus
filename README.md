@@ -33,6 +33,8 @@ Find further details at [dbhi.github.io/qus](https://dbhi.github.io/qus).
 
 > NOTE: Although `docker` is used in these examples, users have reported that other engines such as [podman](https://podman.io/) can also be used. See also [kata-containers/runtime#1280](https://github.com/kata-containers/runtime/issues/1280).
 
+## Setup
+
 The recommended approach is to run the following container:
 
 ``` bash
@@ -54,7 +56,7 @@ i386 i486 alpha arm armeb sparc32plus ppc ppc64 ppc64le m68k mips mipsel mipsn32
 > On Windows, a container must be used, so that changes are applied to the underlying VM, since no kernel is available on the host.
 > I.e., from the [test list](https://dbhi.github.io/qus/#tests), only `C`, `V`, `I` or `D` will work on Windows.
 
----
+## Reset
 
 In order to unset the registered formats, and unload the binaries, run:
 
