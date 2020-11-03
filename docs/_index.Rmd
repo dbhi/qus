@@ -16,6 +16,7 @@ output:
     toc_depth: 3
 repository_url: https://github.com/dbhi/qus
 citation_url: https://dbhi.github.io/qus
+license: CC-BY-4.0
 #tags:
 #  - docker
 #  - software development

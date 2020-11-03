@@ -1,5 +1,20 @@
 #!/usr/bin/env python3
 
+# Copyright 2020 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+
 from pathlib import Path
 from os import listdir
 
@@ -70,7 +85,7 @@ class CLI(Tool, ArgParseMixin):
         # Call constructor of the ArgParseMixin
         ArgParseMixin.__init__(
           self,
-          description=textwrap.dedent('Tool to build (multiarch) images, and to easily browse publicly available tags and assets.'),
+          description=textwrap.dedent('Tool for building (multiarch) images, and for easily browsing publicly available tags and assets.'),
           epilog=textwrap.fill("Happy hacking!"),
           formatter_class=argparse.RawDescriptionHelpFormatter,
           add_help=False
