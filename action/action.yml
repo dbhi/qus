@@ -1,0 +1,17 @@
+name: 'Setup qemu-user-static'
+
+description: 'Setup qemu-user-static in persistent mode'
+
+inputs:
+  targets:
+    description: 'Select target architectures to register interpreters for'
+    required: false
+    default:
+
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+
+branding:
+  color: gray-dark
+  icon: play

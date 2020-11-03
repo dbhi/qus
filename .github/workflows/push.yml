@@ -92,6 +92,28 @@ jobs:
       run: ./run.sh -m
 
 
+  action-all:
+    needs: [ manifests ]
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - uses: ./action
+
+
+  action-arm:
+    needs: [ manifests ]
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - uses: ./action
+      with:
+        targets: arm aarch64
+
+
   test:
     needs: [ manifests ]
     strategy:
