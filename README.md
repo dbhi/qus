@@ -64,4 +64,4 @@ docker run --rm --privileged aptman/qus -- -r
 
 ## Bandwidth-efficient procedure
 
-In contexts such as CI pipelines it might be desirable to reduce the required bandwidth. Hence, instead of using `aptman/qus` images —which include all the binaries for all the supported target architectures—, individual tarballs are available through GitHub Releases. These can be used along with `aptman/qus:register` images or with [`register.sh`](./register.sh) (without an OCI runtime). See either `f`, `F`, `c`, `C`, `v` or `V` in the table below for examples of these use cases.
+In contexts such as CI pipelines it might be desirable to reduce the required bandwidth. Hence, instead of using `aptman/qus` images —which include all the binaries for all the supported target architectures—, individual tarballs are available through GitHub Releases. These can be used along with `aptman/qus:register` images or with [`register.sh`](./register.sh) (without an OCI runtime). See either `f`, `F`, `c`, `C`, `v` or `V` in [Tests](https://dbhi.github.io/qus/#tests) for examples of these use cases.
