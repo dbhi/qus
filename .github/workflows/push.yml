@@ -16,10 +16,13 @@ jobs:
         arch: [ x86_64, i686, aarch64, ppc64le, s390x, armhf, armel, mipsel, mips64el ]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+
+    - uses: actions/checkout@v2
+
     - run: BUILD=debian ./run.sh -b
       env:
         BASE_ARCH: ${{ matrix.arch }}
+
     - name: deploy to hub.docker.com
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       run: ./run.sh -d
@@ -35,11 +38,15 @@ jobs:
         arch: [ x86_64, i686, aarch64, ppc64le, s390x, armv7hl ]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+
+    - uses: actions/checkout@v2
+
     - run: sudo apt-get install -y rpm2cpio zstd cpio curl
+
     - run: BUILD=fedora ./run.sh -b
       env:
         BASE_ARCH: ${{ matrix.arch }}
+
     - name: deploy to hub.docker.com
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       run: ./run.sh -d
@@ -52,7 +59,9 @@ jobs:
     needs: [ debian, fedora ]
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+
+    - uses: actions/checkout@v2
+
     - name: update manifests
       run: ./run.sh -m
       env:
@@ -69,7 +78,9 @@ jobs:
 #, h, H
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v1
+
+    - uses: actions/checkout@v2
+
     - name: test
       run: ./run.sh
       env:
