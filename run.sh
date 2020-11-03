@@ -257,20 +257,9 @@ EOF
 
 #--
 
-deploy () {
-  echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-  print_start "Push $REPO"
-  docker push $REPO
-  docker logout
-}
-
-#--
-
 manifests () {
   mkdir -p ~/.docker
   echo '{"experimental": "enabled"}' > ~/.docker/config.json
-
-  echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
 
   for BUILD in latest debian fedora; do
 
@@ -317,8 +306,6 @@ manifests () {
     done
 
   done
-
-  docker logout
 }
 
 #--
@@ -568,10 +555,9 @@ EOF
 #--
 
 case "$1" in
-  -b|-d|-m|-p)
+  -b|-m|-p)
     build_cfg
     case "$1" in
-      -d) deploy    ;;
       -m) manifests ;;
       -p) publish   ;;
       *)  build

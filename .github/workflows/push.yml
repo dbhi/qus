@@ -8,6 +8,7 @@ on:
 
 jobs:
 
+
   debian:
     strategy:
       fail-fast: false
@@ -23,12 +24,16 @@ jobs:
       env:
         BASE_ARCH: ${{ matrix.arch }}
 
-    - name: deploy to hub.docker.com
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - name: Deploy to DockerHub
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: ./run.sh -d
-      env:
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      run: docker push aptman/qus
+
 
   fedora:
     strategy:
@@ -47,12 +52,16 @@ jobs:
       env:
         BASE_ARCH: ${{ matrix.arch }}
 
-    - name: deploy to hub.docker.com
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - name: Deploy to DockerHub
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: ./run.sh -d
-      env:
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+      run: docker push aptman/qus
+
 
   manifests:
     if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
@@ -62,11 +71,15 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - name: update manifests
+    - name: Login to DockerHub
+      uses: docker/login-action@v1
+      with:
+        username: ${{ secrets.DOCKER_USER }}
+        password: ${{ secrets.DOCKER_PASS }}
+
+    - name: Update manifests
       run: ./run.sh -m
-      env:
-        DOCKER_USER: ${{ secrets.DOCKER_USER }}
-        DOCKER_PASS: ${{ secrets.DOCKER_PASS }}
+
 
   test:
     needs: [ manifests ]

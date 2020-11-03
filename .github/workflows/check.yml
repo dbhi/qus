@@ -11,8 +11,11 @@ jobs:
   check:
     runs-on: ubuntu-latest
     steps:
+
     - uses: actions/checkout@v2
+
     - run: |
         python3 -m pip install -U pip setuptools
         python3 -m pip install -r cli/requirements.txt
+
     - run: ./cli/cli.py check
