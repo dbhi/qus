@@ -25,6 +25,7 @@ class GetterFedora(Getter):
 
     def __init__(self, archs):
         super().__init__(archs)
+        print("[GetterFedora] __init__", archs)
 
     def get_package_binaries(self, host, bindir="bin-static"):
         """
@@ -36,10 +37,11 @@ class GetterFedora(Getter):
         )
 
         args = self.url_args("fedora", host)
+        args += args
 
         url = (
             "https://kojipkgs.fedoraproject.org/packages/qemu/%s/%s/%s/qemu-user-static-%s-%s.%s.rpm"
-            % (args + args)
+            % args
         )
 
         if type(bindir) is str:
