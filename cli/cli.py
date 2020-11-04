@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+# Copyright 2020-2021 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -37,6 +37,7 @@ from debian import (
     extract_debs,
 )
 from fedora import check_fedora_latest
+from build import builder
 
 
 ROOT = Path(__file__).parent.parent
@@ -68,11 +69,6 @@ class Tool:
         extract_debs(targets, debs, tmpdir)
         targets.sort()
         debian_report(targets, debs, report)
-
-    @staticmethod
-    def check():
-        check_debian_latest()
-        check_fedora_latest()
 
 
 class CLI(Tool, ArgParseMixin):
@@ -123,23 +119,39 @@ class CLI(Tool, ArgParseMixin):
             except KeyError:
                 print("Command {0} is unknown.".format(args.Command))
 
-    @CommandAttribute(
-        "check", help="Check if new releases are available upstream (Debian/Fedora)."
-    )
+    @CommandAttribute("check", help="Check if new releases are available upstream (Debian/Fedora).")
     def HandleCheck(self, _):
-        self.check()
+        check_debian_latest()
+        check_fedora_latest()
 
-    @CommandAttribute(
-        "assets", help="Generate report of available releases and assets."
-    )
+    @CommandAttribute("assets", help="Generate report of available releases and assets.")
     def HandleAssets(self, _):
         self.assets()
 
-    @CommandAttribute(
-        "debian", help="Generate report of available resources in DEB packages."
-    )
+    @CommandAttribute("debian", help="Generate report of available resources in DEB packages.")
     def HandleDebian(self, _):
         self.debian()
+
+    @CommandAttribute("build", help="TODO.")
+    @ArgumentAttribute(
+        "-s",
+        "--source",
+        nargs=1,
+        metavar="<Source>",
+        dest="Source",
+        type=str,
+        help="Source to get packages from: debian or fedora",
+    )
+    # @ArgumentAttribute(metavar='<Builder>', dest="Builder", type=str, help="Builder architecture, typically amd64")
+    @ArgumentAttribute(
+        metavar="<Hosts>",
+        dest="Hosts",
+        type=str,
+        nargs="*",
+        help="Host architecture(s)",
+    )
+    def HandleDebian(self, args):
+        builder(args.Source[0], "amd64", args.Hosts)
 
 
 if __name__ == "__main__":
