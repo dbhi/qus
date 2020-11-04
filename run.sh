@@ -205,9 +205,6 @@ EOF
 #--
 
 manifests () {
-  mkdir -p ~/.docker
-  echo '{"experimental": "enabled"}' > ~/.docker/config.json
-
   for BUILD in latest debian fedora; do
 
     MAN_ARCH_LIST="amd64 arm64v8 arm32v7 i386 s390x ppc64le"

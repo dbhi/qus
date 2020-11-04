@@ -69,13 +69,24 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - name: Enable Docker experimental
+      shell: python3 {0}
+      run: |
+        from pathlib import Path
+        from json import load, dump
+        with (Path.home() / ".docker" / "config.json").open("r+") as cfg:
+            data = load(cfg)
+            data['experimental'] = "enabled"
+            cfg.seek(0)
+            dump(data, cfg, indent=2)
 
     - name: Login to DockerHub
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_PASS }}
+
+    - uses: actions/checkout@v2
 
     - name: Update manifests
       run: ./run.sh -m
