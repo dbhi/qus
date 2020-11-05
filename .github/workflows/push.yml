@@ -9,46 +9,46 @@ on:
 jobs:
 
 
-  debian:
+  images:
     strategy:
       fail-fast: false
       max-parallel: 3
       matrix:
-        arch: [ x86_64, i686, aarch64, ppc64le, s390x, armhf, armel, mipsel, mips64el ]
+        src:
+          - debian
+          - fedora
+        arch:
+          - x86_64
+          - i686
+          - aarch64
+          - ppc64le
+          - s390x
+          - armv7hl
+          - armhf
+          - armel
+          - mipsel
+          - mips64el
+        exclude:
+          - src: debian
+            arch: armv7hl
+          - src: fedora
+            arch: armhf
+          - src: fedora
+            arch: armel
+          - src: fedora
+            arch: mipsel
+          - src: fedora
+            arch: mips64el
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
-
-    - run: BUILD=debian ./run.sh -b
-      env:
-        BASE_ARCH: ${{ matrix.arch }}
-
-    - name: Login to DockerHub
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_PASS }}
-
-    - name: Deploy to DockerHub
-      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: docker push aptman/qus
-
-
-  fedora:
-    strategy:
-      fail-fast: false
-      max-parallel: 3
-      matrix:
-        arch: [ x86_64, i686, aarch64, ppc64le, s390x, armv7hl ]
-    runs-on: ubuntu-latest
-    steps:
+    - name: Install dependencies for extracting rpms
+      run: sudo apt-get install -y rpm2cpio zstd cpio curl
+      if: matrix.src == 'fedora'
 
     - uses: actions/checkout@v2
 
-    - run: sudo apt-get install -y rpm2cpio zstd cpio curl
-
-    - run: BUILD=fedora ./run.sh -b
+    - run: BUILD=${{ matrix.src }} ./run.sh -b
       env:
         BASE_ARCH: ${{ matrix.arch }}
 
@@ -65,7 +65,7 @@ jobs:
 
   manifests:
     if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-    needs: [ debian, fedora ]
+    needs: images
     runs-on: ubuntu-latest
     steps:
 
@@ -93,7 +93,7 @@ jobs:
 
 
   action-all:
-    needs: [ manifests ]
+    needs: manifests
     runs-on: ubuntu-latest
     steps:
 
@@ -103,7 +103,7 @@ jobs:
 
 
   action-arm:
-    needs: [ manifests ]
+    needs: manifests
     runs-on: ubuntu-latest
     steps:
 
@@ -115,13 +115,29 @@ jobs:
 
 
   test:
-    needs: [ manifests ]
+    needs: manifests
     strategy:
       fail-fast: false
       max-parallel: 2
       matrix:
-        test: [ "", f, F, c, C, v, V, i, I, d, D, r, R, s, n ]
-#, h, H
+        test:
+          - ""
+          - f
+          - F
+          - c
+          - C
+          - v
+          - V
+          - i
+          - I
+          - d
+          - D
+          - r
+          - R
+          - s
+          - n
+          #- h
+          #- H
     runs-on: ubuntu-latest
     steps:
 
