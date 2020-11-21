@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 # Copyright 2019-2020 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
