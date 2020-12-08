@@ -2,7 +2,7 @@
 
 When QEMU is installed from distribution package managers, it is normally set up along with `binfmt_misc`. Nonetheless, in the context of this project we want to configure it with custom options, instead of relying on the defaults. A script provided by QEMU, [`qemu-binfmt-conf.sh`](https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh), can be used to do so. Among other options, the flag that tells `binfmt` to hold interpreters in memory is supported in `qemu-binfmt-conf.sh` as `-p`.
 
-This project uses a modified version of `qemy-binfmt-conf.sh`^[See [umarcor/qemu: series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh](https://github.com/umarcor/qemu/blob/series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh).], which includes the following enhancements:
+This project uses a modified version of `qemu-binfmt-conf.sh`^[See [umarcor/qemu: series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh](https://github.com/umarcor/qemu/blob/series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh).], which includes the following enhancements:
 
 - Optionally, the list of QEMU interpreters to be registered on the host can be limited.
 - Add option `--clear`.
