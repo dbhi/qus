@@ -9,7 +9,7 @@ on:
 jobs:
 
 
-  images:
+  Images:
     strategy:
       fail-fast: false
       max-parallel: 3
@@ -39,6 +39,7 @@ jobs:
             arch: mipsel
           - src: fedora
             arch: mips64el
+    name: 'I: ${{ matrix.src }} · ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     steps:
 
@@ -63,9 +64,9 @@ jobs:
       run: docker push aptman/qus
 
 
-  manifests:
+  Manifests:
     if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-    needs: images
+    needs: Images
     runs-on: ubuntu-latest
     steps:
 
@@ -92,8 +93,8 @@ jobs:
       run: ./run.sh -m
 
 
-  action-all:
-    needs: manifests
+  Action-All:
+    needs: Manifests
     runs-on: ubuntu-latest
     steps:
 
@@ -102,8 +103,8 @@ jobs:
     - uses: ./action
 
 
-  action-arm:
-    needs: manifests
+  Action-ARM:
+    needs: Manifests
     runs-on: ubuntu-latest
     steps:
 
@@ -114,8 +115,8 @@ jobs:
         targets: arm aarch64
 
 
-  test:
-    needs: manifests
+  Test:
+    needs: Manifests
     strategy:
       fail-fast: false
       max-parallel: 2
@@ -138,6 +139,7 @@ jobs:
           - n
           #- h
           #- H
+    name: 'T: ${{ matrix.test }}'
     runs-on: ubuntu-latest
     steps:
 
