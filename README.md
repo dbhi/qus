@@ -11,13 +11,13 @@
 </p>
 
 <p align="center">
-  <a title="Build Status" href="https://travis-ci.com/dbhi/qus/builds"><img src="https://img.shields.io/travis/com/dbhi/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=travis"></a><!--
+  <a title="Build Status" href="https://travis-ci.com/dbhi/qus/builds"><img src="https://img.shields.io/travis/com/dbhi/qus/main.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=travis"></a><!--
   -->
-  <a title="'push' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Apush"><img alt="'push' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/push?longCache=true&style=flat-square&logo=github&label=push"></a><!--
+  <a title="'push' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Apush"><img alt="'push' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/push/main?longCache=true&style=flat-square&logo=github&label=push"></a><!--
   -->
-  <a title="'check' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Acheck"><img alt="'check' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/check?longCache=true&style=flat-square&logo=github&label=check"></a><!--
+  <a title="'check' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Acheck"><img alt="'check' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/check/main?longCache=true&style=flat-square&logo=github&label=check"></a><!--
   -->
-  <a title="'docs' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Adocs"><img alt="'docs' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/docs?longCache=true&style=flat-square&logo=github&label=docs"></a><!--
+  <a title="'docs' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Adocs"><img alt="'docs' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/docs/main?longCache=true&style=flat-square&logo=github&label=docs"></a><!--
   -->
 </p>
 
