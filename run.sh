@@ -311,7 +311,7 @@ assets() {
 build_cfg () {
   BUILD_ARCH=${BUILD:-debian}
 
-  FEDORA_VERSION="2.fc34"
+  FEDORA_VERSION="4.fc34"
   DEF_FEDORA_VERSION="5.2.0"
 
   DEBIAN_VERSION="+dfsg-2"
