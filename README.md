@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-  <a title="dbhi.github.io/qus" href="https://dbhi.github.io/qus"><img src="./docs/logo/light.png" width="550"/></a>
+  <a title="dbhi.github.io/qus" href="https://dbhi.github.io/qus"><img src="./docs/logo/logo_blur.png" width="550"/></a>
 </p>
 
 <p align="center">

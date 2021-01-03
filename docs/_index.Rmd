@@ -30,7 +30,7 @@ license: CC-BY-4.0
 (ref:repoTree) github.com/dbhi/qus/tree/main
 
 ```{r adaption, echo=FALSE, out.width = '85%', fig.align='center'}
-knitr::include_graphics("logo/light.png")
+knitr::include_graphics("logo/logo.png")
 ```
 
 <aside>
