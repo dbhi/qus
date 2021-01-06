@@ -75,29 +75,20 @@ Multiple minimal working setups to build and execute `arm64v8` containers on `am
 **W** [Continuous integration](https://en.wikipedia.org/wiki/Continuous_integration) [GitHub · GitHub.com](https://en.wikipedia.org/wiki/GitHub#GitHub.com), [Travis CI](https://en.wikipedia.org/wiki/Travis_CI)
 
 <a
-  title="'push' workflow Status"
-  href="https://github.com/dbhi/qus/actions?query=workflow%3Apush"
+  title="'Test' workflow Status"
+  href="https://github.com/dbhi/qus/actions?query=workflow%3ATest"
 ><img
-  alt="'push' workflow Status"
-  src="https://img.shields.io/github/workflow/status/dbhi/qus/push?longCache=true&style=flat-square&logo=github&label=push"
+  alt="'Test' workflow Status"
+  src="https://img.shields.io/github/workflow/status/dbhi/qus/Test?longCache=true&style=flat-square&logo=github&label=Test"
   data-external="1"
 ></a><!--
 -->
 <a
-  title="Build Status"
+  title="Travis Test Status"
   href="https://travis-ci.com/dbhi/qus/builds"
 ><img
   alt="Build Status"
   src="https://img.shields.io/travis/com/dbhi/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=travis"
-  data-external="1"
-></a><!--
--->
-<a
-  title="'check' workflow Status"
-  href="https://github.com/dbhi/qus/actions?query=workflow%3Acheck"
-><img
-  alt="'check' workflow Status"
-  src="https://img.shields.io/github/workflow/status/dbhi/qus/check?longCache=true&style=flat-square&logo=github&label=check"
   data-external="1"
 ></a>
 </aside>

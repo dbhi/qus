@@ -1,4 +1,4 @@
-name: 'push'
+name: Test
 
 on:
   push:
@@ -7,6 +7,86 @@ on:
     - cron: '0 0 * * 5'
 
 jobs:
+
+
+  Check:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - run: |
+        python3 -m pip install -U pip setuptools
+        python3 -m pip install -r cli/requirements.txt
+
+    - run: ./cli/cli.py check
+
+
+  Docs:
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build -t rmdi - < .github/Dockerfile
+
+    - name: Build article
+      run: ./docs/_build.sh
+
+    - name: Publish site to gh-pages
+      if: github.event_name != 'pull_request'
+      run: |
+        mkdir -p public
+        cp docs/index.html public
+        cd public
+        touch .nojekyll
+        git init
+        cp ../.git/config ./.git/config
+        git checkout --orphan gh-pages
+        git add .
+        git config --local user.email "push@gha"
+        git config --local user.name "GHA"
+        git commit -a -m "update ${{ github.sha }}"
+        git push -u origin +gh-pages
+
+
+  Release:
+    runs-on: ubuntu-latest
+    env:
+      QUS_RELEASE: 1
+      BUILD: debian
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - run: |
+        ./run.sh -a
+        ./generate_bin_tests.sh
+        cp test-* releases/
+        ls releases/ | wc -l
+
+    - run: |
+        python3 -m pip install -U pip setuptools
+        python3 -m pip install -r cli/requirements.txt
+
+    - run: ./cli/cli.py debian
+
+    - uses: eine/tip@master
+      if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'pull_request'
+      with:
+        token: ${{ github.token }}
+        files: releases/*
+        snapshots: false
+
+    - run: ./cli/cli.py assets
+
+    - name: '📤 Upload artifact: builddir'
+      uses: actions/upload-artifact@v2
+      with:
+        path: |
+          debian.md
+          report.md
 
 
   Images:
@@ -54,6 +134,7 @@ jobs:
         BASE_ARCH: ${{ matrix.arch }}
 
     - name: Login to DockerHub
+      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USER }}
@@ -82,6 +163,7 @@ jobs:
             dump(data, cfg, indent=2)
 
     - name: Login to DockerHub
+      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       uses: docker/login-action@v1
       with:
         username: ${{ secrets.DOCKER_USER }}
@@ -90,6 +172,7 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Update manifests
+      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
       run: ./run.sh -m
 
 

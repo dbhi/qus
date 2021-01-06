@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Copyright 2019-2020 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+# Copyright 2019-2021 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -192,7 +192,7 @@ build () {
 
   cd ..
 
-  if [ -z "$TRAVIS" ]; then
+  if [ -z "$QUS_RELEASE" ]; then
     print_start "Build $IMG-pkg"
     docker build -t "$IMG"-pkg ./bin-static -f-<<EOF
 FROM scratch
@@ -250,35 +250,6 @@ manifests () {
     done
 
   done
-}
-
-#--
-
-bin_tests () {
-  print_start "Cross-compile main.c for 'aarch64' and 'riscv64' in an 'amd64' docker container"
-
-  cat > main.c <<-EOF
-#include <stdio.h>
-
-int main(void) {
-  printf("Hello world!\n");
-  return 0;
-}
-EOF
-
-  docker run --rm -tv $(pwd):/src -w /src ubuntu:bionic bash -c "$(cat <<-EOF
-apt update -y
-apt install -y gcc-aarch64-linux-gnu ca-certificates curl
-update-ca-certificates
-aarch64-linux-gnu-gcc -static -o test-aarch64 main.c
-chmod +x test-aarch64
-
-mkdir /riscv
-curl -fsSL https://static.dev.sifive.com/dev-tools/riscv64-unknown-elf-gcc-20170612-x86_64-linux-centos6.tar.gz | tar -xzf - -C /riscv --strip-components=1
-/riscv/bin/riscv64-unknown-elf-gcc -static -o test-riscv64 main.c
-chmod +x test-riscv64
-EOF
-)"
 }
 
 #--
@@ -370,11 +341,10 @@ build_cfg () {
 #--
 
 case "$1" in
-  -b|-m|-t)
+  -b|-m)
     build_cfg
     case "$1" in
       -m) manifests ;;
-      -t) bin_tests ;;
       *)  build
     esac
   ;;

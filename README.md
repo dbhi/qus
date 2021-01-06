@@ -1,24 +1,17 @@
 <p align="center">
-  <a title="dbhi.github.io/qus" href="https://dbhi.github.io/qus"><img src="https://img.shields.io/website.svg?label=dbhi.github.io%2Fqus&longCache=true&style=flat-square&url=http%3A%2F%2Fdbhi.github.io%2Fqus%2Findex.html"></a><!--
-  -->
-  <a title="Docker Hub" href="https://hub.docker.com/r/aptman/qus/"><img src="https://img.shields.io/docker/pulls/aptman/qus.svg?longCache=true&style=flat-square&logo=docker&logoColor=fff&label=aptman%2Fqus"></a><!--
-  -->
-  <a title="Releases" href="https://github.com/dbhi/qus/releases"><img src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"></a>
-</p>
-
-<p align="center">
   <a title="dbhi.github.io/qus" href="https://dbhi.github.io/qus"><img src="./docs/logo/logo_blur.png" width="550"/></a>
 </p>
 
 <p align="center">
+  <a title="dbhi.github.io/qus" href="https://dbhi.github.io/qus"><img src="https://img.shields.io/website.svg?label=dbhi.github.io%2Fqus&longCache=true&style=flat-square&url=http%3A%2F%2Fdbhi.github.io%2Fqus%2Findex.html"></a><!--
+  -->
+  <a title="Docker Hub" href="https://hub.docker.com/r/aptman/qus/"><img src="https://img.shields.io/docker/pulls/aptman/qus.svg?longCache=true&style=flat-square&logo=docker&logoColor=fff&label=aptman%2Fqus"></a><!--
+  -->
+  <a title="Releases" href="https://github.com/dbhi/qus/releases"><img src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"></a><!--
+  -->
   <a title="Build Status" href="https://travis-ci.com/dbhi/qus/builds"><img src="https://img.shields.io/travis/com/dbhi/qus/main.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=travis"></a><!--
   -->
-  <a title="'push' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Apush"><img alt="'push' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/push/main?longCache=true&style=flat-square&logo=github&label=push"></a><!--
-  -->
-  <a title="'check' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Acheck"><img alt="'check' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/check/main?longCache=true&style=flat-square&logo=github&label=check"></a><!--
-  -->
-  <a title="'docs' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3Adocs"><img alt="'docs' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/docs/main?longCache=true&style=flat-square&logo=github&label=docs"></a><!--
-  -->
+  <a title="'Test' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3ATest"><img alt="'Test' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/Test/main?longCache=true&style=flat-square&logo=github&label=Test"></a>
 </p>
 
 *qemu-user-static* (**qus**) is a compilation of utilities, examples and references to build and execute OCI images (aka [docker](https://www.docker.com/) images) for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation.
