@@ -22,31 +22,28 @@ import requests
 import re
 
 
-def get_json_from_api(
-    fname: Path,
-    force=False
-):
-    '''
+def get_json_from_api(fname: Path, force=False):
+    """
     Get metadata of releases and assets from GitHub's API and save it in a JSON file.
 
     :param fname: name of the JSON file to save data in.
     :param force: retrieve data, even if the file exists (overwrite it).
-    '''
+    """
     if force or not fname.exists():
-        print('> Get api.github.com/repos/dbhi/qus/releases')
-        data = loads(requests.get('https://api.github.com/repos/dbhi/qus/releases').text)
-        with fname.open('w') as fptr:
+        print("> Get api.github.com/repos/dbhi/qus/releases")
+        data = loads(
+            requests.get("https://api.github.com/repos/dbhi/qus/releases").text
+        )
+        with fname.open("w") as fptr:
             dump(data, fptr, indent=2)
 
-    print('> Load %s' % str(fname))
-    with fname.open('r') as fptr:
+    print("> Load %s" % str(fname))
+    with fname.open("r") as fptr:
         return load(fptr)
 
 
-def extract_from_json(
-    jsondata
-):
-    '''
+def extract_from_json(jsondata):
+    """
     Extract list of targets, for each host, in each release.
 
     TARGETS = []
@@ -58,20 +55,22 @@ def extract_from_json(
             }
         }
     }
-    '''
+    """
     print("> Extract from JSON")
     tables = {}
     targets = []
 
     for r in jsondata:
-        name = r['name']
+        name = r["name"]
 
         if name in tables:
-            raise(Exception('Duplicated host name %s!' % name))
-        tables[name] = { "tag": r['tag_name'], "assets": {} }
+            raise (Exception("Duplicated host name %s!" % name))
+        tables[name] = {"tag": r["tag_name"], "assets": {}}
         print("> Processing %s @ %s" % (name, tables[name]["tag"]))
 
-        for reg in [re.search('qemu-(.*)-static_(.*).tgz', i['name']) for i in r['assets']]:
+        for reg in [
+            re.search("qemu-(.*)-static_(.*).tgz", i["name"]) for i in r["assets"]
+        ]:
             if reg is not None:
                 host = reg.group(2)
                 target = reg.group(1)
@@ -82,7 +81,7 @@ def extract_from_json(
                 if target not in tables[name]["assets"][host]:
                     tables[name]["assets"][host] += [target]
                 else:
-                    raise(Exception('Duplicated target %s for %s!' % (target, host)))
+                    raise (Exception("Duplicated target %s for %s!" % (target, host)))
 
                 if target not in targets:
                     targets += [target]
@@ -91,38 +90,39 @@ def extract_from_json(
     return (targets, tables)
 
 
-def releases_report(
-    targets,
-    tables,
-    report: Path
-):
-    '''
+def releases_report(targets, tables, report: Path):
+    """
     Print data about releases/assets as a markdown report.
-    '''
+    """
     print("> Print report")
 
-    with report.open('w') as fptr:
-      fptr.write('# dbhi/qus report\n')
+    with report.open("w") as fptr:
+        fptr.write("# dbhi/qus report\n")
 
-    with report.open('a') as fptr:
+    with report.open("a") as fptr:
         for rname, release in tables.items():
             print("  - %s: generate table" % rname)
             assets = release["assets"]
             hosts = list(assets.keys())
             hosts.sort()
             ROWS = [
-                ([tgt] +
-                    ['[ok](https://github.com/dbhi/qus/releases/download/%s/qemu-%s-static_%s.tgz)' % (release["tag"], tgt, h) if tgt in assets[h] else '!'
-                    for h in hosts
-                ])
+                (
+                    [tgt]
+                    + [
+                        "[ok](https://github.com/dbhi/qus/releases/download/%s/qemu-%s-static_%s.tgz)"
+                        % (release["tag"], tgt, h)
+                        if tgt in assets[h]
+                        else "!"
+                        for h in hosts
+                    ]
+                )
                 for tgt in targets
             ]
 
             print("  - %s: write table" % rname)
-            fptr.write(tabulate(
-                ROWS,
-                headers=[rname] + hosts,
-                stralign='center',
-                tablefmt='github'
-            ))
-            fptr.write('\n\n---\n\n')
+            fptr.write(
+                tabulate(
+                    ROWS, headers=[rname] + hosts, stralign="center", tablefmt="github"
+                )
+            )
+            fptr.write("\n\n---\n\n")

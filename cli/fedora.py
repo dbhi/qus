@@ -22,13 +22,13 @@ import re
 import sys
 
 
-TMP_RPM = Path(__file__).parent.parent / 'tmp_rpm'
+TMP_RPM = Path(__file__).parent.parent / "tmp_rpm"
 
 
 def check_fedora_latest():
     print("Check Fedora")
 
-    url = 'https://kojipkgs.fedoraproject.org/packages/qemu/'
+    url = "https://kojipkgs.fedoraproject.org/packages/qemu/"
     versions = []
     for line in requests.get(url, stream=True).iter_lines():
         reg = re.search('.*">(.*)/</a>.*', str(line))
@@ -46,16 +46,16 @@ def check_fedora_latest():
                 subvers.append(reg.group(1))
         subvers.reverse()
         for l in subvers:
-            if '.rc' not in l:
+            if ".rc" not in l:
                 latest = (version, l)
                 break
         if latest is not None:
             break
 
     if latest is None:
-        raise(Exception("could not find the latest version!"))
+        raise (Exception("could not find the latest version!"))
 
-    with (Path(__file__).parent.parent / 'run.sh').open('r') as fptr:
+    with (Path(__file__).parent.parent / "run.sh").open("r") as fptr:
         for l in fptr.readlines():
             if 'FEDORA_VERSION="' in l:
                 reg = re.search('DEF_FEDORA_VERSION="(.*)".*', str(l))
