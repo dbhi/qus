@@ -142,7 +142,9 @@ jobs:
 
     - name: Deploy to DockerHub
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: docker push aptman/qus
+      run: |
+        docker image ls
+        docker push -a aptman/qus
 
 
   Manifests:
