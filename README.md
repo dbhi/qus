@@ -44,6 +44,8 @@ Optionally, provide an space separated list of target architectures:
 
 Then, execute foreign binaries and/or containers straightaway!
 
+NOTE: [yaml-multiline.info](https://yaml-multiline.info)
+
 ## Setup
 
 The recommended approach is to run the following container:
