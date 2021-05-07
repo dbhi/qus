@@ -17,10 +17,10 @@ versions:
   default: &ver_def
     debian: &ver_debian_def
       base: "5.2"
-      rev: "+dfsg-3"
+      rev: "+dfsg-10"
     fedora: &ver_fedora_def
       base: "5.2.0"
-      rev: "4.fc34"
+      rev: "6.fc35"
 
 archs:
 
