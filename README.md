@@ -26,6 +26,24 @@ Find further details at [dbhi.github.io/qus](https://dbhi.github.io/qus).
 
 > NOTE: Although `docker` is used in these examples, users have reported that other engines such as [podman](https://podman.io/) can also be used. See also [kata-containers/runtime#1280](https://github.com/kata-containers/runtime/issues/1280).
 
+## As a GitHub Action
+
+Run the Action without arguments for registering all the supported interpreters:
+
+```yaml
+  - uses: dbhi/qus/action@main
+```
+
+Optionally, provide an space separated list of target architectures:
+
+```yaml
+  - uses: dbhi/qus/action@main
+    with:
+      targets: arm aarch64
+```
+
+Then, execute foreign binaries and/or containers straightaway!
+
 ## Setup
 
 The recommended approach is to run the following container:
