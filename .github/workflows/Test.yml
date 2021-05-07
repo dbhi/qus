@@ -185,10 +185,15 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - uses: ./action
+    - uses: dbhi/qus/action@main
+
+    - run: |
+        ./.github/get_tests.sh
+        ./test-aarch64
+        ./test-riscv64
 
 
-  Action-ARM:
+  Action:
     needs: Manifests
     runs-on: ubuntu-latest
     steps:
@@ -197,7 +202,50 @@ jobs:
 
     - uses: ./action
       with:
-        targets: arm aarch64
+        targets: riscv64 aarch64
+
+    - run: |
+        ./.github/get_tests.sh
+        ./test-aarch64
+        ./test-riscv64
+
+
+  Action-literal:
+    needs: Manifests
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - uses: ./action
+      with:
+        targets: |
+          riscv64
+          aarch64
+
+    - run: |
+        ./.github/get_tests.sh
+        ./test-aarch64
+        ./test-riscv64
+
+
+  Action-folded:
+    needs: Manifests
+    runs-on: ubuntu-latest
+    steps:
+
+    - uses: actions/checkout@v2
+
+    - uses: ./action
+      with:
+        targets: >
+          riscv64
+          aarch64
+
+    - run: |
+        ./.github/get_tests.sh
+        ./test-aarch64
+        ./test-riscv64
 
 
   Test:
