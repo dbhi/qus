@@ -57,6 +57,38 @@ In order to unset the registered formats, and unload the binaries, run:
 docker run --rm --privileged aptman/qus -- -r
 ```
 
+## Help
+
+```sh
+# docker run --rm --privileged aptman/qus -h
+Usage: register.sh [--help][--interactive][--list][--static][-- ARGS]
+
+  Wrapper around qemu-binfmt-conf.sh, to configure binfmt_misc to use qemu interpreter
+
+  -h|--help|-help:
+      display this usage
+
+  -i|--interactive|-interactive:
+      execute all the remaining args with 'sh -c', then exit
+
+  -l|--list|-list:
+      list currently registered interpreters
+
+  -s|--static|-static:
+      add '--qemu-suffix -static' to ARGS
+
+  -- ARGS:
+     arguments for qemu-binfmt-conf.sh
+
+  To register a single static target persistently, use e.g.:
+
+      register.sh -s -- -p aarch64
+
+  To remove all register interpreters and exit, use:
+
+      register.sh -- -r
+```
+
 ## Bandwidth-efficient procedure
 
 In contexts such as CI pipelines it might be desirable to reduce the required bandwidth. Hence, instead of using `aptman/qus` images —which include all the binaries for all the supported target architectures—, individual tarballs are available through GitHub Releases. These can be used along with `aptman/qus:register` images or with [`register.sh`](./register.sh) (without an OCI runtime). See either `f`, `F`, `c`, `C`, `v` or `V` in [Tests](https://dbhi.github.io/qus/#tests) for examples of these use cases.
