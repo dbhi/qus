@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+# Copyright 2020-2021 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,8 +19,10 @@ from subprocess import check_call
 
 targets = environ['INPUT_TARGETS']
 
+cmd = ['docker', 'run', '--rm', '--privileged', 'aptman/qus', '-s', '--', '-p']
+
 if targets == '':
-    check_call(['docker', 'run', '--rm', '--privileged', 'aptman/qus', '-s', '--', '-p'])
+    check_call(cmd)
 else:
-    for target in targets.split(' '):
-        check_call(['docker', 'run', '--rm', '--privileged', 'aptman/qus', '-s', '--', '-p', target])
+    for target in targets.replace('\n', ' ').split(' '):
+        check_call(cmd + [target])
