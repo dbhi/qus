@@ -285,7 +285,7 @@ build_cfg () {
   FEDORA_VERSION="6.fc35"
   DEF_FEDORA_VERSION="5.2.0"
 
-  DEBIAN_VERSION="+dfsg-9"
+  DEBIAN_VERSION="+dfsg-10"
   DEF_DEBIAN_VERSION="5.2"
 
   case "$BUILD_ARCH" in
