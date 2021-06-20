@@ -98,15 +98,18 @@ getSingleQemuUserStatic () {
 }
 
 getAndRegisterSingleQemuUserStatic () {
-  print_start "Get single qemu-user-static"
+  gstart "Get single qemu-user-static"
   getSingleQemuUserStatic
+  gend
 
-  print_start "Register binfmt interpreter for single qemu-user-static"
+  gstart "Register binfmt interpreter for single qemu-user-static"
   $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -- -r
   $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -s -- -p "$(guest_arch $(pkg_arch $BASE_ARCH))"
+  gend
 
-  print_start "List binfmt interpreters"
+  gstart "List binfmt interpreters"
   $(command -v sudo) ./register.sh -l -- -t
+  gend
 }
 
 build_register () {
@@ -128,7 +131,7 @@ build_register () {
   [ "$HOST_LIB" = "skip" ] && {
     printf "$ANSI_YELLOW! Skipping creation of $IMG[-register] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
   } || {
-    print_start "Build $IMG-register"
+    gstart "Build $IMG-register"
     docker build -t $IMG-register . -f-<<EOF
 FROM ${HOST_LIB}busybox
 #RUN mkdir /qus
@@ -138,13 +141,15 @@ ADD https://raw.githubusercontent.com/umarcor/qemu/series-qemu-binfmt-conf/scrip
 RUN chmod +x /qus/qemu-binfmt-conf.sh
 ENTRYPOINT ["/qus/register"]
 EOF
+    gend
 
-    print_start "Build $IMG"
+    gstart "Build $IMG"
     docker build -t $IMG . -f-<<EOF
 FROM $IMG-register
 COPY --from="$IMG"-pkg /usr/bin/qemu-* /qus/bin/
 VOLUME /qus
 EOF
+    gend
   }
 }
 
@@ -162,18 +167,20 @@ build () {
   case "$BUILD_ARCH" in
     fedora)
       PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch $BASE_ARCH)/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch $BASE_ARCH).rpm}
-      print_start "Extract $PACKAGE_URI"
+      gstart "Extract $PACKAGE_URI"
 
       # https://bugzilla.redhat.com/show_bug.cgi?id=837945
       curl -fsSL "$PACKAGE_URI" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-*-static"
 
       mv ./usr/bin/* ./
       rm -rf ./usr/bin
+      gend
     ;;
     debian)
       PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_$(pkg_arch $BASE_ARCH).deb}
-      print_start "Extract $PACKAGE_URI"
+      gstart "Extract $PACKAGE_URI"
       curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
+      gend
     ;;
   esac
 
@@ -193,12 +200,13 @@ build () {
   cd ..
 
   if [ -z "$QUS_RELEASE" ]; then
-    print_start "Build $IMG-pkg"
+    gstart "Build $IMG-pkg"
     docker build -t "$IMG"-pkg ./bin-static -f-<<EOF
 FROM scratch
 COPY ./* /usr/bin/
 EOF
     build_register
+    gend
   fi
 }
 
@@ -242,11 +250,13 @@ manifests () {
         cmd="$cmd ${REPO}:${arch}-${MAN_VERSION}${p}"
       done
 
-      print_start "Docker manifest create $MAN_IMG"
+      gstart "Docker manifest create $MAN_IMG"
       docker manifest create -a $MAN_IMG $cmd
+      gend
 
-      print_start "Docker manifest push $MAN_IMG"
+      gstart "Docker manifest push $MAN_IMG"
       docker manifest push --purge "$MAN_IMG"
+      gend
     done
 
   done
@@ -266,12 +276,14 @@ assets() {
   esac
   mkdir -p ../releases
   for BASE_ARCH in $ARCH_LIST; do
-    print_start "Build $BASE_ARCH" "$ANSI_MAGENTA"
+    gstart "Build $BASE_ARCH" "$ANSI_MAGENTA"
     unset PACKAGE_URI
     build_cfg
     build
-    print_start "Copy $BASE_ARCH" "$ANSI_MAGENTA"
+    gend
+    gstart "Copy $BASE_ARCH" "$ANSI_MAGENTA"
     cp -vr releases/* ../releases/
+    gend
   done
   rm -rf releases
   mv ../releases ./
