@@ -283,7 +283,7 @@ build_cfg () {
   BUILD_ARCH=${BUILD:-debian}
 
   FEDORA_VERSION="6.fc35"
-  DEF_FEDORA_VERSION="5.2.0"
+  DEF_FEDORA_VERSION="6.0.0"
 
   DEBIAN_VERSION="+dfsg-1~exp0"
   DEF_DEBIAN_VERSION="6.0"
