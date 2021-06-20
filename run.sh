@@ -18,7 +18,8 @@ set -e
 
 cd $(dirname $0)
 
-export DOCKER_BUILDKIT=1
+export DOCKER_BUILDKIT=0
+export COMPOSE_DOCKER_CLI_BUILD=0
 
 . ./utils.sh
 
