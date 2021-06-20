@@ -14,15 +14,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from sys import stdout, stderr
 from os import environ
 from subprocess import check_call
 
-targets = environ['INPUT_TARGETS']
+targets = environ.get("INPUT_TARGETS")
 
-cmd = ['docker', 'run', '--rm', '--privileged', 'aptman/qus', '-s', '--', '-p']
+print("> setup-qus: {}".format(targets))
 
-if targets == '':
+cmd = ["docker", "run", "--rm", "--privileged", "aptman/qus", "-s", "--", "-p"]
+
+
+def _exec(cmd):
+    print("> {}".format(cmd))
+    stdout.flush()
+    stderr.flush()
     check_call(cmd)
+
+
+_exec(["docker", "pull", "aptman/qus"])
+
+
+if targets is None:
+    _exec(cmd)
 else:
-    for target in targets.replace('\n', ' ').split(' '):
-        check_call(cmd + [target])
+    for target in targets.replace("\n", " ").split(" "):
+        _exec(cmd + [target])
