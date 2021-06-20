@@ -310,7 +310,7 @@ build_cfg () {
   esac
   VERSION=${VERSION:-$DEF_VERSION}
 
-  REPO=${REPO:-aptman/qus}
+  REPO=${REPO:-docker.io/aptman/qus}
   HOST_ARCH=${HOST_ARCH:-x86_64}
   BASE_ARCH=${BASE_ARCH:-x86_64}
 
