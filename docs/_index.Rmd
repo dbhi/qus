@@ -69,7 +69,7 @@ knitr::include_graphics("logo/logo.png")
 
 Ready-to-use docker images are provided for each of seven host architectures officially supported by Docker, Inc. or built by official images [@docker-official-images]: `amd64`, `i386`, `arm64v8`, `arm32v7`, `arm32v6`, `s390x` and `ppc64le`.
 
-Multiple minimal working setups to build and execute `arm64v8` containers on `amd64` are configured and tested on Continuous Integration (CI) services (GitHub Actions [@gha] and Travis CI [@travis-ci]). The full flow is public, for other users to learn and adapt these resources to their needs. See [github.com/dbhi/qus/actions](https://github.com/dbhi/qus/actions) and/or [travis-ci.com/dbhi/qus/builds](https://travis-ci.com/dbhi/qus/builds).
+Multiple minimal working setups to build and execute `arm64v8` containers on `amd64` are configured and tested on Continuous Integration (CI) services (GitHub Actions [@gha]). The full flow is public, for other users to learn and adapt these resources to their needs. See [github.com/dbhi/qus/actions](https://github.com/dbhi/qus/actions).
 
 <aside>
 **W** [Continuous integration](https://en.wikipedia.org/wiki/Continuous_integration) [GitHub · GitHub.com](https://en.wikipedia.org/wiki/GitHub#GitHub.com), [Travis CI](https://en.wikipedia.org/wiki/Travis_CI)
@@ -80,15 +80,6 @@ Multiple minimal working setups to build and execute `arm64v8` containers on `am
 ><img
   alt="'Test' workflow Status"
   src="https://img.shields.io/github/workflow/status/dbhi/qus/Test?longCache=true&style=flat-square&logo=github&label=Test"
-  data-external="1"
-></a><!--
--->
-<a
-  title="Travis Test Status"
-  href="https://travis-ci.com/dbhi/qus/builds"
-><img
-  alt="Build Status"
-  src="https://img.shields.io/travis/com/dbhi/qus/master.svg?longCache=true&style=flat-square&logo=travis-ci&logoColor=fff&label=travis"
   data-external="1"
 ></a>
 </aside>
