@@ -112,3 +112,6 @@ archs:
     debian: mips64el
     fedora: mips64el
     qemu: mips64el
+
+  riscv64:
+    version: *ver_def

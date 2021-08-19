@@ -93,6 +93,7 @@ jobs:
           - armel
           - mipsel
           - mips64el
+          - riscv64
         exclude:
           - src: debian
             arch: armv7hl

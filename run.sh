@@ -187,7 +187,7 @@ manifests () {
     esac
     DEF_VERSION=$("$QUSCLI" version -u "$usage" | cut -d " " -f1)
 
-    MAN_ARCH_LIST="amd64 arm64v8 arm32v7 i386 s390x ppc64le"
+    MAN_ARCH_LIST="amd64 arm64v8 arm32v7 i386 s390x ppc64le riscv64"
     case "$BUILD" in
       fedora)
         MAN_VERSION="f${DEF_VERSION}"
@@ -237,7 +237,7 @@ manifests () {
 #--
 
 assets() {
-  ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
+  ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x riscv64"
   case "$BUILD" in
     fedora)
       ARCH_LIST="$ARCH_LIST armv7hl"
