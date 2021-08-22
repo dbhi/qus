@@ -1,0 +1,13 @@
+# https://docs.github.com/en/github/creating-cloning-and-archiving-repositories/creating-a-repository-on-github/about-citation-files
+
+cff-version: 1.2.0
+message: "Please cite this project as below."
+authors:
+  - family-names: Martinez-Corral
+    given-names: Unai
+    orcid: https://orcid.org/0000-0003-1752-9181
+title: "qemu-user-static (qus) and docker, non-invasive minimal working setups"
+license: Apache-2.0
+version: 0.0.7-v6.0+dfsg-1-exp0
+url: "https://dbhi.github.io/qus"
+repository-code: https://github.com/dbhi/qus

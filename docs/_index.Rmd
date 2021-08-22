@@ -15,7 +15,6 @@ output:
     toc: true
     toc_depth: 3
 repository_url: https://github.com/dbhi/qus
-citation_url: https://dbhi.github.io/qus
 license: CC-BY-4.0
 #tags:
 #  - docker
@@ -55,6 +54,14 @@ knitr::include_graphics("logo/logo.png")
     href="https://github.com/dbhi/qus/releases"
   ><img
     src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square&logo=git&logoColor=fff"
+    data-external="1"
+  ></a><!--
+  -->
+  <a
+    title="Cite this project"
+    href="https://github.com/dbhi/qus/blob/main/CITATION.cff"
+  ><img
+    src="https://img.shields.io/badge/-View%20citation%20file-555555?longCache=true&style=flat-square&logo=LaTeX&logoColor=fff"
     data-external="1"
   ></a>
 </aside>
