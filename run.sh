@@ -298,8 +298,8 @@ build_cfg () {
   FEDORA_VERSION="9.fc35"
   DEF_FEDORA_VERSION="6.0.0"
 
-  DEBIAN_VERSION="+dfsg-4"
-  DEF_DEBIAN_VERSION="6.0"
+  DEBIAN_VERSION="+dfsg-5"
+  DEF_DEBIAN_VERSION="6.1"
 
   case "$BUILD_ARCH" in
     fedora)
