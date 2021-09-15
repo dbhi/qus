@@ -146,6 +146,27 @@ class CLI(Tool, ArgParseMixin):
     def HandleArch(self, args):
         print(Config().normalise_arch(args.Usage, args.Arch))
 
+    @CommandAttribute("version", help="Get version items for a usage and host (arch).")
+    @ArgumentAttribute(
+        "-u",
+        "--usage",
+        dest="Usage",
+        type=str,
+        help="Target usage to get the version for.",
+        default=None,
+    )
+    @ArgumentAttribute(
+        "-a",
+        "--arch",
+        dest="Arch",
+        type=str,
+        help="Target architecture to get the version for.",
+        default="amd64",
+    )
+    def HandleVersion(self, args):
+        items = Config().version(args.Usage, args.Arch)
+        print("{0} {1}".format(items[0], items[1]))
+
     @CommandAttribute("assets", help="Generate report of available releases and assets.")
     def HandleAssets(self, _):
         self.assets()

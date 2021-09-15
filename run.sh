@@ -28,7 +28,7 @@ export COMPOSE_DOCKER_CLI_BUILD=0
 #--
 
 pkg_arch () {
-  "$QUSCLI" arch -u "$BUILD_ARCH" -a "$1"
+  "$QUSCLI" arch -u "$PKG_SOURCE" -a "$1"
 }
 
 guest_arch() {
@@ -40,16 +40,16 @@ guest_arch() {
 getSingleQemuUserStatic () {
   HARCH="$(pkg_arch ${HOST_ARCH})"
   GARCH="$(guest_arch)"
-  case "$BUILD_ARCH" in
+  case "$PKG_SOURCE" in
     fedora)
-      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/${HARCH}/qemu-user-static-${VERSION}-${FEDORA_VERSION}.${HARCH}.rpm"
+      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${SOURCE_VERSION}/${HARCH}/qemu-user-static-${VERSION}-${SOURCE_VERSION}.${HARCH}.rpm"
       echo "$URL"
       curl -fsSL "$URL" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-${GARCH}-static"
       mv ./usr/bin/qemu-"${GARCH}"-static ./
       rm -rf ./usr/bin
     ;;
     debian)
-      URL="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_${HARCH}.deb"
+      URL="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${SOURCE_VERSION}_${HARCH}.deb"
       echo "$URL"
       curl -fsSL "$URL" \
       | dpkg --fsys-tarfile - \
@@ -127,9 +127,9 @@ build () {
 
   BARCH="$(pkg_arch ${BASE_ARCH})"
 
-  case "$BUILD_ARCH" in
+  case "$PKG_SOURCE" in
     fedora)
-      PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/${BARCH}/qemu-user-static-${VERSION}-${FEDORA_VERSION}.${BARCH}.rpm}
+      PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${SOURCE_VERSION}/${BARCH}/qemu-user-static-${VERSION}-${SOURCE_VERSION}.${BARCH}.rpm}
       gstart "Extract $PACKAGE_URI"
 
       # https://bugzilla.redhat.com/show_bug.cgi?id=837945
@@ -140,7 +140,7 @@ build () {
       gend
     ;;
     debian)
-      PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_${BARCH}.deb}
+      PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${SOURCE_VERSION}_${BARCH}.deb}
       gstart "Extract $PACKAGE_URI"
       curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
       gend
@@ -151,7 +151,7 @@ build () {
     tar -czf "../releases/${F}_${BASE_ARCH}.tgz" "$F"
   done
 
-  case "$BUILD_ARCH" in
+  case "$PKG_SOURCE" in
     fedora)
       IMG="${REPO}:${BASE_ARCH}-f${VERSION}"
     ;;
@@ -177,14 +177,23 @@ EOF
 
 manifests () {
   for BUILD in latest debian fedora; do
+    case "$BUILD" in
+      debian|latest)
+        usage="debian"
+      ;;
+      fedora)
+        usage="fedora"
+      ;;
+    esac
+    DEF_VERSION=$("$QUSCLI" version -u "$usage" | cut -d " " -f1)
 
     MAN_ARCH_LIST="amd64 arm64v8 arm32v7 i386 s390x ppc64le"
     case "$BUILD" in
       fedora)
-        MAN_VERSION="f${DEF_FEDORA_VERSION}"
+        MAN_VERSION="f${DEF_VERSION}"
       ;;
       debian|latest)
-        MAN_VERSION="d${DEF_DEBIAN_VERSION}"
+        MAN_VERSION="d${DEF_VERSION}"
         MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6"
       ;;
     esac
@@ -255,48 +264,28 @@ assets() {
 #--
 
 build_cfg () {
-  BUILD_ARCH=${BUILD:-debian}
+  PKG_SOURCE=${BUILD:-debian}
 
-  FEDORA_VERSION="9.fc35"
-  DEF_FEDORA_VERSION="6.0.0"
+  cliVersion="$("$QUSCLI" version -u "$PKG_SOURCE")"
 
-  DEBIAN_VERSION="+dfsg-5"
-  DEF_DEBIAN_VERSION="6.1"
+  VERSION="${VERSION:-$(echo $cliVersion | cut -d " " -f1)}"
+  SOURCE_VERSION=$(echo $cliVersion | cut -d " " -f2)
 
-  case "$BUILD_ARCH" in
-    fedora)
-      DEF_VERSION="$DEF_FEDORA_VERSION"
-    ;;
-    debian)
-      DEF_VERSION="$DEF_DEBIAN_VERSION"
-    ;;
-  esac
-  VERSION=${VERSION:-$DEF_VERSION}
-
-  REPO=${REPO:-docker.io/aptman/qus}
-  HOST_ARCH=${HOST_ARCH:-x86_64}
-
-  PRINT_BASE_ARCH="$BASE_ARCH"
   BASE_ARCH="$("$QUSCLI" arch -a ${BASE_ARCH:-x86_64})"
-
-  [ -n "$PRINT_BASE_ARCH" ] && PRINT_BASE_ARCH="$BASE_ARCH [$PRINT_BASE_ARCH]" || PRINT_BASE_ARCH="$BASE_ARCH"
-
-  echo "VERSION: $VERSION $DEF_VERSION"
-  echo "REPO: $REPO"
-  echo "BASE_ARCH: $PRINT_BASE_ARCH"; unset PRINT_BASE_ARCH
-  echo "HOST_ARCH: $HOST_ARCH";
-  echo "BUILD_ARCH: $BUILD_ARCH";
 }
 
 #--
 
+REPO=${REPO:-docker.io/aptman/qus}
+HOST_ARCH=${HOST_ARCH:-x86_64}
+
 case "$1" in
-  -b|-m)
+  -b)
     build_cfg
-    case "$1" in
-      -m) manifests ;;
-      *)  build
-    esac
+    build
+  ;;
+  -m)
+    manifests
   ;;
   -a)
     assets;
