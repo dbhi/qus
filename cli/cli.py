@@ -30,6 +30,7 @@ from pyAttributes.ArgParseAttributes import (
     SwitchArgumentAttribute,
 )
 
+from config import Config
 from assets import get_json_from_api, extract_from_json, releases_report
 from debian import (
     check_debian_latest,
@@ -70,11 +71,6 @@ class Tool:
         extract_debs(targets, debs, tmpdir)
         targets.sort()
         debian_report(targets, debs, report)
-
-    @staticmethod
-    def check():
-        check_debian_latest()
-        check_fedora_latest()
 
 
 class CLI(Tool, ArgParseMixin):
@@ -127,7 +123,28 @@ class CLI(Tool, ArgParseMixin):
 
     @CommandAttribute("check", help="Check if new releases are available upstream (Debian/Fedora).")
     def HandleCheck(self, _):
-        self.check()
+        check_debian_latest()
+        check_fedora_latest()
+
+    @CommandAttribute("arch", help="Get normalised architecture key/name.")
+    @ArgumentAttribute(
+        "-u",
+        "--usage",
+        dest="Usage",
+        type=str,
+        help="Target usage to get the normalised name for.",
+        default=None,
+    )
+    @ArgumentAttribute(
+        "-a",
+        "--arch",
+        dest="Arch",
+        type=str,
+        help="Target architecture to get the normalised name for.",
+        default="amd64",
+    )
+    def HandleArch(self, args):
+        print(Config().normalise_arch(args.Usage, args.Arch))
 
     @CommandAttribute("assets", help="Generate report of available releases and assets.")
     def HandleAssets(self, _):

@@ -319,7 +319,7 @@ build_cfg () {
   HOST_ARCH=${HOST_ARCH:-x86_64}
 
   PRINT_BASE_ARCH="$BASE_ARCH"
-  BASE_ARCH="$(./cli/config.py key ${BASE_ARCH:-x86_64})"
+  BASE_ARCH="$(./cli/cli.py arch -a ${BASE_ARCH:-x86_64})"
 
   [ -n "$PRINT_BASE_ARCH" ] && PRINT_BASE_ARCH="$BASE_ARCH [$PRINT_BASE_ARCH]" || PRINT_BASE_ARCH="$BASE_ARCH"
 
