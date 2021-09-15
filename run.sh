@@ -317,34 +317,9 @@ build_cfg () {
 
   REPO=${REPO:-docker.io/aptman/qus}
   HOST_ARCH=${HOST_ARCH:-x86_64}
-  BASE_ARCH=${BASE_ARCH:-x86_64}
 
   PRINT_BASE_ARCH="$BASE_ARCH"
-  case "$BASE_ARCH" in
-    x86_64|x86-64|amd64|AMD64)
-      BASE_ARCH=amd64 ;;
-    aarch64|armv8|ARMv8|arm64v8)
-      BASE_ARCH=arm64v8 ;;
-    aarch32|armv8l|armv7|armv7l|ARMv7|arm32v7|armhf|armv7hl)
-      BASE_ARCH=arm32v7 ;;
-    arm32v6|ARMv6|armel)
-      BASE_ARCH=arm32v6 ;;
-    arm32v5|ARMv5)
-      BASE_ARCH=arm32v5 ;;
-    i686|i386|x86)
-      BASE_ARCH=i386 ;;
-    ppc64*|POWER8)
-      BASE_ARCH=ppc64le ;;
-    s390x)
-      BASE_ARCH=s390x ;;
-    mips|mipsel)
-      BASE_ARCH=mipsle ;;
-    mips64*)
-      BASE_ARCH=mips64le ;;
-    *)
-      echo "Invalid BASE_ARCH <${BASE_ARCH}>."
-      exit 1
-  esac
+  BASE_ARCH="$(./cli/config.py key ${BASE_ARCH:-x86_64})"
 
   [ -n "$PRINT_BASE_ARCH" ] && PRINT_BASE_ARCH="$BASE_ARCH [$PRINT_BASE_ARCH]" || PRINT_BASE_ARCH="$BASE_ARCH"
 
