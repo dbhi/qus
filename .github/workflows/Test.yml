@@ -15,9 +15,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: |
-        python3 -m pip install -U pip setuptools
-        python3 -m pip install -r cli/requirements.txt
+    - run: ./.github/setup.sh
 
     - run: ./cli/cli.py check
 
@@ -60,9 +58,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: |
-        python3 -m pip install -U pip setuptools
-        python3 -m pip install -r cli/requirements.txt
+    - run: ./.github/setup.sh
 
     - run: |
         ./run.sh -a
@@ -128,9 +124,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: |
-        python3 -m pip install -U pip setuptools
-        python3 -m pip install -r cli/requirements.txt
+    - run: ./.github/setup.sh
 
     - run: BUILD=${{ matrix.src }} ./run.sh -b
       env:
@@ -176,9 +170,7 @@ jobs:
 
     - uses: actions/checkout@v2
 
-    - run: |
-        python3 -m pip install -U pip setuptools
-        python3 -m pip install -r cli/requirements.txt
+    - run: ./.github/setup.sh
 
     - name: Update manifests
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
