@@ -55,6 +55,10 @@ pkg_arch () {
           echo armel ;;
         ppc64*)
           echo ppc64el ;;
+        mipsle)
+          echo mipsel ;;
+        mips64le)
+          echo mips64el ;;
         *)
           echo "$1"
       esac
@@ -334,9 +338,9 @@ build_cfg () {
     s390x)
       BASE_ARCH=s390x ;;
     mips|mipsel)
-      BASE_ARCH=mipsel ;;
+      BASE_ARCH=mipsle ;;
     mips64*)
-      BASE_ARCH=mips64el ;;
+      BASE_ARCH=mips64le ;;
     *)
       echo "Invalid BASE_ARCH <${BASE_ARCH}>."
       exit 1
