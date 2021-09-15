@@ -1,4 +1,7 @@
-# Tests
+.. _qus:tests:
+
+Tests
+#####
 
 Multiple alternatives exist to install QEMU, to register the interpreter and/or to use OCI containers. The table below summarizes all the combinations that are tested on CI services (GitHub Actions and Travis CI):
 

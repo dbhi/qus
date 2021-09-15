@@ -1,3 +1,3 @@
 __pycache__
-/docs/index.html
-/docs/index.Rmd
+/docs/_build/
+/docs/_theme/

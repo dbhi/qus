@@ -1,4 +1,7 @@
-# Other related sources
+.. _qus:related:
+
+Other related sources
+#####################
 
 Some of these projects were developed in parallel to *qus*, and there has been feedback; so, some features and use cases are equivalent. Currently, the enhancements which might be unique to *qus* are 1) providing docker images for host architectures other than `amd64`; and 2) optionally, limiting the list of QEMU binaries to be registered on the host.
 

@@ -1,4 +1,7 @@
-# Frequently Asked Questions (FAQ)
+.. _qus:faq:
+
+Frequently Asked Questions (FAQ)
+################################
 
 ## Does `qus` work for building images?
 

@@ -1,4 +1,7 @@
-# Provided docker images
+.. _qus:images:
+
+Provided container images
+#########################
 
 When QEMU is installed from distribution package managers, it is normally set up along with `binfmt_misc`. Nonetheless, in the context of this project we want to configure it with custom options, instead of relying on the defaults. A script provided by QEMU, [`qemu-binfmt-conf.sh`](https://raw.githubusercontent.com/qemu/qemu/master/scripts/qemu-binfmt-conf.sh), can be used to do so. Among other options, the flag that tells `binfmt` to hold interpreters in memory is supported in `qemu-binfmt-conf.sh` as `-p`.
 
