@@ -18,6 +18,8 @@ set -e
 
 cd $(dirname $0)
 
+QUSCLI="$(pwd)/cli/cli.py"
+
 export DOCKER_BUILDKIT=0
 export COMPOSE_DOCKER_CLI_BUILD=0
 
@@ -26,78 +28,32 @@ export COMPOSE_DOCKER_CLI_BUILD=0
 #--
 
 pkg_arch () {
-  case "$BUILD_ARCH" in
-    fedora)
-      case "$1" in
-        amd64)
-          echo x86_64 ;;
-        i386)
-          echo i686 ;;
-        arm64v8)
-          echo aarch64 ;;
-        arm32v7)
-          echo armv7hl ;;
-        ppc64*)
-          echo ppc64le ;;
-        *)
-          echo "$1"
-      esac
-    ;;
-    debian)
-      case "$1" in
-        x86_64)
-          echo amd64 ;;
-        arm64v8)
-          echo arm64 ;;
-        arm32v7)
-          echo armhf ;;
-        arm32v6|arm32v5)
-          echo armel ;;
-        ppc64*)
-          echo ppc64el ;;
-        mipsle)
-          echo mipsel ;;
-        mips64le)
-          echo mips64el ;;
-        *)
-          echo "$1"
-      esac
-    ;;
-  esac
+  "$QUSCLI" arch -u "$BUILD_ARCH" -a "$1"
 }
 
 guest_arch() {
-  case "$1" in
-   amd64)
-     echo x86_64 ;;
-   arm64)
-     echo aarch64 ;;
-   armhf|armel|armv7hl)
-     echo arm ;;
-   ppc64*)
-     echo ppc64le ;;
-   *)
-     echo "$1"
-  esac
+  "$QUSCLI" arch -u qemu -a "$(pkg_arch ${BASE_ARCH})"
 }
 
 #--
 
 getSingleQemuUserStatic () {
+  HARCH="$(pkg_arch ${HOST_ARCH})"
+  GARCH="$(guest_arch)"
   case "$BUILD_ARCH" in
     fedora)
-      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch ${HOST_ARCH})/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch ${HOST_ARCH}).rpm"
+      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/${HARCH}/qemu-user-static-${VERSION}-${FEDORA_VERSION}.${HARCH}.rpm"
       echo "$URL"
-      curl -fsSL "$URL" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static"
-      mv ./usr/bin/qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static ./
+      curl -fsSL "$URL" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-${GARCH}-static"
+      mv ./usr/bin/qemu-"${GARCH}"-static ./
       rm -rf ./usr/bin
     ;;
     debian)
-      URL="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_$(pkg_arch ${HOST_ARCH}).deb"
+      URL="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_${HARCH}.deb"
       echo "$URL"
       curl -fsSL "$URL" \
       | dpkg --fsys-tarfile - \
-      | tar xvf - --wildcards ./usr/bin/qemu-$(guest_arch $(pkg_arch ${BASE_ARCH}))-static --strip-components=3
+      | tar xvf - --wildcards ./usr/bin/qemu-"${GARCH}"-static --strip-components=3
     ;;
   esac
 }
@@ -109,7 +65,7 @@ getAndRegisterSingleQemuUserStatic () {
 
   gstart "Register binfmt interpreter for single qemu-user-static"
   $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -- -r
-  $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -s -- -p "$(guest_arch $(pkg_arch $BASE_ARCH))"
+  $(command -v sudo) QEMU_BIN_DIR="$(pwd)" ./register.sh -s -- -p "$(guest_arch)"
   gend
 
   gstart "List binfmt interpreters"
@@ -169,9 +125,11 @@ build () {
 
   cd bin-static
 
+  BARCH="$(pkg_arch ${BASE_ARCH})"
+
   case "$BUILD_ARCH" in
     fedora)
-      PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/$(pkg_arch $BASE_ARCH)/qemu-user-static-${VERSION}-${FEDORA_VERSION}.$(pkg_arch $BASE_ARCH).rpm}
+      PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${FEDORA_VERSION}/${BARCH}/qemu-user-static-${VERSION}-${FEDORA_VERSION}.${BARCH}.rpm}
       gstart "Extract $PACKAGE_URI"
 
       # https://bugzilla.redhat.com/show_bug.cgi?id=837945
@@ -182,7 +140,7 @@ build () {
       gend
     ;;
     debian)
-      PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_$(pkg_arch $BASE_ARCH).deb}
+      PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${DEBIAN_VERSION}_${BARCH}.deb}
       gstart "Extract $PACKAGE_URI"
       curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
       gend
@@ -319,7 +277,7 @@ build_cfg () {
   HOST_ARCH=${HOST_ARCH:-x86_64}
 
   PRINT_BASE_ARCH="$BASE_ARCH"
-  BASE_ARCH="$(./cli/cli.py arch -a ${BASE_ARCH:-x86_64})"
+  BASE_ARCH="$("$QUSCLI" arch -a ${BASE_ARCH:-x86_64})"
 
   [ -n "$PRINT_BASE_ARCH" ] && PRINT_BASE_ARCH="$BASE_ARCH [$PRINT_BASE_ARCH]" || PRINT_BASE_ARCH="$BASE_ARCH"
 
