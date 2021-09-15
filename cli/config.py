@@ -25,7 +25,6 @@ except ImportError:
 
 
 class Config:
-
     def __init__(self):
         with (Path(__file__).parent / "config.yml").open("r") as fptr:
             CONFIG = load(fptr, Loader=Loader)
@@ -64,6 +63,8 @@ class Config:
         ver = self._archs[key]["version"][usage]
         return (ver["base"], ver["rev"])
 
+
 if __name__ == "__main__":
     from sys import argv as sys_argv
+
     print(Config().normalise_arch(sys_argv[1], sys_argv[2]))

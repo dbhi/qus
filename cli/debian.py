@@ -46,9 +46,7 @@ def check_output(args):
 def check_debian_latest():
     print("Check Debian")
     versions = []
-    for line in requests.get(
-        "http://ftp.debian.org/debian/pool/main/q/qemu/", stream=True
-    ).iter_lines():
+    for line in requests.get("http://ftp.debian.org/debian/pool/main/q/qemu/", stream=True).iter_lines():
         reg = re.search(">qemu-user-static_(.*)_.*.deb", str(line))
         if reg is not None:
             version = reg.group(1)
@@ -88,9 +86,7 @@ def get_debs_list():
     }
     """
     debs = {}
-    for line in requests.get(
-        "http://ftp.debian.org/debian/pool/main/q/qemu/", stream=True
-    ).iter_lines():
+    for line in requests.get("http://ftp.debian.org/debian/pool/main/q/qemu/", stream=True).iter_lines():
         reg = re.search(".*>qemu-user-static_(.*)_(.*).deb", str(line))
         if reg is not None:
             version = reg.group(1)
@@ -133,9 +129,7 @@ def _extract_debs(targets, debs, version, tmpdir):
         fname = "qemu-user-static_%s_%s.deb" % (version, host)
         debdir = tmpdir / fname[0:-4]
         if not debdir.exists():
-            check_call(
-                ["7z", "x", "-o./" + str(debdir), "-y", "./" + str(tmpdir / fname)]
-            )
+            check_call(["7z", "x", "-o./" + str(debdir), "-y", "./" + str(tmpdir / fname)])
 
         for line in check_output(["7z", "l", "./" + str(debdir / "data.tar")]):
             reg = re.search("bin/qemu-(.*)-static.*", str(line))
@@ -173,10 +167,7 @@ def debian_report(targets, tables, report: Path):
             print("  - %s: generate table" % version)
             hosts = list(assets.keys())
             hosts.sort()
-            ROWS = [
-                ([tgt] + ["ok" if tgt in assets[h] else "!" for h in hosts])
-                for tgt in targets
-            ]
+            ROWS = [([tgt] + ["ok" if tgt in assets[h] else "!" for h in hosts]) for tgt in targets]
 
             print("  - %s: write table" % version)
             fptr.write(

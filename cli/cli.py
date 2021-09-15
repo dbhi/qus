@@ -123,21 +123,15 @@ class CLI(Tool, ArgParseMixin):
             except KeyError:
                 print("Command {0} is unknown.".format(args.Command))
 
-    @CommandAttribute(
-        "check", help="Check if new releases are available upstream (Debian/Fedora)."
-    )
+    @CommandAttribute("check", help="Check if new releases are available upstream (Debian/Fedora).")
     def HandleCheck(self, _):
         self.check()
 
-    @CommandAttribute(
-        "assets", help="Generate report of available releases and assets."
-    )
+    @CommandAttribute("assets", help="Generate report of available releases and assets.")
     def HandleAssets(self, _):
         self.assets()
 
-    @CommandAttribute(
-        "debian", help="Generate report of available resources in DEB packages."
-    )
+    @CommandAttribute("debian", help="Generate report of available resources in DEB packages.")
     def HandleDebian(self, _):
         self.debian()
 

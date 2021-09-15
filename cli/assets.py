@@ -31,9 +31,7 @@ def get_json_from_api(fname: Path, force=False):
     """
     if force or not fname.exists():
         print("> Get api.github.com/repos/dbhi/qus/releases")
-        data = loads(
-            requests.get("https://api.github.com/repos/dbhi/qus/releases").text
-        )
+        data = loads(requests.get("https://api.github.com/repos/dbhi/qus/releases").text)
         with fname.open("w") as fptr:
             dump(data, fptr, indent=2)
 
@@ -68,9 +66,7 @@ def extract_from_json(jsondata):
         tables[name] = {"tag": r["tag_name"], "assets": {}}
         print("> Processing %s @ %s" % (name, tables[name]["tag"]))
 
-        for reg in [
-            re.search("qemu-(.*)-static_(.*).tgz", i["name"]) for i in r["assets"]
-        ]:
+        for reg in [re.search("qemu-(.*)-static_(.*).tgz", i["name"]) for i in r["assets"]]:
             if reg is not None:
                 host = reg.group(2)
                 target = reg.group(1)
@@ -120,9 +116,5 @@ def releases_report(targets, tables, report: Path):
             ]
 
             print("  - %s: write table" % rname)
-            fptr.write(
-                tabulate(
-                    ROWS, headers=[rname] + hosts, stralign="center", tablefmt="github"
-                )
-            )
+            fptr.write(tabulate(ROWS, headers=[rname] + hosts, stralign="center", tablefmt="github"))
             fptr.write("\n\n---\n\n")
