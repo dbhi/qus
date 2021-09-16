@@ -19,6 +19,7 @@
 
 from pathlib import Path
 from os import listdir
+from sys import exit as sys_exit
 
 from pyAttributes.ArgParseAttributes import (
     ArgParseMixin,
@@ -123,8 +124,12 @@ class CLI(Tool, ArgParseMixin):
 
     @CommandAttribute("check", help="Check if new releases are available upstream (Debian/Fedora).")
     def HandleCheck(self, _):
-        check_debian_latest()
-        check_fedora_latest()
+        ecode = 0
+        if check_debian_latest() is not None:
+            ecode = 1
+        if check_fedora_latest() is not None:
+            ecode = 1
+        sys_exit(ecode)
 
     @CommandAttribute("arch", help="Get normalised architecture key/name.")
     @ArgumentAttribute(

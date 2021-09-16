@@ -21,7 +21,8 @@ from tabulate import tabulate
 import subprocess
 import requests
 import re
-import sys
+
+from config import Config
 
 
 TMP_DEB = Path(__file__).parent.parent / "tmp_deb"
@@ -59,22 +60,15 @@ def check_debian_latest():
 
     latest = versions[0]
 
-    with (Path(__file__).parent.parent / "run.sh").open("r") as fptr:
-        for l in fptr.readlines():
-            if 'DEBIAN_VERSION="' in l:
-                reg = re.search('DEF_DEBIAN_VERSION="(.*)".*', str(l))
-                if reg is None:
-                    reg = re.search('DEBIAN_VERSION="(.*)".*', str(l))
-                    if reg is not None:
-                        debv = reg.group(1)
-                defdebv = reg.group(1)
+    items = Config().version('debian', 'amd64')
+    debver = "{0}{1}".format(items[0], items[1])
 
-    if defdebv + debv != latest:
-        print("Current version:", defdebv + debv)
-        print("Latest upstream:", latest)
-        sys.exit(1)
+    if debver != latest:
+        print("  Current version:", debver)
+        print("  Latest upstream:", latest)
+        return 1
 
-    print(latest)
+    print("  Up to date:", latest)
 
 
 def get_debs_list():

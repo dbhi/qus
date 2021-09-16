@@ -15,13 +15,12 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
-from sys import platform
 from pathlib import Path
 from tabulate import tabulate
-import subprocess
 import requests
 import re
-import sys
+
+from config import Config
 
 
 TMP_RPM = Path(__file__).parent.parent / "tmp_rpm"
@@ -57,19 +56,11 @@ def check_fedora_latest():
     if latest is None:
         raise (Exception("could not find the latest version!"))
 
-    with (Path(__file__).parent.parent / "run.sh").open("r") as fptr:
-        for l in fptr.readlines():
-            if 'FEDORA_VERSION="' in l:
-                reg = re.search('DEF_FEDORA_VERSION="(.*)".*', str(l))
-                if reg is None:
-                    reg = re.search('FEDORA_VERSION="(.*)".*', str(l))
-                    if reg is not None:
-                        fedv = reg.group(1)
-                deffedv = reg.group(1)
+    fedver = Config().version('fedora', 'amd64')
 
-    if (deffedv, fedv) != latest:
-        print("Current version:", (deffedv, fedv))
-        print("Latest upstream:", latest)
-        sys.exit(1)
+    if fedver != latest:
+        print("  Current version:", fedver)
+        print("  Latest upstream:", latest)
+        return 1
 
-    print(latest)
+    print("  Up to date:", latest)
