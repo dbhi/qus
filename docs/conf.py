@@ -33,8 +33,13 @@ extensions = [
     "sphinx.ext.intersphinx",
     #"sphinx.ext.graphviz",
     #"sphinx.ext.viewcode",
+    "sphinxcontrib.bibtex",
 
-    #"exec",
+    "exec",
+]
+
+bibtex_bibfiles = [
+    "refs.bib"
 ]
 
 #autodoc_default_options = {
