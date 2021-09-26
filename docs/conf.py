@@ -72,14 +72,14 @@ language = None
 exclude_patterns = []
 
 # reST settings
-prologPath = "prolog.inc"
-try:
-    with open(prologPath, "r") as prologFile:
-        rst_prolog = prologFile.read()
-except Exception as ex:
-    print("[ERROR:] While reading '{0!s}'.".format(prologPath))
-    print(ex)
-    rst_prolog = ""
+#prologPath = "prolog.inc"
+#try:
+#    with open(prologPath, "r") as prologFile:
+#        rst_prolog = prologFile.read()
+#except Exception as ex:
+#    print("[ERROR:] While reading '{0!s}'.".format(prologPath))
+#    print(ex)
+#    rst_prolog = ""
 
 numfig = True
 
