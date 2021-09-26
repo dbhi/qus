@@ -19,6 +19,13 @@ jobs:
     - name: '🧰 Checkout'
       uses: actions/checkout@v2
 
+    - name: 🚢 Build container image 'vhdl/doc'
+      run: |
+        docker build -t qus/doc - <<-EOF
+        FROM btdi/sphinx:featured
+        RUN pip3 install sphinxcontrib-bibtex
+        EOF
+
     - name: '📓 BuildTheDocs (BTD)'
       uses: buildthedocs/btd@v0
       with:
