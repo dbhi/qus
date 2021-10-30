@@ -20,5 +20,7 @@ set -e
 
 cd $(dirname "$0")/..
 
+docker version
+
 python3 -m pip install -U pip setuptools
 python3 -m pip install -r cli/requirements.txt
