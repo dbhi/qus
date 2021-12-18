@@ -58,7 +58,7 @@ jobs:
 
     - run: ./cli/cli.py debian
 
-    - uses: eine/tip@master
+    - uses: pyTooling/Actions/releaser@r0
       if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'pull_request'
       with:
         token: ${{ github.token }}
