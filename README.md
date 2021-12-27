@@ -34,7 +34,7 @@ Run the Action without arguments for registering all the supported interpreters:
   - uses: dbhi/qus/action@main
 ```
 
-Optionally, provide an space separated list of target architectures:
+Optionally, provide a space-separated list of target architectures:
 
 ```yaml
   - uses: dbhi/qus/action@main
@@ -66,8 +66,8 @@ i386 i486 alpha arm armeb sparc32plus ppc ppc64 ppc64le m68k mips mipsel mipsn32
 
 > NOTE: sudo privileges on the host are required in order to register `binfmt` formats.
 > On GNU/Linux, it is possible to execute `register.sh` directly.
-> On Windows, a container must be used, so that changes are applied to the underlying VM, since no kernel is available on the host.
-> I.e., from the [test list](https://dbhi.github.io/qus/#tests), only `C`, `V`, `I` or `D` will work on Windows.
+> On Windows, a container must be used, so that changes are applied to the underlying VM, since no kernel is available on the host
+> (_i.e._, from the [test list](https://dbhi.github.io/qus/#tests), only `C`, `V`, `I` or `D` will work on Windows).
 
 ## Reset
 
