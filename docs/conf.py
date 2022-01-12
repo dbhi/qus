@@ -112,24 +112,26 @@ numfig = True
 
 # -- Options for HTML output ----------------------------------------------
 
-html_theme_options = {
-    "logo_only": True,
-    "home_breadcrumbs": False,
-    "vcs_pageview_mode": "blob",
-}
-
 html_context = {}
-ctx = Path(__file__).resolve().parent / "context.json"
+ctx = ROOT / "context.json"
 if ctx.is_file():
-    html_context.update(loads(ctx.open("r").read()))
+    html_context.update(loads(ctx.open("r", encoding="utf-8").read()))
 
-html_theme_path = ["."]
-html_theme = "_theme"
+if (ROOT / "_theme").is_dir():
+	html_theme_path = ["."]
+	html_theme = "_theme"
+	html_theme_options = {
+		'logo_only': True,
+		'home_breadcrumbs': False,
+		'vcs_pageview_mode': 'blob',
+	}
+else:
+	html_theme = "alabaster"
 
 html_static_path = ["_static"]
 
 html_logo = str(Path(html_static_path[0]) / "logo" / "logo_blur.png")
-#html_favicon = str(Path(html_static_path[0]) / "logo" / "osvb.ico")
+#html_favicon = str(Path(html_static_path[0]) / "logo" / "qus.ico")
 
 htmlhelp_basename = "qusDoc"
 
