@@ -131,7 +131,7 @@ else:
 html_static_path = ["_static"]
 
 html_logo = str(Path(html_static_path[0]) / "logo" / "logo_blur.png")
-#html_favicon = str(Path(html_static_path[0]) / "logo" / "qus.ico")
+html_favicon = str(Path(html_static_path[0]) / "logo" / "favicon.svg")
 
 htmlhelp_basename = "qusDoc"
 
