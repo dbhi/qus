@@ -4,3 +4,4 @@ References
 ##########
 
 .. bibliography::
+  :labelprefix: R

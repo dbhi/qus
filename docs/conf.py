@@ -38,6 +38,7 @@ extensions = [
     "exec",
 ]
 
+bibtex_default_style = 'plain'
 bibtex_bibfiles = [
     "refs.bib"
 ]
