@@ -175,5 +175,5 @@ extlinks = {
     "qussharp": ("https://github.com/dbhi/qus/issues/%s", "#"),
     "qusissue": ("https://github.com/dbhi/qus/issues/%s", "issue #"),
     "quspull": ("https://github.com/dbhi/qus/pull/%s", "pull request #"),
-    "qussrc": ("https://github.com/dbhi/qus/blob/main/%s", None),
+    "qussrc": ("https://github.com/dbhi/qus/blob/main/%s", ''),
 }
