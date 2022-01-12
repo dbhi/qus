@@ -56,7 +56,7 @@ source_suffix = {
 master_doc = "index"
 
 project = u"qemu-user-static (qus) and containers"
-copyright = u"2019-2021, Unai Martinez-Corral"
+copyright = u"2019-2022, Unai Martinez-Corral"
 author = u"Unai Martinez-Corral and contributors"
 
 # TODO: it would be interesting if Sphinx supported additional metadata for each author.
