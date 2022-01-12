@@ -11,32 +11,24 @@ jobs:
 
 
   Docs:
+    name: '📓 Docs'
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - name: '🧰 Checkout'
+      uses: actions/checkout@v2
 
-    - name: Build Docker image
-      run: docker build -t rmdi - < .github/Dockerfile
+    - name: '📓 BuildTheDocs (BTD)'
+      uses: buildthedocs/btd@v0
+      with:
+        token: ${{ github.token }}
 
-    - name: Build article
-      run: ./docs/_build.sh
-
-    - name: Publish site to gh-pages
-      if: github.event_name != 'pull_request'
-      run: |
-        mkdir -p public
-        cp docs/index.html public
-        cd public
-        touch .nojekyll
-        git init
-        cp ../.git/config ./.git/config
-        git checkout --orphan gh-pages
-        git add .
-        git config --local user.email "push@gha"
-        git config --local user.name "GHA"
-        git commit -a -m "update ${{ github.sha }}"
-        git push -u origin +gh-pages
+    - name: '📤 Upload artifact: HTML'
+      uses: actions/upload-artifact@master
+      with:
+        name: docs
+        path: docs/_build/html
 
 
   Release:
