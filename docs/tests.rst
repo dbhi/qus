@@ -5,13 +5,10 @@ Tests
 
 Multiple alternatives exist to install QEMU, to register the interpreter and/or to use OCI containers. The table below summarizes all the combinations that are tested on CI services (GitHub Actions and Travis CI):
 
-.. exec::
-  from table import TestsTable
-  TestsTable()
+.. include:: TestsTable.inc
 
 .. TIP::
   ``n`` is about executing a binary on the host, not inside a container.
-
 
 where:
 
