@@ -1,6 +1,3 @@
-CP=cp
-
-# Sphinx options.
 SPHINXOPTS    =
 SPHINXBUILD   = sphinx-build
 PAPER         =
@@ -12,15 +9,18 @@ ALLSPHINXOPTS   = -d $(BUILDDIR)/doctrees -T -D language=en $(PAPEROPT_$(PAPER))
 
 #---
 
-man:
-	$(SPHINXBUILD) -b man $(ALLSPHINXOPTS) $(BUILDDIR)/man
+references:
+	curl -fsSL https://github.com/umarcor/umarcor/archive/refs/heads/main.tar.gz | \
+	tar -xz --strip-components=1 umarcor-main/references/
 
 #---
 
-html:
-	$(SPHINXBUILD) -b html $(ALLSPHINXOPTS) $(BUILDDIR)/html
+theme:
+	mkdir _theme
+	curl -fsSL https://codeload.github.com/buildthedocs/sphinx.theme/tar.gz/v1 | tar xzf - --strip-components=1 -C _theme
 
 #---
 
-latex:
-	$(SPHINXBUILD) -b latex $(ALLSPHINXOPTS) $(BUILDDIR)/latex
+%:
+	$(SPHINXBUILD) -b $@ $(ALLSPHINXOPTS) $(BUILDDIR)/$@
+

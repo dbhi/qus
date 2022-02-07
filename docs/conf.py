@@ -66,7 +66,7 @@ extensions = [
 
 bibtex_default_style = 'plain'
 bibtex_bibfiles = [
-    str(ROOT / 'refs/qus.bib'),
+    str(ROOT / 'references/qus.bib'),
 ]
 for item in bibtex_bibfiles:
     if not Path(item).exists():

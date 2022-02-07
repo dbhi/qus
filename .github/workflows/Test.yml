@@ -21,8 +21,8 @@ jobs:
 
     - name: 🛠️ Get bib files from umarcor/umarcor
       run: |
-        ./docs/get_umarcor_refs.sh
-        ls -la docs/refs
+        make -C docs references
+        ls -la docs/references
 
     - name: '📓 BuildTheDocs (BTD)'
       uses: buildthedocs/btd@v0
