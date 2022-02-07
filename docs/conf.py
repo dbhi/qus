@@ -66,8 +66,11 @@ extensions = [
 
 bibtex_default_style = 'plain'
 bibtex_bibfiles = [
-    "refs.bib"
+    str(ROOT / 'refs/qus.bib'),
 ]
+for item in bibtex_bibfiles:
+    if not Path(item).exists():
+        raise Exception(f"Bibliography file {item} does not exist!")
 
 #autodoc_default_options = {
 #    "members": True,
