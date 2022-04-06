@@ -86,14 +86,11 @@ jobs:
           - aarch64
           - ppc64le
           - s390x
-          - armv7hl
           - armhf
           - armel
           - mipsel
           - mips64el
         exclude:
-          - src: debian
-            arch: armv7hl
           - src: fedora
             arch: armhf
           - src: fedora

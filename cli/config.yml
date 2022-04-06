@@ -59,7 +59,6 @@ archs:
       - armhf
       - armv7hl
     debian: armhf
-    fedora: armv7hl
     qemu: arm
 
   arm32v6:
