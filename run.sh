@@ -187,14 +187,14 @@ manifests () {
     esac
     DEF_VERSION=$("$QUSCLI" version -u "$usage" | cut -d " " -f1)
 
-    MAN_ARCH_LIST="amd64 arm64v8 arm32v7 i386 s390x ppc64le"
+    MAN_ARCH_LIST="amd64 arm64v8 i386 s390x ppc64le"
     case "$BUILD" in
       fedora)
         MAN_VERSION="f${DEF_VERSION}"
       ;;
       debian|latest)
         MAN_VERSION="d${DEF_VERSION}"
-        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6"
+        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6 arm32v7"
       ;;
     esac
     case "$BUILD" in
