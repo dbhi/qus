@@ -22,8 +22,8 @@ versions:
       base: "7.0"
       rev: "+dfsg-1"
     fedora: &ver_fedora_def
-      base: "6.2.0"
-      rev: "8.fc37"
+      base: "7.0.0"
+      rev: "1.fc37"
 
 archs:
 
