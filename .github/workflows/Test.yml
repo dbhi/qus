@@ -17,7 +17,7 @@ jobs:
     steps:
 
     - name: '🧰 Checkout'
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: 🛠️ Get bib files from umarcor/umarcor
       run: |
@@ -31,7 +31,7 @@ jobs:
         skip-deploy: github.event_name == 'pull_request'
 
     - name: '📤 Upload artifact: HTML'
-      uses: actions/upload-artifact@master
+      uses: actions/upload-artifact@v3
       with:
         name: docs
         path: docs/_build/html
@@ -44,7 +44,7 @@ jobs:
       BUILD: debian
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: ./.github/setup.sh
 
@@ -66,7 +66,7 @@ jobs:
     - run: ./cli/cli.py assets
 
     - name: '📤 Upload artifact: builddir'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v3
       with:
         path: |
           debian.md
@@ -107,7 +107,7 @@ jobs:
       run: sudo apt-get install -y rpm2cpio zstd cpio curl
       if: matrix.src == 'fedora'
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: ./.github/setup.sh
 
@@ -153,7 +153,7 @@ jobs:
         username: ${{ secrets.DOCKER_USER }}
         password: ${{ secrets.DOCKER_PASS }}
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - run: ./.github/setup.sh
 
@@ -167,7 +167,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: dbhi/qus/action@main
 
@@ -182,7 +182,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: ./action
       with:
@@ -199,7 +199,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: ./action
       with:
@@ -218,7 +218,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - uses: ./action
       with:
@@ -259,7 +259,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: test
       run: ./test.sh
