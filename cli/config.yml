@@ -20,7 +20,7 @@ versions:
   default: &ver_def
     debian: &ver_debian_def
       base: "7.0"
-      rev: "+dfsg-6"
+      rev: "+dfsg-7"
     fedora: &ver_fedora_def
       base: "7.0.0"
       rev: "3.fc37"
