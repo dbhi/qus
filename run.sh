@@ -42,8 +42,8 @@ getSingleQemuUserStatic () {
   GARCH="$(guest_arch)"
   case "$PKG_SOURCE" in
     fedora)
-      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${SOURCE_VERSION}/${HARCH}/qemu-user-static-${VERSION}-${SOURCE_VERSION}.${HARCH}.rpm"
-      echo "$URL"
+      URL="https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${SOURCE_VERSION}/${HARCH}/qemu-user-static-${GARCH}-${VERSION}-${SOURCE_VERSION}.${HARCH}.rpm"
+      echo "$GARCH on $HARCH [$URL]"
       curl -fsSL "$URL" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-${GARCH}-static"
       mv ./usr/bin/qemu-"${GARCH}"-static ./
       rm -rf ./usr/bin
@@ -129,15 +129,34 @@ build () {
 
   case "$PKG_SOURCE" in
     fedora)
-      PACKAGE_URI=${PACKAGE_URI:-https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${SOURCE_VERSION}/${BARCH}/qemu-user-static-${VERSION}-${SOURCE_VERSION}.${BARCH}.rpm}
-      gstart "Extract $PACKAGE_URI"
-
-      # https://bugzilla.redhat.com/show_bug.cgi?id=837945
-      curl -fsSL "$PACKAGE_URI" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-*-static"
-
-      mv ./usr/bin/* ./
-      rm -rf ./usr/bin
-      gend
+      for TARCH in \
+        aarch64 \
+        alpha \
+        arm \
+        cris \
+        hexagon \
+        hppa \
+        loongarch64 \
+        m68k \
+        microblaze \
+        mips \
+        nios2 \
+        or1k \
+        ppc \
+        riscv \
+        s390x \
+        sh4 \
+        sparc \
+        x86 \
+        xtensa;
+      do
+        PACKAGE_URI=https://kojipkgs.fedoraproject.org/packages/qemu/${VERSION}/${SOURCE_VERSION}/${BARCH}/qemu-user-static-${TARCH}-${VERSION}-${SOURCE_VERSION}.${BARCH}.rpm
+        gstart "Extract $TARCH $PACKAGE_URI"
+        curl -fsSL "$PACKAGE_URI" | rpm2cpio - | zstdcat | cpio -dimv "*usr/bin*qemu-*-static"
+        mv ./usr/bin/* ./
+        rm -rf ./usr/bin/
+        gend
+      done
     ;;
     debian)
       PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${SOURCE_VERSION}_${BARCH}.deb}
@@ -187,14 +206,14 @@ manifests () {
     esac
     DEF_VERSION=$("$QUSCLI" version -u "$usage" | cut -d " " -f1)
 
-    MAN_ARCH_LIST="amd64 arm64v8 i386 s390x ppc64le"
+    MAN_ARCH_LIST="amd64 arm64v8 i386 s390x"
     case "$BUILD" in
       fedora)
         MAN_VERSION="f${DEF_VERSION}"
       ;;
       debian|latest)
         MAN_VERSION="d${DEF_VERSION}"
-        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6 arm32v7"
+        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6 arm32v7 ppc64le"
       ;;
     esac
     case "$BUILD" in

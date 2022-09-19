@@ -92,6 +92,8 @@ jobs:
           - mips64el
         exclude:
           - src: fedora
+            arch: ppc64le
+          - src: fedora
             arch: armhf
           - src: fedora
             arch: armel
