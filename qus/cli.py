@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# Copyright 2020 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+# Copyright 2020-2022 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,16 +31,17 @@ from pyAttributes.ArgParseAttributes import (
     SwitchArgumentAttribute,
 )
 
-from config import Config
-from assets import get_json_from_api, extract_from_json, releases_report
-from debian import (
+from qus.config import Config
+from qus.assets import get_json_from_api, extract_from_json, releases_report
+from qus.debian import (
     check_debian_latest,
     get_debs_list,
     get_debs,
     debian_report,
     extract_debs,
 )
-from fedora import check_fedora_latest
+from qus.fedora import check_fedora_latest
+from qus.manifests import update_manifests
 
 
 ROOT = Path(__file__).parent.parent
@@ -73,15 +74,17 @@ class Tool:
         targets.sort()
         debian_report(targets, debs, report)
 
+    @staticmethod
+    def update_manifests():
+        update_manifests()
+
 
 class CLI(Tool, ArgParseMixin):
     def __init__(self):
         import argparse
         import textwrap
 
-        # Call constructor of the main interitance tree
         super().__init__()
-        # Call constructor of the ArgParseMixin
         ArgParseMixin.__init__(
             self,
             description=textwrap.dedent(
@@ -179,6 +182,10 @@ class CLI(Tool, ArgParseMixin):
     @CommandAttribute("debian", help="Generate report of available resources in DEB packages.")
     def HandleDebian(self, _):
         self.debian()
+
+    @CommandAttribute("manifests", help="Update manifests.")
+    def HandleManifests(self, _):
+        self.update_manifests()
 
 
 if __name__ == "__main__":

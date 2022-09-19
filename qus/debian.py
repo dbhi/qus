@@ -22,10 +22,10 @@ import subprocess
 import requests
 import re
 
-from config import Config
+from qus.config import Config
 
 
-TMP_DEB = Path(__file__).parent.parent / "tmp_deb"
+TMP_DEB = Path(__file__).resolve().parent.parent / "tmp_deb"
 
 
 def check_call(args):
@@ -60,7 +60,7 @@ def check_debian_latest():
 
     latest = versions[0]
 
-    items = Config().version('debian', 'amd64')
+    items = Config().version("debian", "amd64")
     debver = "{0}{1}".format(items[0], items[1])
 
     if debver != latest:

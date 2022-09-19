@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-
+#
 # Copyright 2019-2022 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,77 +14,42 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 from os import environ
 from pathlib import Path
 from subprocess import check_call
-from sys import argv as sys_argv, stdout, stderr
+from sys import argv as sys_argv, stdout, stderr, exit as sys_exit
 
 from qus.config import Config
+from qus.context import REPO
 
-REPO = environ.get("REPO", "docker.io/aptman/qus")
 
-if sys_argv[1] == "-m":
-    arch_list = ["amd64", "arm64v8", "i386", "s390x", "ppc64le"]
-    for build in ["latest", "debian", "fedora"]:
-        isFedora = build == "fedora"
-        isLatest = build == "latest"
-        b_arch_list = arch_list + ([] if isFedora else ["arm32v6", "arm32v7"])
+ROOT = Path(__file__).resolve().parent.parent
 
-        version = ("f" if isFedora else "d") + Config().version("fedora" if isFedora else "debian", "amd64")[0]
 
-        for image in ["latest", "pkg", "register"]:
-            b_prefix = image if isLatest else ("" if image == "latest" else f"-{image}")
-            manifest = f"{REPO}:{'' if isLatest else version}{b_prefix}"
+if sys_argv[1] not in ['-b','-a']:
+    print(f"Unknown subcommand '{sys_argv[1]}'!")
+    sys_exit(1)
 
-            i_prefix = "" if image == "latest" else f"-{image}"
-            image_list = [f"{REPO}:{arch}-{version}{i_prefix}" for arch in b_arch_list]
 
-            print(f"[qus] Docker manifest {manifest}")
-            print(f"[qus] Images:")
-            print("\n".join(image_list))
-            print("[qus] Create")
-            stdout.flush()
-            stderr.flush()
-            check_call(["docker", "manifest", "create", "-a", manifest] + image_list)
-            print("[qus] Push")
-            check_call(["docker", "manifest", "push", "--purge", manifest])
-            stdout.flush()
-            stderr.flush()
-
-else:
-
-    ROOT = Path(__file__).resolve().parent.parent
-
-    QUS_CLI = ROOT / "qus/cli.py"
-
-    env = environ.copy()
-    env.update(
-        {
-            "QUSCLI": QUS_CLI,
-            "REPO": REPO,
-            "HOST_ARCH": environ.get("HOST_ARCH", "x86_64"),
-        }
-    )
-
-    check_call(
-        f"""
+check_call(
+    f"""
 set -e
 
 . {ROOT / 'utils.sh'}
 
 pkg_arch () {{
-  {QUS_CLI} arch -u "$PKG_SOURCE" -a "$1"
+  python -m qus arch -u "$PKG_SOURCE" -a "$1"
 }}
 
 guest_arch() {{
-  {QUS_CLI} arch -u qemu -a "$(pkg_arch ${{BASE_ARCH}})"
+  python -m qus arch -u qemu -a "$(pkg_arch ${{BASE_ARCH}})"
 }}
 
+getSingleQemuUserStatic () {{
+  HARCH="$(pkg_arch {environ.get('HOST_ARCH', 'x86_64')})"
 """
-        + """
-
-getSingleQemuUserStatic () {
-  HARCH="$(pkg_arch ${HOST_ARCH})"
+    + """
   GARCH="$(guest_arch)"
   case "$PKG_SOURCE" in
     fedora)
@@ -199,11 +164,15 @@ build () {
 
   case "$PKG_SOURCE" in
     fedora)
-      IMG="${REPO}:${BASE_ARCH}-f${VERSION}"
+"""
+    + f"""
+      IMG="{REPO}:${{BASE_ARCH}}-f${{VERSION}}"
     ;;
     debian)
-      IMG="${REPO}:${BASE_ARCH}-d${VERSION}"
+      IMG="{REPO}:${{BASE_ARCH}}-d${{VERSION}}"
     ;;
+"""
+    + """
   esac
 
   cd ..
@@ -251,18 +220,18 @@ assets() {
 build_cfg () {
   PKG_SOURCE=${BUILD:-debian}
 
-  cliVersion="$("$QUSCLI" version -u "$PKG_SOURCE")"
+  cliVersion="$(python -m qus version -u "$PKG_SOURCE")"
 
   VERSION="${VERSION:-$(echo $cliVersion | cut -d " " -f1)}"
   SOURCE_VERSION=$(echo $cliVersion | cut -d " " -f2)
 
-  BASE_ARCH="$("$QUSCLI" arch -a ${BASE_ARCH:-x86_64})"
+  BASE_ARCH="$(python -m qus arch -a ${BASE_ARCH:-x86_64})"
 }
 
 #--
 
 """
-        + f"""
+    + f"""
 case '{sys_argv[1]}' in
   -b)
     build_cfg
@@ -271,13 +240,9 @@ case '{sys_argv[1]}' in
   -a)
     assets;
   ;;
-  *)
-    printf "${{ANSI_RED}}Unknown option '{sys_argv[1]}'!${{ANSI_NOCOLOR}}\n"
-    exit 1
 esac
 """,
-        env=env,
-        shell=True,
-        executable="/bin/bash",
-        cwd=ROOT,
-    )
+    shell=True,
+    executable="/bin/bash",
+    cwd=ROOT,
+)

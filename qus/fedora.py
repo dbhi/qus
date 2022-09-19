@@ -20,7 +20,7 @@ from tabulate import tabulate
 import requests
 import re
 
-from config import Config
+from qus.config import Config
 
 
 TMP_RPM = Path(__file__).parent.parent / "tmp_rpm"
@@ -56,7 +56,7 @@ def check_fedora_latest():
     if latest is None:
         raise (Exception("could not find the latest version!"))
 
-    fedver = Config().version('fedora', 'amd64')
+    fedver = Config().version("fedora", "amd64")
 
     if fedver != latest:
         print("  Current version:", fedver)
