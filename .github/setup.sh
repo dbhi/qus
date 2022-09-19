@@ -1,6 +1,6 @@
 #!/usr/bin/env sh
 
-# Copyright 2021 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+# Copyright 2021-2022 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,4 +23,4 @@ cd $(dirname "$0")/..
 docker version
 
 python3 -m pip install -U pip setuptools
-python3 -m pip install -r cli/requirements.txt
+python3 -m pip install -r qus/requirements.txt

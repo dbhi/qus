@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/usr/bin/env python
 
-# Copyright 2019-2021 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
+# Copyright 2019-2022 Unai Martinez-Corral <unai.martinezcorral@ehu.eus>
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,28 +14,74 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from os import environ
+from pathlib import Path
+from subprocess import check_call
+from sys import argv as sys_argv, stdout, stderr
+
+from qus.config import Config
+
+REPO = environ.get("REPO", "docker.io/aptman/qus")
+
+if sys_argv[1] == "-m":
+    arch_list = ["amd64", "arm64v8", "i386", "s390x", "ppc64le"]
+    for build in ["latest", "debian", "fedora"]:
+        isFedora = build == "fedora"
+        isLatest = build == "latest"
+        b_arch_list = arch_list + ([] if isFedora else ["arm32v6", "arm32v7"])
+
+        version = ("f" if isFedora else "d") + Config().version("fedora" if isFedora else "debian", "amd64")[0]
+
+        for image in ["latest", "pkg", "register"]:
+            b_prefix = image if isLatest else ("" if image == "latest" else f"-{image}")
+            manifest = f"{REPO}:{'' if isLatest else version}{b_prefix}"
+
+            i_prefix = "" if image == "latest" else f"-{image}"
+            image_list = [f"{REPO}:{arch}-{version}{i_prefix}" for arch in b_arch_list]
+
+            print(f"[qus] Docker manifest {manifest}")
+            print(f"[qus] Images:")
+            print("\n".join(image_list))
+            print("[qus] Create")
+            stdout.flush()
+            stderr.flush()
+            check_call(["docker", "manifest", "create", "-a", manifest] + image_list)
+            print("[qus] Push")
+            check_call(["docker", "manifest", "push", "--purge", manifest])
+            stdout.flush()
+            stderr.flush()
+
+else:
+
+    ROOT = Path(__file__).resolve().parent.parent
+
+    QUS_CLI = ROOT / "qus/cli.py"
+
+    env = environ.copy()
+    env.update(
+        {
+            "QUSCLI": QUS_CLI,
+            "REPO": REPO,
+            "HOST_ARCH": environ.get("HOST_ARCH", "x86_64"),
+        }
+    )
+
+    check_call(
+        f"""
 set -e
 
-cd $(dirname $0)
+. {ROOT / 'utils.sh'}
 
-QUSCLI="$(pwd)/cli/cli.py"
+pkg_arch () {{
+  {QUS_CLI} arch -u "$PKG_SOURCE" -a "$1"
+}}
 
-export DOCKER_BUILDKIT=0
-export COMPOSE_DOCKER_CLI_BUILD=0
+guest_arch() {{
+  {QUS_CLI} arch -u qemu -a "$(pkg_arch ${{BASE_ARCH}})"
+}}
 
-. ./utils.sh
-
-#--
-
-pkg_arch () {
-  "$QUSCLI" arch -u "$PKG_SOURCE" -a "$1"
-}
-
-guest_arch() {
-  "$QUSCLI" arch -u qemu -a "$(pkg_arch ${BASE_ARCH})"
-}
-
-#--
+"""
+        + """
 
 getSingleQemuUserStatic () {
   HARCH="$(pkg_arch ${HOST_ARCH})"
@@ -175,67 +221,6 @@ EOF
 
 #--
 
-manifests () {
-  for BUILD in latest debian fedora; do
-    case "$BUILD" in
-      debian|latest)
-        usage="debian"
-      ;;
-      fedora)
-        usage="fedora"
-      ;;
-    esac
-    DEF_VERSION=$("$QUSCLI" version -u "$usage" | cut -d " " -f1)
-
-    MAN_ARCH_LIST="amd64 arm64v8 i386 s390x ppc64le"
-    case "$BUILD" in
-      fedora)
-        MAN_VERSION="f${DEF_VERSION}"
-      ;;
-      debian|latest)
-        MAN_VERSION="d${DEF_VERSION}"
-        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6 arm32v7"
-      ;;
-    esac
-    case "$BUILD" in
-      latest)
-        unset MAN_IMG_VERSION
-      ;;
-      debian|fedora)
-        MAN_IMG_VERSION="$MAN_VERSION"
-      ;;
-    esac
-
-    for i in latest pkg register; do
-      #[ "$i" == "latest" ] && p="latest" || p="$i"
-
-      [ "x$MAN_IMG_VERSION" != "x" ] && p="-$i" || p="$i"
-      if [ "x$MAN_IMG_VERSION" != "x" ] && [ "x$i" = "xlatest" ]; then
-        p=""
-      fi
-
-      MAN_IMG="${REPO}:${MAN_IMG_VERSION}${p}"
-
-      [ "$i" == "latest" ] && p="" || p="-$i"
-      unset cmd
-      for arch in $MAN_ARCH_LIST; do
-        cmd="$cmd ${REPO}:${arch}-${MAN_VERSION}${p}"
-      done
-
-      gstart "Docker manifest create $MAN_IMG"
-      docker manifest create -a $MAN_IMG $cmd
-      gend
-
-      gstart "Docker manifest push $MAN_IMG"
-      docker manifest push --purge "$MAN_IMG"
-      gend
-    done
-
-  done
-}
-
-#--
-
 assets() {
   ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
   case "$BUILD" in
@@ -276,21 +261,23 @@ build_cfg () {
 
 #--
 
-REPO=${REPO:-docker.io/aptman/qus}
-HOST_ARCH=${HOST_ARCH:-x86_64}
-
-case "$1" in
+"""
+        + f"""
+case '{sys_argv[1]}' in
   -b)
     build_cfg
     build
-  ;;
-  -m)
-    manifests
   ;;
   -a)
     assets;
   ;;
   *)
-    printf "${ANSI_RED}Unknown option '$1'!${ANSI_NOCOLOR}\n"
+    printf "${{ANSI_RED}}Unknown option '{sys_argv[1]}'!${{ANSI_NOCOLOR}}\n"
     exit 1
 esac
+""",
+        env=env,
+        shell=True,
+        executable="/bin/bash",
+        cwd=ROOT,
+    )

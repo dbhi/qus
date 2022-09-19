@@ -49,12 +49,12 @@ jobs:
     - run: ./.github/setup.sh
 
     - run: |
-        ./run.sh -a
+        PYTHONPATH=$(pwd) ./qus/run.py -a
         ./generate_bin_tests.sh
         cp test-* releases/
         ls releases/ | wc -l
 
-    - run: ./cli/cli.py debian
+    - run: ./qus/cli.py debian
 
     - uses: pyTooling/Actions/releaser@r0
       if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'pull_request'
@@ -63,7 +63,7 @@ jobs:
         files: releases/*
         snapshots: false
 
-    - run: ./cli/cli.py assets
+    - run: ./qus/cli.py assets
 
     - name: '📤 Upload artifact: builddir'
       uses: actions/upload-artifact@v3
@@ -111,7 +111,7 @@ jobs:
 
     - run: ./.github/setup.sh
 
-    - run: BUILD=${{ matrix.src }} ./run.sh -b
+    - run: BUILD=${{ matrix.src }} PYTHONPATH=$(pwd) ./qus/run.py -b
       env:
         BASE_ARCH: ${{ matrix.arch }}
 
@@ -159,7 +159,7 @@ jobs:
 
     - name: Update manifests
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: ./run.sh -m
+      run: PYTHONPATH=$(pwd) ./qus/run.py -m
 
 
   Action-All:

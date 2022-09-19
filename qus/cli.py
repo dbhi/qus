@@ -170,7 +170,7 @@ class CLI(Tool, ArgParseMixin):
     )
     def HandleVersion(self, args):
         items = Config().version(args.Usage, args.Arch)
-        print("{0} {1}".format(items[0], items[1]))
+        print(f"{items[0]} {items[1]}")
 
     @CommandAttribute("assets", help="Generate report of available releases and assets.")
     def HandleAssets(self, _):
