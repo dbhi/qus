@@ -115,18 +115,16 @@ jobs:
       env:
         BASE_ARCH: ${{ matrix.arch }}
 
-    - name: Login to DockerHub
-      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_PASS }}
-
     - name: Deploy to DockerHub
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: |
-        docker image ls
-        docker push -a aptman/qus
+      uses: pyTooling/Actions/with-post-step@r0
+      with:
+        main: |
+          # Release
+          echo '${{ secrets.DOCKER_PASS }}' | docker login docker.io -u '${{ secrets.DOCKER_USER }}' --password-stdin
+          docker image ls
+          docker push -a aptman/qus
+        post: docker logout docker.io
 
 
   Manifests:
@@ -146,20 +144,19 @@ jobs:
             cfg.seek(0)
             dump(data, cfg, indent=2)
 
-    - name: Login to DockerHub
-      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKER_USER }}
-        password: ${{ secrets.DOCKER_PASS }}
-
     - uses: actions/checkout@v3
 
     - run: ./.github/setup.sh
 
     - name: Update manifests
       if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      run: ./run.sh -m
+      uses: pyTooling/Actions/with-post-step@r0
+      with:
+        main: |
+          # Update manifests
+          echo '${{ secrets.DOCKER_PASS }}' | docker login docker.io -u '${{ secrets.DOCKER_USER }}' --password-stdin
+          ./run.sh -m
+        post: docker logout docker.io
 
 
   Action-All:
