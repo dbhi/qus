@@ -8,6 +8,6 @@ authors:
     orcid: https://orcid.org/0000-0003-1752-9181
 title: "qemu-user-static (qus) and containers, non-invasive minimal working setups"
 license: Apache-2.0
-version: 0.0.7-v6.0+dfsg-1-exp0
+version: 0.0.11
 url: "https://dbhi.github.io/qus"
 repository-code: https://github.com/dbhi/qus
