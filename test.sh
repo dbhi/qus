@@ -22,7 +22,7 @@ export DOCKER_BUILDKIT=1
 
 . ./utils.sh
 
-TEST_RELEASE="v0.0.9-v6.2+dfsg-3"
+TEST_RELEASE="v0.0.11-v7.1+dfsg-2--bpo11+3"
 if [ -n "$1" ]; then
   TEST_RELEASE="$1"
 fi
