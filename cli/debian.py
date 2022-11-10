@@ -16,6 +16,7 @@
 
 
 from sys import platform
+from os import environ
 from pathlib import Path
 from tabulate import tabulate
 import subprocess
@@ -63,12 +64,11 @@ def check_debian_latest():
     items = Config().version('debian', 'amd64')
     debver = "{0}{1}".format(items[0], items[1])
 
-    if debver != latest:
-        print("  Current version:", debver)
-        print("  Latest upstream:", latest)
-        return 1
-
-    print("  Up to date:", latest)
+    with Path(environ.get("GITHUB_STEP_SUMMARY", "summary.md")).open("a") as wfptr:
+        if debver != latest:
+            wfptr.write(f"\n- [Debian] Current: {debver} | Latest: {latest}\n")
+            return 1
+        wfptr.write(f"\n- [Debian] Up to date: {latest}\n")
 
 
 def get_debs_list():

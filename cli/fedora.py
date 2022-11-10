@@ -15,6 +15,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 
+from os import environ
 from pathlib import Path
 from tabulate import tabulate
 import requests
@@ -55,12 +56,13 @@ def check_fedora_latest():
 
     if latest is None:
         raise (Exception("could not find the latest version!"))
+    latest = f"{latest[0]}/{latest[1]}"
 
     fedver = Config().version('fedora', 'amd64')
+    fedver = f"{fedver[0]}/{fedver[1]}"
 
-    if fedver != latest:
-        print("  Current version:", fedver)
-        print("  Latest upstream:", latest)
-        return 1
-
-    print("  Up to date:", latest)
+    with Path(environ.get("GITHUB_STEP_SUMMARY", "summary.md")).open("a") as wfptr:
+        if fedver != latest:
+            wfptr.write(f"\n- [Fedora] Current: {fedver} | Latest: {latest}\n")
+            return 1
+        wfptr.write(f"\n- [Fedora] Up to date: {latest}\n")
