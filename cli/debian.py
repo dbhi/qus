@@ -124,9 +124,8 @@ def _extract_debs(targets, debs, version, tmpdir):
     for host in debs[version]:
         fname = "qemu-user-static_%s_%s.deb" % (version, host)
         debdir = tmpdir / fname[0:-4]
-        print(host, debdir, tmpdir/fname)
-        debdir.mkdir(parents=True)
         if not debdir.exists():
+            debdir.mkdir(parents=True)
             check_call(["7z", "x", "-o./" + str(debdir), "-y", "./" + str(tmpdir / fname)])
 
         for line in check_output(["7z", "l", "./" + str(debdir / "data.tar")]):
