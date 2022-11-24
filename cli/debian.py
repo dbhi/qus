@@ -125,6 +125,7 @@ def _extract_debs(targets, debs, version, tmpdir):
         fname = "qemu-user-static_%s_%s.deb" % (version, host)
         debdir = tmpdir / fname[0:-4]
         print(host, debdir, tmpdir/fname)
+        debdir.mkdir(parents=True)
         if not debdir.exists():
             check_call(["7z", "x", "-o./" + str(debdir), "-y", "./" + str(tmpdir / fname)])
 
