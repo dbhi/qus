@@ -68,10 +68,13 @@ class Tool:
         tmpdir = ROOT / "tmp_deb"
         debs = get_debs_list()
         get_debs(debs, tmpdir)
+        print("ITERDIR")
+        for item in tmpdir.iterdir():
+            print(item)
         targets = []
         extract_debs(targets, debs, tmpdir)
-        targets.sort()
-        debian_report(targets, debs, report)
+        #targets.sort()
+        #debian_report(targets, debs, report)
 
 
 class CLI(Tool, ArgParseMixin):
