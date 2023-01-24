@@ -177,8 +177,8 @@ intersphinx_mapping = {
 # -- Sphinx.Ext.ExtLinks --------------------------------------------------
 extlinks = {
     "wikipedia": ("https://en.wikipedia.org/wiki/%s", None),
-    "qussharp": ("https://github.com/dbhi/qus/issues/%s", "#"),
-    "qusissue": ("https://github.com/dbhi/qus/issues/%s", "issue #"),
-    "quspull": ("https://github.com/dbhi/qus/pull/%s", "pull request #"),
-    "qussrc": ("https://github.com/dbhi/qus/blob/main/%s", ''),
+    "qussharp": ("https://github.com/dbhi/qus/issues/%s", "#%s"),
+    "qusissue": ("https://github.com/dbhi/qus/issues/%s", "issue #%s"),
+    "quspull": ("https://github.com/dbhi/qus/pull/%s", "pull request #%s"),
+    "qussrc": ("https://github.com/dbhi/qus/blob/main/%s", '%s'),
 }
