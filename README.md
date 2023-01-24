@@ -9,9 +9,9 @@
   -->
   <a title="Releases" href="https://github.com/dbhi/qus/releases"><img src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&style=flat-square"></a><!--
   -->
-  <a title="'Test' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3ATest"><img alt="'Test' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/Test/main?longCache=true&style=flat-square&logo=github&label=Test"></a><!--
+  <a title="'Test' workflow Status" href="https://github.com/dbhi/qus/actions/workflows/Test.yml"><img alt="'Test' workflow Status" src="https://img.shields.io/github/actions/workflow/status/dbhi/qus/Test.yml?branch=main&longCache=true&style=flat-square&logo=github&label=Test"></a><!--
   -->
-  <a title="'Canary' workflow Status" href="https://github.com/dbhi/qus/actions?query=workflow%3ACanary"><img alt="'Canary' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/Canary/main?longCache=true&style=flat-square&logo=github&label=Canary"></a>
+  <a title="'Canary' workflow Status" href="https://github.com/dbhi/qus/actions/workflows/Canary.yml"><img alt="'Canary' workflow Status" src="https://img.shields.io/github/actions/workflow/status/dbhi/qus/Canary.yml?branch=main&longCache=true&style=flat-square&logo=github&label=Canary"></a>
 </p>
 
 *qemu-user-static* (**qus**) is a compilation of utilities, examples and references to build and execute OCI images (aka [docker](https://www.docker.com/) images) for foreign architectures using [QEMU](https://www.qemu.org/)'s user-mode emulation.
