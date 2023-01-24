@@ -63,6 +63,6 @@ def check_fedora_latest():
 
     with Path(environ.get("GITHUB_STEP_SUMMARY", "summary.md")).open("a") as wfptr:
         if fedver != latest:
-            wfptr.write(f"\n- [Fedora] Current: {fedver} | Latest: {latest}\n")
+            wfptr.write(f"\n- [Fedora] Current: `{fedver}` | Latest: `{latest}`\n")
             return 1
-        wfptr.write(f"\n- [Fedora] Up to date: {latest}\n")
+        wfptr.write(f"\n- [Fedora] Up to date: `{latest}`\n")
