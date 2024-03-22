@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Introduction &mdash; qemu-user-static (qus) and containers latest documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=c6e86fd7"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Context: containers and QEMU" href="context.html" />
+    <link rel="prev" title="qemu-user-static (qus) and containers" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> qemu-user-static (qus) and containers
+          </a>
+              <div class="version">
+                latest
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">Context: containers and QEMU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="images.html">Provided container images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related.html">Other related sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">qemu-user-static (qus) and containers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+        
+          
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Introduction</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/dbhi/qus/blob/main/docs/intro.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="introduction">
+<span id="qus-intro"></span><h1>Introduction<a class="headerlink" href="#introduction" title="Link to this heading">¶</a></h1>
+<p>The widespread adoption of single-board computers (SBCs) <span id="id1">[<a class="reference internal" href="references.html#id19" title="Wikipedia contributors. Wikipedia: Single-board computer. URL: https://en.wikipedia.org/wiki/Single-board_computer.">R30</a>]</span>, along with the evolution of FPGAs into complex
+system on chip (SoC) <span id="id2">[<a class="reference internal" href="references.html#id20" title="Wikipedia contributors. Wikipedia: System on a chip. URL: https://en.wikipedia.org/wiki/System_on_a_chip.">R32</a>]</span> circuits with Linux-capable CPUs, has increased the demand of (cross-)compiling and
+testing strategies for applications targeting architectures other than <code class="docutils literal notranslate"><span class="pre">x86</span></code> | <code class="docutils literal notranslate"><span class="pre">x86-64</span></code> | <code class="docutils literal notranslate"><span class="pre">amd64</span></code>.
+Apart from the most known <a class="reference external" href="https://www.raspberrypi.org/">Raspberry Pi</a> <span id="id3">[<a class="reference internal" href="references.html#id21" title="Wikipedia contributors. Wikipedia: Raspberry Pi. URL: https://en.wikipedia.org/wiki/Raspberry_Pi.">R29</a>]</span> and other similar low-cost
+devices, many actual SoCs with a programmable region <a class="footnote-reference brackets" href="#f1" id="id4" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a> (PR) include multi-core ARM subsystems.
+Nonetheless, since devices for embedded applications are typically less powerful than regular workstations, it is common
+to develop applications on <code class="docutils literal notranslate"><span class="pre">x86-64</span></code> and then deploy/use them on the target devices.</p>
+<p>The traditional approach involves installing cross-compilation toolchains on the development workstations.
+However, cross-platform packages pollute the development environment, and might need to be built from sources.
+In order to reduce the burden of setting up and maintaining a development environment up to date, packaging solutions
+are used.
+The most known environment packaging solution are Virtual Machines (VMs), which effectively emulate full machines (from
+hardware to system libraries, including the kernel).
+Yet, using VMs might be overkill for developing user-space applications.
+On the other hand, containers <span id="id5">[<a class="reference internal" href="references.html#id7" title="Linux Foundation. Open container initiative (oci). 2005. URL: https://opencontainers.org/.">R19</a>]</span> <span id="id6">[<a class="reference internal" href="references.html#id2" title="Solomon Hykes, Docker, Inc., and contributors. Docker. 2013. URL: https://www.docker.com.">R7</a>]</span> are a mechanism to package system and user
+libraries only, while using the hardware (including the kernel) of the host.
+In behalf of containers reducing both the setup and startup burden, most used distributions (<em>busybox</em>, <em>ubuntu</em>,
+<em>centos</em>, <em>debian</em>, <em>fedora</em>, <em>alpine</em>, <em>opensuse</em>, etc.) are already available <span id="id7">[<a class="reference internal" href="references.html#id3" title="Docker contributors. Docker-library/official-images: architectures other than amd64? 2015. URL: https://github.com/docker-library/official-images#architectures-other-than-amd64.">R15</a>]</span> as
+Docker images for architectures such as ARM, s390x or PPC.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Note that naming of ARM architectures is not consistent: ARM (Armv7, Armv8, AArch32, AArch64…), Docker (arm32v7,
+arm64v8…), Debian (armel, armhf, aarch64…), Fedora (armv7hl, aarch64…). In this document, all of them are used
+equally. See functions <code class="docutils literal notranslate"><span class="pre">pkg_arch</span></code> and <code class="docutils literal notranslate"><span class="pre">guest_arch</span></code> in <a class="reference external" href="https://github.com/dbhi/qus/blob/main/run.sh">run.sh</a> for details about equivalencies.</p>
+</div>
+<p>Unfortunately, due to containers reusing the kernel of the host, images for foreign architectures cannot be executed on
+a regular container runtime.
+Trying to do so will likely produce the same error as executing any foreign binary directly on the host.
+Thankfully, QEMU <span id="id8">[<a class="reference internal" href="references.html#id10" title="Fabrice Bellard and contributors. Qemu, the fast! processor emulator. 2005. URL: https://www.qemu.org/.">R4</a>]</span> can emulate foreign architectures through dynamic binary modification/translation (DBM)
+<span id="id9">[<a class="reference internal" href="references.html#id22" title="Wikipedia contributors. Wikipedia: Binary translation. URL: https://en.wikipedia.org/wiki/Binary_translation.">R22</a>]</span>.
+Thus, it can translate foreign instructions/signals for the kernel to understand them, and vice versa.
+On that account, the purpose of this repository and this article is to document how to use OCI containers along with
+QEMU.</p>
+<p>The remainder of the document is organized as follows.
+In the next two sections, QEMU’s different operating modes are explained, and the images generated and published by the
+author are described.
+Then, the test suite that allows to continuously check the whole set of images is explained.
+Thereupon, development details are provided.
+There is also a section about frequently asked questions.
+Last, references to related blog posts and similar projects are listed.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id4">1</a><span class="fn-bracket">]</span></span>
+<p><em>Programmable Region</em> is a term used by <a class="reference external" href="https://www.xilinx.com/">Xilinx</a> to refer to the reconfigurable part of
+their SoCs.
+The PR is commonly referred to as <em>FPGA</em> for historical reasons.</p>
+</aside>
+</aside>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="qemu-user-static (qus) and containers" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="context.html" class="btn btn-neutral float-right" title="Context: containers and QEMU" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022, Unai Martinez-Corral.</p>
+  </div>Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/buildthedocs/sphinx.theme">theme</a>
+    provided by <a href="https://buildthedocs.github.io">Build the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

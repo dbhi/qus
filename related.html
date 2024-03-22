@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Other related sources &mdash; qemu-user-static (qus) and containers latest documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=c6e86fd7"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="References" href="references.html" />
+    <link rel="prev" title="Frequently Asked Questions (FAQ)" href="faq.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> qemu-user-static (qus) and containers
+          </a>
+              <div class="version">
+                latest
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">Context: containers and QEMU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="images.html">Provided container images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Other related sources</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#multiarch-qemu-user-static">multiarch/qemu-user-static</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#fkrull-docker-qemu-user-static">fkrull/docker-qemu-user-static</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#rmoriz-multiarch-test">rmoriz/multiarch-test</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#linuxkit-binfmt-docker-binfmt">linuxkit/binfmt | docker/binfmt</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#blog-posts">Blog posts</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">qemu-user-static (qus) and containers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+        
+          
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Other related sources</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/dbhi/qus/blob/main/docs/related.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="other-related-sources">
+<span id="qus-related"></span><h1>Other related sources<a class="headerlink" href="#other-related-sources" title="Link to this heading">¶</a></h1>
+<p>Some of these projects were developed in parallel to <em>qus</em>, and there has been feedback; so, some features and use cases
+are equivalent.
+Currently, the enhancements which might be unique to <em>qus</em> are
+1) providing docker images for host architectures other than <code class="docutils literal notranslate"><span class="pre">amd64</span></code>; and
+2) optionally, limiting the list of QEMU binaries to be registered on the host.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>There is some info about QEMU and Docker at
+<a class="reference external" href="https://wiki.qemu.org/Testing/DockerBuild">wiki.qemu.org/Testing/DockerBuild</a>.
+However, it is focused on building and testing QEMU itself, and details about how to set
+<code class="docutils literal notranslate"><span class="pre">binfmt</span></code> interpreters are not explained.</p>
+</div>
+<section id="multiarch-qemu-user-static">
+<h2>multiarch/qemu-user-static<a class="headerlink" href="#multiarch-qemu-user-static" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/multiarch/qemu-user-static">multiarch/qemu-user-static</a> is the most similar to <em>qus</em>.
+Script <code class="docutils literal notranslate"><span class="pre">register.sh</span></code> in <em>qus</em> was initially based on <em>multiarch</em>’s.
+Later, <em>qus</em> was used as a reference by <em>multiarch</em>, in order to implement <em>persistent</em> loading.
+The main difference is that <em>multiarch</em> does not provide images for host architectures other than <code class="docutils literal notranslate"><span class="pre">amd64</span></code>.</p>
+<p><span id="id1">[<a class="reference internal" href="references.html#id35" title="Jun Aruga. Let's add fedora multiarch containers to your ci. 2019. URL: https://github.com/junaruga/fedora-workshop-multiarch/blob/master/slides/Lets-add-Fedora-multiarch-to-CI.pdf.">R2</a>]</span> is a talk by one of the maintainers of <a class="reference external" href="https://github.com/multiarch/qemu-user-static">multiarch/qemu-user-static</a>
+that provides an introduction to contexts where these projects are useful.
+See also <span id="id2">[<a class="reference internal" href="references.html#id36" title="Pradipta Kumar. Travis with docker and qemu for multi-architecture ci workflow. 2017. URL: https://developer.ibm.com/linuxonpower/2017/07/28/travis-multi-architecture-ci-workflow/.">R8</a>]</span>.</p>
+</section>
+<section id="fkrull-docker-qemu-user-static">
+<h2>fkrull/docker-qemu-user-static<a class="headerlink" href="#fkrull-docker-qemu-user-static" title="Link to this heading">¶</a></h2>
+<p>In <a class="reference external" href="https://github.com/fkrull/docker-qemu-user-static/">fkrull/docker-qemu-user-static</a> QEMU binaries are also loaded
+persistently.
+However, <em>fkrull</em> uses some custom Python scripts, instead of relying on <code class="docutils literal notranslate"><span class="pre">qemu-binfmt-conf.sh</span></code>.</p>
+</section>
+<section id="rmoriz-multiarch-test">
+<h2>rmoriz/multiarch-test<a class="headerlink" href="#rmoriz-multiarch-test" title="Link to this heading">¶</a></h2>
+<p><a class="reference external" href="https://github.com/rmoriz/multiarch-test">rmoriz/multiarch-test</a> tries to fix <a class="reference external" href="https://github.com/moby/moby/issues/36552">moby/moby#36552</a>
+in <code class="docutils literal notranslate"><span class="pre">hooks/build</span></code>, but we have not found that issue in this project yet.</p>
+</section>
+<section id="linuxkit-binfmt-docker-binfmt">
+<span id="qus-related-linuxkit"></span><h2>linuxkit/binfmt | docker/binfmt<a class="headerlink" href="#linuxkit-binfmt-docker-binfmt" title="Link to this heading">¶</a></h2>
+<p>Although not well documented, since version 1.13.0 (2017-01-19), QEMU is installed by default with Docker Desktop and a
+tool written in golang (named <code class="docutils literal notranslate"><span class="pre">binfmt</span></code>) is used to register interpreters in the kernel.
+The upstream project is <a class="reference external" href="https://github.com/linuxkit/linuxkit">linuxkit/linuxkit</a>.</p>
+<p>For further details about similarities/differences, see:</p>
+<ul class="simple">
+<li><p>The project from docker (<a class="reference external" href="https://github.com/docker/binfmt">docker/binfmt</a>) was deprecated in favour of
+<a class="reference external" href="https://github.com/linuxkit/linuxkit/tree/master/pkg/binfmt">github.com/linuxkit/linuxkit/tree/master/pkg/binfmt</a>.</p>
+<ul>
+<li><p><a class="reference external" href="https://github.com/docker/binfmt/issues/17">docker/binfmt#17</a></p></li>
+</ul>
+</li>
+<li><p><a class="reference external" href="https://github.com/linuxkit/linuxkit/issues/3401">linuxkit/linuxkit#3401</a></p></li>
+<li><p><a class="reference external" href="https://github.com/moby/qemu">moby/qemu</a></p></li>
+</ul>
+<p>At DockerCon San Francisco 2019, a partnership with Arm was announced:
+<a class="reference external" href="https://www.docker.com/blog/multi-arch-images/">Building Multi-Arch Images for Arm and x86 with Docker Desktop</a>.</p>
+</section>
+<section id="blog-posts">
+<h2>Blog posts<a class="headerlink" href="#blog-posts" title="Link to this heading">¶</a></h2>
+<ul class="simple">
+<li><p><a class="reference external" href="https://ownyourbits.com">ownyourbits.com</a></p>
+<ul>
+<li><p><a class="reference external" href="https://ownyourbits.com/2018/06/27/running-and-building-arm-docker-containers-in-x86/">Running and building ARM Docker containers in x86</a></p></li>
+<li><p><a class="reference external" href="https://ownyourbits.com/2018/06/13/transparently-running-binaries-from-any-architecture-in-linux-with-qemu-and-binfmt_misc/">Transparently running binaries from any architecture in Linux with QEMU and binfmt_misc</a></p></li>
+</ul>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="faq.html" class="btn btn-neutral float-left" title="Frequently Asked Questions (FAQ)" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="references.html" class="btn btn-neutral float-right" title="References" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022, Unai Martinez-Corral.</p>
+  </div>Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/buildthedocs/sphinx.theme">theme</a>
+    provided by <a href="https://buildthedocs.github.io">Build the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

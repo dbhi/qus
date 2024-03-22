@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>qemu-user-static (qus) and containers &mdash; qemu-user-static (qus) and containers latest documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=c6e86fd7"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="#" class="icon icon-home"> qemu-user-static (qus) and containers
+          </a>
+              <div class="version">
+                latest
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1"><a class="reference internal" href="context.html">Context: containers and QEMU</a></li>
+<li class="toctree-l1"><a class="reference internal" href="images.html">Provided container images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related.html">Other related sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">qemu-user-static (qus) and containers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+        
+          
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="qemu-user-static-qus-and-containers">
+<span id="qus"></span><h1>qemu-user-static (qus) and containers<a class="headerlink" href="#qemu-user-static-qus-and-containers" title="Link to this heading">¶</a></h1>
+<p class="centered">
+<strong><a class="reference external" href="https://github.com/dbhi/qus"><img alt="'dbhi/qus' GitHub repository" src="https://img.shields.io/github/stars/dbhi/qus?longCache=true&amp;style=flat-square&amp;label=dbhi%2Fqus&amp;logo=github&amp;color=d45500" style="height: 22px;" /></a>
+<a class="reference external" href="https://hub.docker.com/r/aptman/qus/"><img alt="Docker Hub" src="https://img.shields.io/docker/pulls/aptman/qus.svg?longCache=true&amp;style=flat-square&amp;logo=docker&amp;logoColor=fff&amp;label=aptman%2Fqus" style="height: 22px;" /></a>
+<a class="reference external" href="https://github.com/dbhi/qus/releases"><img alt="Releases" src="https://img.shields.io/github/commits-since/dbhi/qus/latest.svg?longCache=true&amp;style=flat-square&amp;logo=git&amp;logoColor=fff" style="height: 22px;" /></a>
+<a class="reference external" href="https://github.com/dbhi/qus/blob/main/CITATION.cff"><img alt="Cite this project" src="https://img.shields.io/badge/-View%20citation%20file-555555?longCache=true&amp;style=flat-square&amp;logo=LaTeX&amp;logoColor=fff" style="height: 22px;" /></a>
+<a class="reference external" href="https://gitter.im/hdl/community"><img alt="Join the chat at gitter.im/hdl/community" src="https://img.shields.io/badge/chat-on%20gitter-4db797.svg?longCache=true&amp;style=flat-square&amp;logo=gitter&amp;logoColor=e8ecef" style="height: 22px;" /></a>
+<a class="reference external" href="https://github.com/dbhi/qus/actions?query=workflow%3ATest"><img alt="'Test' workflow Status" src="https://img.shields.io/github/workflow/status/dbhi/qus/Test?longCache=true&amp;style=flat-square&amp;logo=github&amp;label=Test" style="height: 22px;" /></a></strong></p><a class="reference external image-reference" href="https://github.com/dbhi/qus"><img alt="_images/logo.png" class="align-center" src="_images/logo.png" style="width: 500px;" /></a>
+<br><p>Welcome to the Documentation of <em>qemu-user-static and containers (qus)</em>!
+Build and execute <a class="reference external" href="https://opencontainers.org/">OCI</a> images for foreign architectures using <a class="reference external" href="https://www.qemu.org/">QEMU</a>’s
+user-mode emulation.</p>
+<p><em>qus</em> is a compilation of utilities, examples and references to build and execute OCI images <span id="id1">[<a class="reference internal" href="references.html#id7" title="Linux Foundation. Open container initiative (oci). 2005. URL: https://opencontainers.org/.">R19</a>]</span> <span id="id2">[<a class="reference internal" href="references.html#id6" title="Wikipedia contributors. Wikipedia: Open Container Initiative. URL: https://en.wikipedia.org/wiki/Open_Container_Initiative.">R27</a>]</span> <span id="id3">[<a class="reference internal" href="references.html#id5" title="Open Container Initiative contributors. GitHub: opencontainers. URL: https://github.com/opencontainers.">R20</a>]</span> (aka
+Docker <span id="id4">[<a class="reference internal" href="references.html#id2" title="Solomon Hykes, Docker, Inc., and contributors. Docker. 2013. URL: https://www.docker.com.">R7</a>]</span> <span id="id5">[<a class="reference internal" href="references.html#id13" title="Wikipedia contributors. Wikipedia: Docker (software). URL: https://en.wikipedia.org/wiki/Docker_%28software%29.">R25</a>]</span> <span id="id6">[<a class="reference internal" href="references.html#id12" title="Docker contributors. GitHub: docker. URL: https://github.com/docker.">R14</a>]</span> images) for foreign architectures, using QEMU’s
+<span id="id7">[<a class="reference internal" href="references.html#id11" title="Fabrice Bellard. QEMU, a Fast and Portable Dynamic Translator. In Proceedings of the Annual Conference on USENIX Annual Technical Conference, ATEC '05, 41–41. Berkeley, CA, USA, 2005. USENIX Association. URL: https://www.qemu.org/.">R3</a>]</span> <span id="id8">[<a class="reference internal" href="references.html#id10" title="Fabrice Bellard and contributors. Qemu, the fast! processor emulator. 2005. URL: https://www.qemu.org/.">R4</a>]</span> <span id="id9">[<a class="reference internal" href="references.html#id9" title="Wikipedia contributors. Wikipedia: QEMU. URL: https://en.wikipedia.org/wiki/QEMU.">R28</a>]</span> user-mode emulation.</p>
+<p>Ready-to-use docker images are provided for each of seven host architectures officially supported by Docker, Inc. or
+built by official images <span id="id10">[<a class="reference internal" href="references.html#id3" title="Docker contributors. Docker-library/official-images: architectures other than amd64? 2015. URL: https://github.com/docker-library/official-images#architectures-other-than-amd64.">R15</a>]</span>:</p>
+<ul class="simple">
+<li><p><strong>amd64</strong></p></li>
+<li><p><strong>i386</strong></p></li>
+<li><p><strong>arm64v8</strong></p></li>
+<li><p><strong>arm32v7</strong></p></li>
+<li><p><strong>arm32v6</strong></p></li>
+<li><p><strong>s390x</strong></p></li>
+<li><p><strong>ppc64le</strong></p></li>
+</ul>
+<p>Multiple minimal working setups to build and execute <code class="docutils literal notranslate"><span class="pre">arm64v8</span></code> containers on <code class="docutils literal notranslate"><span class="pre">amd64</span></code> are configured and tested on
+Continuous Integration (CI) <span id="id11">[<a class="reference internal" href="references.html#id14" title="Wikipedia contributors. Wikipedia: Continuous integration. URL: https://en.wikipedia.org/wiki/Continuous_integration.">R24</a>]</span> services (GitHub Actions <span id="id12">[<a class="reference internal" href="references.html#id16" title="GitHub. Github actions. 2019. URL: https://github.com/features/actions.">R16</a>]</span> <span id="id13">[<a class="reference internal" href="references.html#id15" title="Wikipedia contributors. Wikipedia: GitHub. URL: https://en.wikipedia.org/wiki/GitHub#GitHub.com.">R26</a>]</span>).
+The full flow is public, for other users to learn and adapt these resources to their needs.
+See <a class="reference external" href="https://github.com/dbhi/qus/actions">github.com/dbhi/qus/actions</a>.</p>
+<p>These resources are tested on GNU/Linux and Windows 10 (Docker Desktop).
+Contributions to test them on other host OSs are welcome!</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-right" title="Introduction" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022, Unai Martinez-Corral.</p>
+  </div>Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/buildthedocs/sphinx.theme">theme</a>
+    provided by <a href="https://buildthedocs.github.io">Build the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

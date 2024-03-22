@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Context: containers and QEMU &mdash; qemu-user-static (qus) and containers latest documentation</title>
+      <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/documentation_options.js?v=c6e86fd7"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Provided container images" href="images.html" />
+    <link rel="prev" title="Introduction" href="intro.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="index.html" class="icon icon-home"> qemu-user-static (qus) and containers
+          </a>
+              <div class="version">
+                latest
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="intro.html">Introduction</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Context: containers and QEMU</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#qemu-modes">QEMU modes</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-qemu">Installing QEMU</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="images.html">Provided container images</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tests.html">Tests</a></li>
+<li class="toctree-l1"><a class="reference internal" href="development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="faq.html">Frequently Asked Questions (FAQ)</a></li>
+<li class="toctree-l1"><a class="reference internal" href="related.html">Other related sources</a></li>
+<li class="toctree-l1"><a class="reference internal" href="references.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">qemu-user-static (qus) and containers</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+        
+          
+            <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home"></a> &raquo;</li>
+      <li>Context: containers and QEMU</li>
+      <li class="wy-breadcrumbs-aside">
+              <a href="https://github.com/dbhi/qus/blob/main/docs/context.rst" class="fa fa-github"> Edit on GitHub</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="context-containers-and-qemu">
+<span id="qus-context"></span><h1>Context: containers and QEMU<a class="headerlink" href="#context-containers-and-qemu" title="Link to this heading">¶</a></h1>
+<blockquote>
+<div><p>&gt; <em>Docker is a computer program that performs operating-system-level virtualization, also known as “containerization”.
+(…) Containers are (software packages) isolated from each other and bundle their own application, tools, libraries
+and configuration files;
+(…) All containers are run by a single operating-system kernel and are thus more lightweight than virtual machines.</em></p>
+<p>&gt; <em>Docker (…) uses the resource isolation features of the Linux kernel such as cgroups and kernel namespaces, and a
+union-capable file system such as OverlayFS and others to allow independent “containers” to run within a single Linux
+instance, avoiding the overhead of starting and maintaining virtual machines (VMs).
+The Linux kernel’s support for namespaces mostly isolates an application’s view of the operating environment,
+including process trees, network, user IDs and mounted file systems, while the kernel’s cgroups provide resource
+limiting for memory and CPU.</em></p>
+<p class="attribution">—Wikipedia: Docker_(software) <span id="id1">[<a class="reference internal" href="references.html#id13" title="Wikipedia contributors. Wikipedia: Docker (software). URL: https://en.wikipedia.org/wiki/Docker_%28software%29.">R25</a>]</span></p>
+</div></blockquote>
+<blockquote>
+<div><p>&gt; <em>QEMU (short for Quick Emulator) is a free and open-source emulator that performs hardware virtualization.
+(…) it emulates the machine’s processor through dynamic binary translation and provides a set of different hardware
+and device models for the machine, enabling it to run a variety of guest operating systems.
+It also can be used with KVM to run virtual machines at near-native speed (by taking advantage of hardware extensions
+such as Intel VT-x).
+QEMU can also do emulation for user-level processes, allowing applications compiled for one architecture to run on
+another.</em></p>
+<p class="attribution">—Wikipedia: QEMU <span id="id2">[<a class="reference internal" href="references.html#id9" title="Wikipedia contributors. Wikipedia: QEMU. URL: https://en.wikipedia.org/wiki/QEMU.">R28</a>]</span></p>
+</div></blockquote>
+<section id="qemu-modes">
+<h2>QEMU modes<a class="headerlink" href="#qemu-modes" title="Link to this heading">¶</a></h2>
+<p>The main issue to underline is that QEMU provides multiple operating modes:
+<a class="reference external" href="https://qemu.weilnetz.de/doc/qemu-doc.html#QEMU-System-emulator-for-non-PC-targets">full-system emulation</a>,
+<a class="reference external" href="https://qemu.weilnetz.de/doc/qemu-doc.html#QEMU-User-space-emulator">user-mode emulation</a> and
+<a class="reference external" href="https://wiki.qemu.org/Features/KVM">virtualization</a>.
+Some of them allow dynamic binary translation of the instruction set, endianness and 32/64 bit mismatches.
+Besides, some focus on isolation between the host and the guest, and/or on performance.</p>
+<p>Virtualization and full-system emulation (when the guest architecture is the same as the host’s) are similar to docker
+containers, but each machine runs it’s own kernel while containers use/share the kernel of the host.
+This has been addressed from different perspectives.
+For example, the content of a docker image can extracted and used in a QEMU machine <span id="id3">[<a class="reference internal" href="references.html#id25" title="Max Rottenkolber. Building vm images from docker containers. 2015. URL: https://mr.gy/blog/build-vm-image-with-docker.html.">R10</a>]</span>.
+Conversely, a QEMU image in QCOW2 format can be converted to a docker image <span id="id4">[<a class="reference internal" href="references.html#id26" title="golfayi. Convert qcow2 image to docker image. 2018. URL: https://github.com/golfayi/Convert-qcow2-image-to-docker-image.">R17</a>]</span>.
+Furthermore, approaches such as Kata Containers <span id="id5">[<a class="reference internal" href="references.html#id27" title="OpenStack Foundation. Kata containers, open source container runtime, building lightweight virtual machines that seamlessly plug into the containers ecosystem. 2017. URL: https://katacontainers.io.">R21</a>]</span> provide alternative runtimes for docker to
+seamlessly bring the best of both: execute containers on top of QEMU virtualization.</p>
+<p>Unfortunately, virtualization of foreign architectures is not supported <a class="footnote-reference brackets" href="#f1" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a>, so it is out of the scope of Kata
+Containers for now <a class="footnote-reference brackets" href="#f2" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a>.
+As a result, execution of docker containers on a qemu-system VM requires the user to learn how to handle images, launch
+options and communication between the host and the VM.
+For example, in <span id="id8">[<a class="reference internal" href="references.html#id28" title="Louis Taylor. Raspbian on travis ci. 2016. URL: http://blog.kragniz.eu/raspbian-on-travis-ci/.">R12</a>]</span>, an image for RPi is created.
+On the one hand, the process requires manual steps (although it can be probably automated as in
+<a class="reference external" href="https://github.com/rouault/gdal_coverage/blob/freebsd9.2/.travis.yml">rouault/gdal_coverage: .travis.yml</a> from
+<span id="id9">[<a class="reference internal" href="references.html#id29" title="Even Rouault. Running freebsd in travis-ci. 2016. URL: http://erouault.blogspot.com/2016/09/running-freebsd-in-travis-ci.html.">R11</a>]</span>).
+On the other hand, the execution command is not friendly for new users:
+<code class="docutils literal notranslate"><span class="pre">qemu-system-arm</span> <span class="pre">-kernel</span> <span class="pre">raspberry-qemu/kernel-qemu</span> <span class="pre">-cpu</span> <span class="pre">arm1176</span> <span class="pre">-m</span> <span class="pre">256</span> <span class="pre">-M</span> <span class="pre">versatilepb</span> <span class="pre">-no-reboot</span> <span class="pre">-serial</span> <span class="pre">stdio</span> <span class="pre">-append</span> <span class="pre">&quot;root=/dev/sda2</span> <span class="pre">panic=1</span> <span class="pre">rootfstype=ext4</span> <span class="pre">rw&quot;</span> <span class="pre">-net</span> <span class="pre">user,hostfwd=tcp::10022-:22</span> <span class="pre">-net</span> <span class="pre">nic</span> <span class="pre">-display</span> <span class="pre">none</span> <span class="pre">-hda</span> <span class="pre">2015-11-21-raspbian-jessie-lite.img</span></code>.
+Moreover, that example does not consider the execution of docker, which is the target of this project.</p>
+<div class="admonition tip">
+<p class="admonition-title">Tip</p>
+<p>Contributions of example scripts to automatically provision QEMU images for some known SBC
+(such as <a class="reference external" href="http://www.pynq.io/board.html">PYNQ</a>,
+<a class="reference external" href="https://www.raspberrypi.org/),[96boards.org](https://www.96boards.org/">Raspberry Pi</a>,
+<a class="reference external" href="https://www.pine64.org">Pine64</a>, etc.) allowing running docker images are welcome!
+Please <a class="reference external" href="https://github.com/dbhi/qus/compare">open a pull request</a>.</p>
+</div>
+<p>Alternatively, in user-mode emulation, QEMU runs a program for another Linux/BSD on any supported architecture.
+System calls are thunked for endianness and for 32/64 bit mismatches, so that the program is executed as any other
+application on the host.</p>
+<p>It is to be noted that user-mode emulation has three main caveats.
+First, user-mode emulation seems to be less polished than full-system emulation, so it might crash if non-supported
+features are used <span id="id10">[<a class="reference internal" href="references.html#id30" title="Riku Voipio. Linux-user support in qemu. 2017. URL: https://www.youtube.com/watch?v=4MaGnMGPIq0.">R13</a>]</span>.
+Second, because the underlying machine is the host, there is no emulated kernel and hardware resources specific to the
+target device/system are not available (unlike in a fully-featured VM).
+Third, there is no isolation between the program and the host, so malicious programs can gain privileges.</p>
+<p>Nevertheless, within its contraints, it is a very valuable solution for cross-building and executing foreign docker
+images.
+This is specially so in free/public CI environments, because most provides do not support native architectures others
+than x86-64.
+Hence, QEMU allows to build, for instance, docker images for Raspberry Pi in GitHub Actions.
+Precisely, <em>qus</em> is used in dbhi/containers <span id="id11">[<a class="reference internal" href="references.html#id31" title="Unai Martinez-Corral. Dbhi/containers, containerized open and free development tools for dynamic binary hardware injection (dbhi). 2018. URL: https://github.com/dbhi/containers.">R9</a>]</span> to build multiarch images (for <code class="docutils literal notranslate"><span class="pre">arm32v7</span></code>, <code class="docutils literal notranslate"><span class="pre">arm64v8</span></code>
+and <code class="docutils literal notranslate"><span class="pre">amd64</span></code>).
+Moreover, since 2017, QEMU is installed and enabled by default with Docker Desktop <a class="footnote-reference brackets" href="#f3" id="id12" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a>; thus, features equivalent to
+a subset of what <em>qus</em> provides are available off the shelf on Windows and macOS.
+Regarding isolation, the fact that programs are executed inside docker containers does allow to partially restrict them
+<a class="footnote-reference brackets" href="#f4" id="id13" role="doc-noteref"><span class="fn-bracket">[</span>4<span class="fn-bracket">]</span></a>.</p>
+<p>Summarizing, this repository is focused on alternatives to configure and use QEMU in user-mode emulation mode.
+Nonetheless, we are open to contributions of examples with system-mode emulation.</p>
+</section>
+<section id="installing-qemu">
+<h2>Installing QEMU<a class="headerlink" href="#installing-qemu" title="Link to this heading">¶</a></h2>
+<p>As explained at <a class="reference external" href="https://www.qemu.org/download/">qemu.org/download</a>, QEMU is packaged by most Linux distributions,
+so either of <code class="docutils literal notranslate"><span class="pre">qemu-user</span></code> or <code class="docutils literal notranslate"><span class="pre">qemu-user-static</span></code> can be installed through package managers.
+Furthermore, since <code class="docutils literal notranslate"><span class="pre">qemu-user-static</span></code> packages contain statically built binaries <span id="id14">[<a class="reference internal" href="references.html#id23" title="Wikipedia contributors. Wikipedia: Static build. URL: https://en.wikipedia.org/wiki/Static_build.">R31</a>]</span>, it is
+possible to extract them directly.
+That is, to retrieve pre-built packages, extract the desired binary, and copy it to the development workstation.
+Alternatively, QEMU can be built from sources.</p>
+<p>Either of the installation procedures allows to execute a binary for a foreign architecture by prepending the
+corresponding QEMU executable. E.g.:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>qemu-&lt;arch&gt;<span class="o">[</span>-static<span class="o">]</span><span class="w"> </span>&lt;binary&gt;
+</pre></div>
+</div>
+<p>This procedure is straightforward for explicitly executing a few binaries.
+However, it is not practical in the context of docker images, because it would require dockerfiles and scripts to be
+modified ad-hoc.
+Fortunately, the Linux kernel has a capability named <code class="docutils literal notranslate"><span class="pre">binfmt_misc</span></code> <span id="id15">[<a class="reference internal" href="references.html#id24" title="Wikipedia contributors. Wikipedia: Binfmt_misc. URL: https://en.wikipedia.org/wiki/Binfmt_misc.">R23</a>]</span> which allows arbitrary
+executable file formats to be transparently recognized and passed to certain applications <span id="id16">[<a class="reference internal" href="references.html#id34" title="James Bottomley. Binfmt_misc: add persistent opened binary handler for containers. 2016. URL: https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=948b701a607f123df92ed29084413e5dd8cda2ed.">R5</a>]</span>
+<span id="id17">[<a class="reference internal" href="references.html#id33" title="Jonathan Corbet. Architecture emulation containers with binfmt_misc. 2016. URL: https://lwn.net/Articles/679308/.">R6</a>]</span>.
+This is configured either by directly sending special sequences to the register file in a special purpose file system
+interface (usually mounted under part of <code class="docutils literal notranslate"><span class="pre">/proc</span></code>), or using a wrapper (like Debian-based distributions) or systemd’s
+<code class="docutils literal notranslate"><span class="pre">systemd-binfmt.service</span></code>.</p>
+<p>Moreover, in version 4.8 of the kernel a new flag was added to the <code class="docutils literal notranslate"><span class="pre">binfmt</span></code> handlers <span id="id18">[<a class="reference internal" href="references.html#id32" title="KernelNewbies contributors. Kernelnewbies: linux_4.8. 2016. URL: https://kernelnewbies.org/Linux_4.8?highlight=%28binfmt%29.">R18</a>]</span>.
+It allows to open the emulation binary when it is registered, so in future it is cloned from the open file.
+This is specially useful because it allows to work with foreign architecture containers without contaminating the
+container image.</p>
+<aside class="footnote-list brackets">
+<aside class="footnote brackets" id="f1" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">1</a><span class="fn-bracket">]</span></span>
+<p>See <a class="reference external" href="https://wiki.qemu.org/Features/KVM">wiki.qemu.org: Features/KVM</a>.</p>
+</aside>
+<aside class="footnote brackets" id="f2" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">2</a><span class="fn-bracket">]</span></span>
+<p>See <a class="reference external" href="https://github.com/kata-containers/runtime/issues/1280">kata-containers/runtime#1280</a>.</p>
+</aside>
+<aside class="footnote brackets" id="f3" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id12">3</a><span class="fn-bracket">]</span></span>
+<p>See <a class="reference internal" href="related.html#qus-related-linuxkit"><span class="std std-ref">linuxkit/binfmt | docker/binfmt</span></a> below.</p>
+</aside>
+<aside class="footnote brackets" id="f4" role="doc-footnote">
+<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id13">4</a><span class="fn-bracket">]</span></span>
+<p>See <a class="reference external" href="https://docs.docker.com/engine/security/security/">docs.docker.com: Docker security</a> and
+<a class="reference external" href="https://github.com/mviereck/x11docker#security">mviereck/x11docker: Security</a>.</p>
+</aside>
+</aside>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="intro.html" class="btn btn-neutral float-left" title="Introduction" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="images.html" class="btn btn-neutral float-right" title="Provided container images" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2019-2022, Unai Martinez-Corral.</p>
+  </div>Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/buildthedocs/sphinx.theme">theme</a>
+    provided by <a href="https://buildthedocs.github.io">Build the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
