@@ -10,67 +10,67 @@ on:
 jobs:
 
 
-  Docs:
-    name: '📓 Docs'
-    if: github.event_name != 'pull_request'
-    runs-on: ubuntu-latest
-    steps:
+  # Docs:
+  #   name: '📓 Docs'
+  #   if: github.event_name != 'pull_request'
+  #   runs-on: ubuntu-latest
+  #   steps:
 
-    - name: '🧰 Checkout'
-      uses: actions/checkout@v3
+  #   - name: '🧰 Checkout'
+  #     uses: actions/checkout@v3
 
-    - name: 🛠️ Get bib files from umarcor/umarcor
-      run: |
-        make -C docs references
-        ls -la docs/references
+  #   - name: 🛠️ Get bib files from umarcor/umarcor
+  #     run: |
+  #       make -C docs references
+  #       ls -la docs/references
 
-    - name: '📓 BuildTheDocs (BTD)'
-      uses: buildthedocs/btd@v0
-      with:
-        token: ${{ github.token }}
-        skip-deploy: github.event_name == 'pull_request'
+  #   - name: '📓 BuildTheDocs (BTD)'
+  #     uses: buildthedocs/btd@v0
+  #     with:
+  #       token: ${{ github.token }}
+  #       skip-deploy: github.event_name == 'pull_request'
 
-    - name: '📤 Upload artifact: HTML'
-      uses: actions/upload-artifact@v3
-      with:
-        name: docs
-        path: docs/_build/html
+  #   - name: '📤 Upload artifact: HTML'
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       name: docs
+  #       path: docs/_build/html
 
 
-  Release:
-    runs-on: ubuntu-latest
-    env:
-      QUS_RELEASE: 1
-      BUILD: debian
-    steps:
+  # Release:
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     QUS_RELEASE: 1
+  #     BUILD: debian
+  #   steps:
 
-    - uses: actions/checkout@v3
+  #   - uses: actions/checkout@v3
 
-    - run: ./.github/setup.sh
+  #   - run: ./.github/setup.sh
 
-    - run: |
-        ./run.sh -a
-        ./generate_bin_tests.sh
-        cp test-* releases/
-        ls releases/ | wc -l
+  #   - run: |
+  #       ./run.sh -a
+  #       ./generate_bin_tests.sh
+  #       cp test-* releases/
+  #       ls releases/ | wc -l
 
-    - run: ./cli/cli.py debian
+  #   - run: ./cli/cli.py debian
 
-    - uses: pyTooling/Actions/releaser@r0
-      if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'pull_request'
-      with:
-        token: ${{ github.token }}
-        files: releases/*
-        snapshots: false
+  #   - uses: pyTooling/Actions/releaser@r0
+  #     if: startsWith(github.ref, 'refs/tags/') && github.event_name != 'pull_request'
+  #     with:
+  #       token: ${{ github.token }}
+  #       files: releases/*
+  #       snapshots: false
 
-    - run: ./cli/cli.py assets
+  #   - run: ./cli/cli.py assets
 
-    - name: '📤 Upload artifact: builddir'
-      uses: actions/upload-artifact@v3
-      with:
-        path: |
-          debian.md
-          report.md
+  #   - name: '📤 Upload artifact: builddir'
+  #     uses: actions/upload-artifact@v3
+  #     with:
+  #       path: |
+  #         debian.md
+  #         report.md
 
 
   Images:
@@ -79,7 +79,7 @@ jobs:
       matrix:
         src:
           - debian
-          - fedora
+  #       - fedora
         arch:
           - x86_64
           - i686
@@ -117,16 +117,16 @@ jobs:
       env:
         BASE_ARCH: ${{ matrix.arch }}
 
-    - name: Deploy to DockerHub
-      if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
-      uses: pyTooling/Actions/with-post-step@r0
-      with:
-        main: |
-          # Release
-          echo '${{ secrets.DOCKER_PASS }}' | docker login docker.io -u '${{ secrets.DOCKER_USER }}' --password-stdin
-          docker image ls
-          docker push -a aptman/qus
-        post: docker logout docker.io
+    # - name: Deploy to DockerHub
+    #   if: github.event_name != 'pull_request' && github.repository == 'dbhi/qus'
+    #   uses: pyTooling/Actions/with-post-step@r0
+    #   with:
+    #     main: |
+    #       # Release
+    #       echo '${{ secrets.DOCKER_PASS }}' | docker login docker.io -u '${{ secrets.DOCKER_USER }}' --password-stdin
+    #       docker image ls
+    #       docker push -a aptman/qus
+    #     post: docker logout docker.io
 
 
   Manifests:
