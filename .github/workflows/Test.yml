@@ -101,6 +101,10 @@ jobs:
             arch: mipsel
           - src: fedora
             arch: mips64el
+          - src: debian
+            arch: mipsel
+          - src: debian
+            arch: mips64el
     name: 'I: ${{ matrix.src }} · ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     steps:

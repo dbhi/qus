@@ -37,6 +37,14 @@ guest_arch() {
 
 #--
 
+getDEB () {
+  URL="http://ftp.debian.org/debian/pool/main/q/qemu/${1}_${VERSION}${SOURCE_VERSION}_${2}.deb"
+  echo "$URL"
+  curl -fsSL "$URL" \
+  | dpkg --fsys-tarfile - \
+  | tar xf - --wildcards "${3}" --strip-components=3
+}
+
 getSingleQemuUserStatic () {
   HARCH="$(pkg_arch ${HOST_ARCH})"
   GARCH="$(guest_arch)"
@@ -49,11 +57,10 @@ getSingleQemuUserStatic () {
       rm -rf ./usr/bin
     ;;
     debian)
-      URL="http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${SOURCE_VERSION}_${HARCH}.deb"
-      echo "$URL"
-      curl -fsSL "$URL" \
-      | dpkg --fsys-tarfile - \
-      | tar xvf - --wildcards ./usr/bin/qemu-"${GARCH}"-static --strip-components=3
+      getDEB qemu-user        "$HARCH" "./usr/bin/qemu-${GARCH}"
+      getDEB qemu-user-static "$HARCH" "./usr/bin/qemu-${GARCH}-static"
+      [ -e "qemu-${GARCH}-static" ] || mv "qemu-${GARCH}" "qemu-${GARCH}-static"
+      rm -rf ./usr/bin
     ;;
   esac
 }
@@ -161,7 +168,12 @@ build () {
     debian)
       PACKAGE_URI=${PACKAGE_URI:-http://ftp.debian.org/debian/pool/main/q/qemu/qemu-user-static_${VERSION}${SOURCE_VERSION}_${BARCH}.deb}
       gstart "Extract $PACKAGE_URI"
-      curl -fsSL "$PACKAGE_URI" | dpkg --fsys-tarfile - | tar xvf - --wildcards ./usr/bin/qemu-*-static --strip-components=3
+      getDEB qemu-user        "$BARCH" "./usr/bin/qemu-*"
+      getDEB qemu-user-static "$BARCH" "./usr/bin/qemu-*-static"
+      for f in qemu-*; do
+        [ "$f" = "${f%-static}" ] || continue
+        [ -e "${f}-static" ] || ln -s "$f" "${f}-static"
+      done
       gend
     ;;
   esac
@@ -262,7 +274,7 @@ assets() {
       ARCH_LIST="$ARCH_LIST armv7hl"
     ;;
     debian)
-      ARCH_LIST="$ARCH_LIST armhf armel mipsel mips64el"
+      ARCH_LIST="$ARCH_LIST armhf armel"
     ;;
   esac
   mkdir -p ../releases
