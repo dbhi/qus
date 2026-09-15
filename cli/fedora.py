@@ -27,6 +27,14 @@ from config import Config
 TMP_RPM = Path(__file__).parent.parent / "tmp_rpm"
 
 
+def _nat_key(s):
+    return [
+        (0, int(t)) if t.isdigit() else (1, t)
+        for t in re.split(r"(\d+)", s)
+        if t != ""
+    ]
+
+
 def check_fedora_latest():
     print("Check Fedora")
 
@@ -37,17 +45,14 @@ def check_fedora_latest():
         if reg is not None:
             versions.append(reg.group(1))
 
-    versions.reverse()
-
     latest = None
-    for version in versions:
+    for version in sorted(versions, key=_nat_key, reverse=True):
         subvers = []
         for vline in requests.get(url + version, stream=True).iter_lines():
             reg = re.search('.*/">(.*fc.*)/</a>.*', str(vline))
             if reg is not None:
                 subvers.append(reg.group(1))
-        subvers.reverse()
-        for l in subvers:
+        for l in sorted(subvers, key=_nat_key, reverse=True):
             if ".rc" not in l:
                 latest = (version, l)
                 break
