@@ -111,9 +111,11 @@ def get_debs_list():
 def _get_debs(tmpdir, version, hosts):
     for host in hosts:
         fname = "qemu-user-static_%s_%s.deb" % (version, host)
-        if not (tmpdir / fname).exists():
+        deb = tmpdir / fname
+        if not deb.exists():
             g = requests.get("http://ftp.debian.org/debian/pool/main/q/qemu/%s" % fname)
-            (tmpdir / fname).open("wb").write(g.content)
+            g.raise_for_status()
+            deb.open("wb").write(g.content)
 
 
 def get_debs(debs, tmpdir, version=None):
@@ -131,9 +133,9 @@ def _extract_debs(targets, debs, version, tmpdir):
         fname = "qemu-user-static_%s_%s.deb" % (version, host)
         debdir = tmpdir / fname[0:-4]
         if not debdir.exists():
-            check_call(["7z", "x", "-o./" + str(debdir), "-y", "./" + str(tmpdir / fname)])
+            check_call(["7z", "x", "-o%s" % debdir, "-y", str(tmpdir / fname)])
 
-        for line in check_output(["7z", "l", "./" + str(debdir / "data.tar")]):
+        for line in check_output(["7z", "l", str(debdir / "data.tar")]):
             reg = re.search("bin/qemu-(.*)-static.*", str(line))
             if reg is not None:
                 target = reg.group(1)
