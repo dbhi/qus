@@ -29,6 +29,14 @@ from config import Config
 TMP_DEB = Path(__file__).parent.parent / "tmp_deb"
 
 
+def _nat_key(s):
+    return [
+        (0, int(t)) if t.isdigit() else (1, t)
+        for t in re.split(r"(\d+)", s)
+        if t != ""
+    ]
+
+
 def check_call(args):
     print("check_call: %s" % " ".join(args))
     if platform == "linux":
@@ -57,9 +65,7 @@ def check_debian_latest():
             if version not in versions:
                 versions.append(version)
 
-    versions.reverse()
-
-    latest = versions[0]
+    latest = sorted(versions, key=_nat_key, reverse=True)[0]
 
     items = Config().version('debian', 'amd64')
     debver = "{0}{1}".format(items[0], items[1])
