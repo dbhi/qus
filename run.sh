@@ -140,14 +140,12 @@ build () {
         aarch64 \
         alpha \
         arm \
-        cris \
         hexagon \
         hppa \
         loongarch64 \
         m68k \
         microblaze \
         mips \
-        nios2 \
         or1k \
         ppc \
         riscv \
@@ -218,14 +216,14 @@ manifests () {
     esac
     DEF_VERSION=$("$QUSCLI" version -u "$usage" | cut -d " " -f1)
 
-    MAN_ARCH_LIST="amd64 arm64v8 i386 s390x"
+    MAN_ARCH_LIST="amd64 arm64v8 s390x"
     case "$BUILD" in
       fedora)
         MAN_VERSION="f${DEF_VERSION}"
       ;;
       debian|latest)
         MAN_VERSION="d${DEF_VERSION}"
-        MAN_ARCH_LIST="$MAN_ARCH_LIST arm32v6 arm32v7 ppc64le"
+        MAN_ARCH_LIST="$MAN_ARCH_LIST i386 arm32v6 arm32v7 ppc64le"
       ;;
     esac
     case "$BUILD" in
@@ -268,13 +266,12 @@ manifests () {
 #--
 
 assets() {
-  ARCH_LIST="x86_64 i686 aarch64 ppc64le s390x"
+  ARCH_LIST="x86_64 aarch64 ppc64le s390x"
   case "$BUILD" in
     fedora)
-      ARCH_LIST="$ARCH_LIST armv7hl"
     ;;
     debian)
-      ARCH_LIST="$ARCH_LIST armhf armel"
+      ARCH_LIST="$ARCH_LIST i686 armhf armel"
     ;;
   esac
   mkdir -p ../releases

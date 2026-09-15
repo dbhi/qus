@@ -22,8 +22,8 @@ versions:
       base: "10.0.13"
       rev: "+ds-0+deb13u1"
     fedora: &ver_fedora_def
-      base: "7.2.0"
-      rev: "7.fc39"
+      base: "11.1.1"
+      rev: "2.fc46"
 
 archs:
 

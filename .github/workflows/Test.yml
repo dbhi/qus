@@ -101,6 +101,8 @@ jobs:
             arch: mipsel
           - src: fedora
             arch: mips64el
+          - src: fedora
+            arch: i686
           - src: debian
             arch: mipsel
           - src: debian
