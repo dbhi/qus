@@ -17,7 +17,7 @@ jobs:
     steps:
 
     - name: '🧰 Checkout'
-      uses: actions/checkout@v3
+      uses: actions/checkout@v7
 
     - name: 🛠️ Get bib files from umarcor/umarcor
       run: |
@@ -31,7 +31,7 @@ jobs:
         skip-deploy: github.event_name == 'pull_request'
 
     - name: '📤 Upload artifact: HTML'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v7
       with:
         name: docs
         path: docs/_build/html
@@ -44,7 +44,7 @@ jobs:
       BUILD: debian
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - run: ./.github/setup.sh
 
@@ -66,7 +66,7 @@ jobs:
     - run: ./cli/cli.py assets
 
     - name: '📤 Upload artifact: builddir'
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v7
       with:
         path: |
           debian.md
@@ -115,7 +115,7 @@ jobs:
       run: sudo apt-get install -y rpm2cpio zstd cpio curl
       if: matrix.src == 'fedora'
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - run: ./.github/setup.sh
 
@@ -152,7 +152,7 @@ jobs:
             cfg.seek(0)
             dump(data, cfg, indent=2)
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - run: ./.github/setup.sh
 
@@ -172,7 +172,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - uses: dbhi/qus/action@main
 
@@ -187,7 +187,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - uses: ./action
       with:
@@ -204,7 +204,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - uses: ./action
       with:
@@ -223,7 +223,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - uses: ./action
       with:
@@ -264,7 +264,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v7
 
     - name: test
       run: ./test.sh
