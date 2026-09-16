@@ -90,7 +90,7 @@ build_images () {
 
   for target in pkg register final; do
     [ "$target" != "pkg" ] && [ -z "$HOST_LIB" ] && {
-      printf "$ANSI_YELLOW! Skipping creation of $IMG[-$target] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
+      printf "$ANSI_YELLOW! Skipping creation of $IMG[-$target]; unsupported HOST_ARCH <$BASE_ARCH>.$ANSI_NOCOLOR\n"
       continue
     }
 
