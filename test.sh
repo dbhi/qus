@@ -18,8 +18,6 @@ set -e
 
 cd $(dirname $0)
 
-export DOCKER_BUILDKIT=1
-
 . ./utils.sh
 
 TEST_RELEASE="v0.0.11-v7.1+dfsg-2--bpo11+3"

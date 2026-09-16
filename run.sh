@@ -20,9 +20,6 @@ cd $(dirname $0)
 
 QUSCLI="$(pwd)/cli/cli.py"
 
-export DOCKER_BUILDKIT=0
-export COMPOSE_DOCKER_CLI_BUILD=0
-
 . ./utils.sh
 
 #--
@@ -300,6 +297,34 @@ build_cfg () {
   SOURCE_VERSION=$(echo $cliVersion | cut -d " " -f2)
 
   BASE_ARCH="$("$QUSCLI" arch -a ${BASE_ARCH:-x86_64})"
+}
+
+#--
+
+target_platform () {
+  case "$1" in
+    x86_64)   echo "linux/amd64" ;;
+    i686)     echo "linux/386" ;;
+    aarch64)  echo "linux/arm64" ;;
+    armhf)    echo "linux/arm/v7" ;;
+    armel)    echo "linux/arm/v6" ;;
+    ppc64le)  echo "linux/ppc64le" ;;
+    s390x)    echo "linux/s390x" ;;
+    *)        echo "linux/amd64" ;;
+  esac
+}
+
+host_lib () {
+  case "$1" in
+    x86_64)   echo "amd64/" ;;
+    i686)     echo "i386/" ;;
+    aarch64)  echo "arm64v8/" ;;
+    armhf)    echo "arm32v7/" ;;
+    armel)    echo "arm32v6/" ;;
+    ppc64le)  echo "ppc64le/" ;;
+    s390x)    echo "s390x/" ;;
+    *)        echo "amd64/" ;;
+  esac
 }
 
 #--

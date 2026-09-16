@@ -18,8 +18,6 @@ set -e
 
 cd $(dirname $0)
 
-export DOCKER_BUILDKIT=1
-
 . ./utils.sh
 
 echo "· Cross-compile main.c for 'aarch64' and 'riscv64' in an 'amd64' docker container"
