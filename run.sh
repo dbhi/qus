@@ -77,14 +77,9 @@ getAndRegisterSingleQemuUserStatic () {
   gend
 }
 
-build_register () {
-  case "$BASE_ARCH" in
-    amd64|arm64v8|arm32v7|arm32v6|i386|ppc64le|s390x)
-      HOST_LIB="${BASE_ARCH}/"
-    ;;
-    *)
-      HOST_LIB="skip"
-  esac
+build_images () {
+  TARGET_PLATFORM="$(target_platform "$BASE_ARCH")"
+  HOST_LIB="$(host_lib "$BASE_ARCH")"
 
   if [ -n "$CI" ]; then
     case "$BASE_ARCH" in
@@ -93,29 +88,29 @@ build_register () {
     esac
   fi
 
-  [ "$HOST_LIB" = "skip" ] && {
-    printf "$ANSI_YELLOW! Skipping creation of $IMG[-register] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
-  } || {
-    gstart "Build $IMG-register"
-    docker build -t $IMG-register . -f-<<EOF
-FROM ${HOST_LIB}busybox
-#RUN mkdir /qus
-ENV QEMU_BIN_DIR=/qus/bin
-COPY ./register.sh /qus/register
-ADD https://raw.githubusercontent.com/umarcor/qemu/series-qemu-binfmt-conf/scripts/qemu-binfmt-conf.sh /qus/qemu-binfmt-conf.sh
-RUN chmod +x /qus/qemu-binfmt-conf.sh
-ENTRYPOINT ["/qus/register"]
-EOF
-    gend
+  for target in pkg register final; do
+    [ "$target" != "pkg" ] && [ -z "$HOST_LIB" ] && {
+      printf "$ANSI_YELLOW! Skipping creation of $IMG[-$target] because HOST_LIB <$HOST_LIB>.$ANSI_NOCOLOR\n"
+      continue
+    }
 
-    gstart "Build $IMG"
-    docker build -t $IMG . -f-<<EOF
-FROM $IMG-register
-COPY --from="$IMG"-pkg /usr/bin/qemu-* /qus/bin/
-VOLUME /qus
-EOF
+    if [ "$target" = "final" ]; then
+      TAG="$IMG"
+    else
+      TAG="$IMG-$target"
+    fi
+
+    [ -n "$TARGET_PLATFORM" ] && PLATFORM="--platform=$TARGET_PLATFORM" || PLATFORM=""
+
+    gstart "Build $TAG"
+    docker build $PLATFORM \
+      --build-arg HOST_LIB="$HOST_LIB" \
+      --build-arg TARGET_PLATFORM="$TARGET_PLATFORM" \
+      -t "$TAG" --target="$target" \
+      -f qus.dockerfile \
+      .
     gend
-  }
+  done
 }
 
 #--
@@ -189,13 +184,7 @@ build () {
   cd ..
 
   if [ -z "$QUS_RELEASE" ]; then
-    gstart "Build $IMG-pkg"
-    docker build -t "$IMG"-pkg ./bin-static -f-<<EOF
-FROM scratch
-COPY ./* /usr/bin/
-EOF
-    build_register
-    gend
+    build_images
   fi
 }
 
@@ -303,27 +292,21 @@ build_cfg () {
 
 target_platform () {
   case "$1" in
-    x86_64)   echo "linux/amd64" ;;
-    i686)     echo "linux/386" ;;
-    aarch64)  echo "linux/arm64" ;;
-    armhf)    echo "linux/arm/v7" ;;
-    armel)    echo "linux/arm/v6" ;;
+    amd64)    echo "linux/amd64" ;;
+    i386)     echo "linux/386" ;;
+    arm64v8)  echo "linux/arm64" ;;
+    arm32v7)  echo "linux/arm/v7" ;;
+    arm32v6)  echo "linux/arm/v6" ;;
     ppc64le)  echo "linux/ppc64le" ;;
     s390x)    echo "linux/s390x" ;;
-    *)        echo "linux/amd64" ;;
   esac
 }
 
 host_lib () {
   case "$1" in
-    x86_64)   echo "amd64/" ;;
-    i686)     echo "i386/" ;;
-    aarch64)  echo "arm64v8/" ;;
-    armhf)    echo "arm32v7/" ;;
-    armel)    echo "arm32v6/" ;;
-    ppc64le)  echo "ppc64le/" ;;
-    s390x)    echo "s390x/" ;;
-    *)        echo "amd64/" ;;
+    amd64|arm64v8|arm32v7|arm32v6|i386|ppc64le|s390x)
+      echo "$1/"
+    ;;
   esac
 }
 
